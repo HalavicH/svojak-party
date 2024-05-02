@@ -3,9 +3,14 @@
     import Button from "../components/Button.svelte";
     import ModalPlaceholder from "../components/utils/ModalPlaceholder.svelte";
     import SettingsModal from "./menu/SettingsModal.svelte";
+    import GamePackModal from "./menu/GamePackModal.svelte";
 
     function openSetup() {
         openModal(SettingsModal, { title: 'Alert', message: 'This is an alert' })
+    }
+
+    function openGamePack() {
+        openModal(GamePackModal, { title: 'Alert', message: 'This is an alert' })
     }
 </script>
 
@@ -30,7 +35,7 @@
 <!--            <Modal isVisible={settingsVisible}/>-->
             <Button text="Check setup (HW & Players)" onClick={openSetup}/>
             <p>then</p>
-            <Button text="Open pack" onClick={openSetup}/>
+            <Button text="Open pack" onClick={openGamePack}/>
             <p></p>
             <Button text="Debug menu" onClick={openSetup}/>
         </div>
