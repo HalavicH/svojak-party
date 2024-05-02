@@ -41,11 +41,12 @@
     }
 
     .contents {
+        --modal-background-color: #383838;
         min-width: 30%;
         max-width: 90%;
         border-radius: 6px;
         padding: 16px;
-        background: #505050;
+        background: var(--modal-background-color);
         display: flex;
         flex-direction: column;
         justify-content: center;

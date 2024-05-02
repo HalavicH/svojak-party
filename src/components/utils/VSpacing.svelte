@@ -1,5 +1,5 @@
 <script>
-    export let size = "20px";
+    export let size;
 </script>
 
 <div style="height: {size};"></div>

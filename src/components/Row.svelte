@@ -1,4 +1,8 @@
-<div class="row">
+<script>
+    export let jc = "center";
+</script>
+
+<div class="row" style="justify-content: {jc}">
     <slot></slot>
 </div>
 
@@ -6,7 +10,7 @@
     .row {
         display: flex;
         flex-direction: row;
-        justify-content: center;
+        /*justify-content: center;*/
         align-items: center;
     }
 </style>

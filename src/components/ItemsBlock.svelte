@@ -36,6 +36,6 @@
 
         color: var(--title-text-color);
         font-style: italic;
-        font-size: 20px;
+        font-size: 1.1em;
     }
 </style>
