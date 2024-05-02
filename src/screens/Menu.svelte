@@ -1,8 +1,8 @@
 <script>
     import { openModal } from 'svelte-modals'
     import Button from "../components/Button.svelte";
-    import ModalPlaceholder from "../components/ModalPlaceholder.svelte";
-    import SettingsModal from "../components/SettingsModal.svelte";
+    import ModalPlaceholder from "../components/utils/ModalPlaceholder.svelte";
+    import SettingsModal from "./menu/SettingsModal.svelte";
 
     function openSetup() {
         openModal(SettingsModal, { title: 'Alert', message: 'This is an alert' })
@@ -15,13 +15,13 @@
     <h1>Welcome to Svojak!</h1>
     <p>Powered by BronuCon commuity</p>
     <div class="row">
-        <a href="https://bronucon.in.ua" target="_blank">
+<!--        <a href="https://bronucon.in.ua" target="_blank">-->
             <img
                     src="public/bc-logo.png"
                     class="logo bronucon"
                     alt="BronuCon logo"
             />
-        </a>
+<!--        </a>-->
     </div>
 <!--    <p>Clicked  {count} {count === 1 ? 'time' : 'times'}</p>-->
 

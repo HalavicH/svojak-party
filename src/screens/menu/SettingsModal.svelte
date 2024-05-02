@@ -1,8 +1,8 @@
 <script>
-    import BaseModal from "./BaseModal.svelte";
-    import Button from "./Button.svelte";
-    import HSpacing from "./HSpacing.svelte";
-    import VSpacing from "./VSpacing.svelte";
+    import BaseModal from "../../components/utils/BaseModal.svelte";
+    import Button from "../../components/Button.svelte";
+    import HSpacing from "../../components/utils/HSpacing.svelte";
+    import VSpacing from "../../components/utils/VSpacing.svelte";
     export let isOpen;
 </script>
 
