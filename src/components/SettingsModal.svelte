@@ -1,5 +1,8 @@
 <script>
     import BaseModal from "./BaseModal.svelte";
+    import Button from "./Button.svelte";
+    import HSpacing from "./HSpacing.svelte";
+    import VSpacing from "./VSpacing.svelte";
     export let isOpen;
 </script>
 
@@ -7,9 +10,11 @@
     <h2>HUB Settings</h2>
     <div class="items-block">
         <p class="title">Choose HUB variant</p>
+        <VSpacing size={"2em"}/>
         <div class="row">
-            <button id="hw-hub-btn">Physical HUB</button>
-            <button id="web-hub-btn">Web-based HUB</button>
+            <Button text="Physical HUB"/>
+            <HSpacing size={"5em"}/>
+            <Button text="Web-based HUB"/>
         </div>
     </div>
 </BaseModal>

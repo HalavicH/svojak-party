@@ -7,7 +7,22 @@
 <button id={id} type="button" on:click={onClick}>{text}</button>
 
 <style>
+    button {
+        border-radius: 8px;
+        border: 1px solid transparent;
+        padding: 0.6em 1.2em;
+        font-size: 1em;
+        font-weight: 500;
+        font-family: inherit;
+        color: #e8e8e8;
+        background-color: #0f0f0f98;
+        transition: border-color 0.25s;
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
     button:hover {
-        filter: drop-shadow(0 0 2em #747bff);
+        filter: drop-shadow(0 0 0.4em #747bff);
+        transition: all 0.25s;
     }
 </style>
