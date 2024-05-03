@@ -19,6 +19,6 @@
         /* display: flex; */
         word-wrap: break-word;
         list-style-type: disc;
-        min-width: 30%;
+        min-width: 50%;
     }
 </style>

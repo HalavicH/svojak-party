@@ -10,15 +10,21 @@
     import {closeModal, openModal} from 'svelte-modals'
     import SettingsModal from "./SettingsModal.svelte";
     import WarningBar from "../../components/WarningBar.svelte";
+    import {open} from "@tauri-apps/api/dialog";
+    import {notify} from "../../lib/notifications"
+    import {invoke} from "@tauri-apps/api/tauri";
+    import {TauriApiCommand} from "../../lib/commands.js";
+    import PackErrorModal from "./PackErrorModal.svelte";
 
     export let isOpen;
 
-     let packInfo = {
-        name: 'Zlyj reper Zenyk',
-        author: 'Zlyj reper Zenyk',
-        roundsNum: 3,
-        questionsNum: 69,
-        topics: [
+    export let packInfo = {
+        packName: 'Zlyj reper Zenyk',
+        packAuthor: 'Zlyj reper Zenyk',
+        packRounds: 3,
+        packTopics: 3,
+        packQuestions: 69,
+        packTopicList: [
             'Beer',
             'Pone',
             'Music',
@@ -38,7 +44,7 @@
     };
 
     // Static
-     let gameDurationOptions = [
+    let gameDurationOptions = [
         {value: 10, title: "10min"},
         {value: 15, title: "15min"},
         {value: 20, title: "20min"}
@@ -57,20 +63,20 @@
 </script>
 
 <BaseModal {isOpen}>
-    <h2>Pack: {packInfo.name}</h2>
+    <h2>Pack: {packInfo.packName}</h2>
     <ItemsBlock title="Pack info:">
-        <div class="sub-title">Author: {packInfo.author}</div>
+        <div class="sub-title">Author: {packInfo.packAuthor}</div>
         <VSpacing size="0.5em"/>
         <Row jc={"space-around"}>
-            <div>Rounds: {packInfo.roundsNum}</div>
-            <div>Topics: {packInfo.topics.length}</div>
-            <div>Questions: {packInfo.questionsNum}</div>
+            <div>Rounds: {packInfo.packRounds}</div>
+            <div>Topics: {packInfo.packTopics}</div>
+            <div>Questions: {packInfo.packQuestions}</div>
         </Row>
 
         <VSpacing size="1em"/>
 
         <div class="sub-title">Topic list:</div>
-        <MultiColumnList items={packInfo.topics}/>
+        <MultiColumnList items={packInfo.packTopicList}/>
     </ItemsBlock>
 
     <ItemsBlock title="Gameplay settings:">

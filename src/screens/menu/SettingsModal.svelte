@@ -52,10 +52,4 @@
     p {
         margin: 5px 0px;
     }
-
-    .row {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-    }
 </style>
