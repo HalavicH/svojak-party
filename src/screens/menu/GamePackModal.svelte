@@ -6,59 +6,95 @@
     import ItemsBlock from "../../components/ItemsBlock.svelte";
     import Row from "../../components/Row.svelte";
     import DropDown from "../../components/DropDown.svelte";
+    import MultiColumnList from "../../components/MultiColumnList.svelte";
+    import {closeModal, openModal} from 'svelte-modals'
+    import SettingsModal from "./SettingsModal.svelte";
+    import WarningBar from "../../components/WarningBar.svelte";
 
     export let isOpen;
 
+     let packInfo = {
+        name: 'Zlyj reper Zenyk',
+        author: 'Zlyj reper Zenyk',
+        roundsNum: 3,
+        questionsNum: 69,
+        topics: [
+            'Beer',
+            'Pone',
+            'Music',
+            'Movies',
+            'Fallout',
+            'Beer',
+            'Pone',
+            'Music',
+            'Movies',
+            'Fallout',
+            'Beer',
+            'Pone',
+            'Music',
+            'Movies',
+            'Fallout',
+        ],
+    };
+
     // Static
-    let gameDurationOptions = [
+     let gameDurationOptions = [
         {value: 10, title: "10min"},
         {value: 15, title: "15min"},
         {value: 20, title: "20min"}
     ];
+
+    let users = [
+        {id: 1, name: "Button"},
+        // {id: 2, name: "HalavicH"},
+        // {id: 3, name: "Baadtrip"},
+    ];
+
+    function openSettings() {
+        closeModal();
+        openModal(SettingsModal);
+    }
 </script>
 
 <BaseModal {isOpen}>
-    <h2>Pack: Zlyj reper Zenyk</h2>
+    <h2>Pack: {packInfo.name}</h2>
     <ItemsBlock title="Pack info:">
-        <label>Author: Zlyj reper Zenyk</label>
+        <div class="sub-title">Author: {packInfo.author}</div>
         <VSpacing size="0.5em"/>
         <Row jc={"space-around"}>
-            <div id="pack-round-num">Rounds: 3</div>
-            <div id="pack-topics-num">Topics: 20</div>
-            <div id="pack-question-num">Questions: 66</div>
+            <div>Rounds: {packInfo.roundsNum}</div>
+            <div>Topics: {packInfo.topics.length}</div>
+            <div>Questions: {packInfo.questionsNum}</div>
         </Row>
-        <VSpacing size="0.5em"/>
-        <div id="topic-list-title">Topic list:</div>
-        <ul id="topic-list">
-            <li>Beer</li>
-            <li>Pone</li>
-            <li>Music</li>
-            <li>Movies</li>
-            <li>Fallout equestria</li>
-            <li>Beer</li>
-            <li>Pone</li>
-            <li>Music</li>
-            <li>Movies</li>
-            <li>Fallout equestria</li>
-            <li>Beer</li>
-            <li>Pone</li>
-            <li>Music</li>
-            <li>Movies</li>
-            <li>Fallout equestria</li>
-        </ul>
+
+        <VSpacing size="1em"/>
+
+        <div class="sub-title">Topic list:</div>
+        <MultiColumnList items={packInfo.topics}/>
     </ItemsBlock>
 
     <ItemsBlock title="Gameplay settings:">
         <Row>
             <label for="round-duration">Select round duration:</label>
-            <HSpacing/>
+            <HSpacing size="1em"/>
             <DropDown options={gameDurationOptions}/>
         </Row>
     </ItemsBlock>
 
-    <div class="action-block">
-        <button id="start-the-game" type="button">Start the game</button>
-    </div>
+    <VSpacing size="1em"/>
+    {#if users.length < 2}
+        <WarningBar text="It's required to have at least 2 users to start"/>
+        <div class="action-block">
+            <!--        <button id="start-the-game" type="button">Start the game</button>-->
+            <Button text="Open settings" onClick={openSettings}/>
+        </div>
+    {:else}
+        <div class="action-block">
+            <!--        <button id="start-the-game" type="button">Start the game</button>-->
+            <Button text="Start the game" onClick={() => {console.log("Start pressed");}}/>
+        </div>
+    {/if}
+
 </BaseModal>
 
 <style>
@@ -70,9 +106,8 @@
         margin: 5px 0px;
     }
 
-    .row {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
+    .sub-title {
+        color: #adadad;
+        font-style: italic;
     }
 </style>

@@ -20,19 +20,15 @@
     <h1>Welcome to Svojak!</h1>
     <p>Powered by BronuCon commuity</p>
     <div class="row">
-<!--        <a href="https://bronucon.in.ua" target="_blank">-->
             <img
                     src="public/bc-logo.png"
                     class="logo bronucon"
                     alt="BronuCon logo"
             />
-<!--        </a>-->
     </div>
-<!--    <p>Clicked  {count} {count === 1 ? 'time' : 'times'}</p>-->
 
     <div class="row">
         <div>
-<!--            <Modal isVisible={settingsVisible}/>-->
             <Button text="Check setup (HW & Players)" onClick={openSetup}/>
             <p>then</p>
             <Button text="Open pack" onClick={openGamePack}/>

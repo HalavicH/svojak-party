@@ -14,10 +14,6 @@
 
 <style>
     .items-block {
-        --title-text-color: #9cb7b9;
-        --items-block-color: #2f2f2f;
-        --items-block-border-color: #000000;
-
         background-color: var(--items-block-color);
         border: 1px solid var(--items-block-border-color);
         border-radius: inherit;
@@ -37,5 +33,6 @@
         color: var(--title-text-color);
         font-style: italic;
         font-size: 1.1em;
+        font-weight: bolder;
     }
 </style>

@@ -50,6 +50,7 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        /*align-items: flex-start; !* Align items to the start of the cross axis (vertical) *!*/
         pointer-events: auto;
     }
 

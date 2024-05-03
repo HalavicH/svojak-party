@@ -10,10 +10,10 @@
     <h2>HUB Settings</h2>
     <div class="items-block">
         <p class="title">Choose HUB variant</p>
-        <VSpacing size={"2em"}/>
+        <VSpacing size="2em"/>
         <div class="row">
             <Button text="Physical HUB"/>
-            <HSpacing size={"5em"}/>
+            <HSpacing size="5em"/>
             <Button text="Web-based HUB"/>
         </div>
     </div>
