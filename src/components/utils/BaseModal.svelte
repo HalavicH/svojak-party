@@ -1,15 +1,20 @@
 <script>
-    import { closeModal } from 'svelte-modals'
+    import {closeModal} from 'svelte-modals'
+    import {doWithSound, getWhooshSound} from "../../lib/sound.js";
 
     // provided by Modals
     export let isOpen
+
+    function handleCloseModal() {
+        doWithSound(closeModal, getWhooshSound());
+    }
 </script>
 
 {#if isOpen}
     <div role="dialog" class="modal">
         <div class="contents">
             <div class="close-panel">
-                <span class="close" on:click={closeModal}>&times;</span>
+                <span class="close" on:click={handleCloseModal}>&times;</span>
             </div>
             <slot/>
         </div>

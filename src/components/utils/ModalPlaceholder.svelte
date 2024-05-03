@@ -1,12 +1,18 @@
 <script>
     import {Modals, closeModal} from 'svelte-modals'
+    import {doWithSound, getWhooshSound} from "../../lib/sound.js";
+
+    function handleCloseModal() {
+        doWithSound(closeModal, getWhooshSound());
+    }
+
 </script>
 
 <Modals>
     <div
             slot="backdrop"
             class="backdrop"
-            on:click={closeModal}
+            on:click={handleCloseModal}
     />
 </Modals>
 

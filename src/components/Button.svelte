@@ -1,10 +1,16 @@
 <script>
+    import {doWithSound, getClickSound} from "../lib/sound.js";
+
     export let id = "";
     export let text = "Button";
     export let onClick = () => {};
+
+    function handleClick() {
+        doWithSound(onClick, getClickSound());
+    }
 </script>
 
-<button id={id} type="button" on:click={onClick}>{text}</button>
+<button id={id} type="button" on:click={handleClick}>{text}</button>
 
 <style>
     button {

@@ -83,14 +83,12 @@
 
     <VSpacing size="1em"/>
     {#if users.length < 2}
-        <WarningBar text="It's required to have at least 2 users to start"/>
+        <WarningBar text="It's required to have at least 2 players to start"/>
         <div class="action-block">
-            <!--        <button id="start-the-game" type="button">Start the game</button>-->
             <Button text="Open settings" onClick={openSettings}/>
         </div>
     {:else}
         <div class="action-block">
-            <!--        <button id="start-the-game" type="button">Start the game</button>-->
             <Button text="Start the game" onClick={() => {console.log("Start pressed");}}/>
         </div>
     {/if}
