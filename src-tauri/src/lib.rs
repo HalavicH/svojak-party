@@ -1,5 +1,6 @@
 pub mod api {
     pub mod dto;
+    pub mod events;
     pub mod mapper;
 
     pub mod controller {

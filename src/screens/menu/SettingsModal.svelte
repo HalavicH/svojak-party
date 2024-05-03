@@ -2,20 +2,23 @@
     import BaseModal from "../../components/utils/BaseModal.svelte";
     import Button from "../../components/Button.svelte";
     import HSpacing from "../../components/utils/HSpacing.svelte";
-    import VSpacing from "../../components/utils/VSpacing.svelte";
     import {closeModal, openModal} from "svelte-modals";
     import ItemsBlock from "../../components/ItemsBlock.svelte";
     import Row from "../../components/Row.svelte";
     import WebClientsSettingsModal from "./WebClientsSettingsModal.svelte";
+    import {invoke} from "@tauri-apps/api/tauri";
+    import {HubType, TauriApiCommand} from "../../lib/commands"
 
     export let isOpen;
 
-    function openPhysicalClientsSettings() {
+    async function openPhysicalClientsSettings() {
+        invoke(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.HwHub}).then();
         closeModal();
         // openModal(PhysicalClientsSettingsModal);
     }
 
     function openWebClientsSettings() {
+        invoke(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.WebHub}).then();
         closeModal();
         openModal(WebClientsSettingsModal);
     }
