@@ -1,0 +1,58 @@
+:root {
+    /* SET LIGHT THEME */
+    --text-color: #0f0f0f;
+    --title-text-color: #410060;
+    --background-color: #f6f6f6;
+    --items-block-color: #e2f0fd;
+    --items-block-border-color: #8692c9;
+
+    --primary-button-color: #a7ffe9;
+    --primary-button-active-color: #e8e8e8;
+    --secondary-button-color: #cbeaee;
+    --secondary-button-border-color: #bddce0;
+
+    --modal-background-color: #eaf6f6;
+    --modal-table-background-color: #c3ebef;
+    --modal-table-labels-color: #c5cef5;
+    --modal-table-border-color: #bddce0;
+    --modal-select-color: #c7cef2;
+
+    --accent-color: rgba(40, 114, 124, 0.281);
+
+    /* Other common settings */
+    color: var(--text-color);
+    background-color: var(--background-color);
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+/*@media (prefers-color-scheme: dark) {*/
+    :root {
+        /* SET DARK THEME */
+        --text-color: #f6f6f6;
+        --title-text-color: #9cb7b9;
+        --background-color: #2f2f2f;
+        --items-block-color: #2f2f2f;
+        --items-block-border-color: #000000;
+
+        --primary-button-color: #0f0f0f98;
+        --primary-button-active-color: #0f0f0f69;
+        --secondary-button-color: #499885;
+        --secondary-button-border-color: #368270;
+
+        --modal-background-color: #383838;
+        --modal-table-background-color: #262626;
+        --modal-table-border-color: rgba(189, 220, 224, 0);
+        --modal-table-labels-color: #3d4643;
+        --modal-select-color: #262828;
+
+        --accent-color: rgba(40, 114, 124, 0.281);
+    }
+/*} */

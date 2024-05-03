@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Svojak Web terminal</title>
+    <link rel="stylesheet" href="./reset.css">
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js" charset="utf-8" defer></script>
+</head>
+<body>
+<main>
+    <!-- Register screen -->
+    <div id="register">
+        <h1>Вітаю в веб клієнті Свояка</h1>
+        <h2>який був запілений накалєнкє за 1 вечір</h2>
+        <h2>бо де-хто вміє в тайм менеджмент</h2>
+        <div class="row">
+            <img src="assets/welcome.png" class="logo" />
+        </div>
+
+        <div id="new-player">
+            <input type="text" name="name" id="name" autocomplete="off" placeholder="Твій нік" maxlength="29" />
+            <button type="submit" id="submit-player">Готово</button>
+        </div>
+    </div>
+
+    <div id="collision">
+        <h1>Хм... конфлікт</h1>
+        <h2>Здається з цієї IP адреси вже є гравець.</h2>
+    </div>
+
+    <div id="unauthorized">
+        <h1>Хм...</h1>
+        <h2>Здається в тебе сторінка з попередньої гри.</h2>
+        <h2>Онови сторінку і перелогінься.</h2>
+    </div>
+
+    <div id="content">
+        <div class="row">
+            <div class="info" id="ip-address"></div>
+            <div class="info" id="player-id"></div>
+            <div class="info" id="player-name"></div>
+        </div>
+        <h1>Уявляй що це фізичний термінал</h1>
+        <h2>Коли хочеш відповісти - жмакай по кнопці</h2>
+        <div class="row">
+            <img src="assets/welcome.png" class="user-image" />
+        </div>
+
+        <div id="player-status">Тут буде статус твого кліку :)</div>
+        <br />
+        <div class="button-container">
+            <button type="submit" id="answer" class="answer active">Answer</button>
+        </div>
+    </div>
+</main>
+</body>
+</html>
