@@ -3,9 +3,6 @@
 
     // provided by Modals
     export let isOpen
-
-    // export let title
-    // export let message
 </script>
 
 {#if isOpen}
@@ -15,11 +12,6 @@
                 <span class="close" on:click={closeModal}>&times;</span>
             </div>
             <slot/>
-<!--            <h2>{title}</h2>-->
-<!--            <p>{message}</p>-->
-<!--            <div class="actions">-->
-<!--                <button on:click="{closeModal}">OK</button>-->
-<!--            </div>-->
         </div>
     </div>
 {/if}
@@ -84,11 +76,5 @@
     p {
         text-align: center;
         margin-top: 16px;
-    }
-
-    .actions {
-        margin-top: 32px;
-        display: flex;
-        justify-content: flex-end;
     }
 </style>

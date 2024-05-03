@@ -13,6 +13,10 @@
 
 
 <style>
+    p {
+        margin: 0.5em;
+    }
+
     .items-block {
         background-color: var(--items-block-color);
         border: 1px solid var(--items-block-border-color);
