@@ -21,7 +21,9 @@ lazy_static::lazy_static! {
 }
 
 pub fn game() -> MutexGuard<'static, GameContext> {
-    CONTEXT.lock().expect("Mutex is poisoned")
+    CONTEXT.lock()
+        .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
+        .expect("Mutex is poisoned")
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]

@@ -28,9 +28,15 @@ export const TauriApiCommand = {
     IS_ALLOW_ANSWER_REQUIRED: 'is_allow_answer_required',
     FETCH_ROUND_STATS: 'fetch_round_stats'
 };
+
 export const HubType = {
     HwHub: 'HwHub',
     WebHub: 'WebHub',
+}
+
+export const HubStatusOptions = {
+    Detected: 'Detected',
+    NoDevice: 'NoDevice',
 }
 
 

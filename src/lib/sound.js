@@ -1,10 +1,10 @@
-let clickSound = new Audio('../../public/sounds/click.mp3');
+let clickSound = new Audio('/sounds/click.mp3');
 clickSound.volume = 0.3;
 
-let swipeSound = new Audio('../../public/sounds/movement-swipe-whoosh.mp3');
+let swipeSound = new Audio('/sounds/movement-swipe-whoosh.mp3');
 swipeSound.volume = 0.1; // Set volume
 
-let selectionSound = new Audio('../../public/sounds/selection-sound.mp3');
+let selectionSound = new Audio('/sounds/selection-sound.mp3');
 selectionSound.volume = 0.1; // Set volume
 
 export function getClickSound() {

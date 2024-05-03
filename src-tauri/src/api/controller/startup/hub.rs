@@ -9,7 +9,7 @@ use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 
 /// Set hub type to web or serial
 #[command]
-pub async fn set_hub_type(window: Window, hub_type: HubType) {
+pub fn set_hub_type(window: Window, hub_type: HubType) {
     log::debug!("Got request to set hub type: {:?}", hub_type);
     let mut game = game();
     send_message(&window, &format!("Set {:?}", hub_type));
@@ -18,7 +18,7 @@ pub async fn set_hub_type(window: Window, hub_type: HubType) {
 
 /// Tries to detect hub at given serial port. If successful saves port name
 #[command]
-pub async fn discover_hub(path: String) -> Result<HubStatus, HubManagerError> {
+pub fn discover_hub(path: String) -> Result<HubStatus, HubManagerError> {
     let guard = game();
     let result = guard.get_locked_hub_mut().probe(&path);
     match result {

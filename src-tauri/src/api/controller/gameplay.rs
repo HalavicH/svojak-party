@@ -6,7 +6,9 @@ use tauri::command;
 
 #[command]
 pub fn fetch_players() -> Vec<PlayerGameDto> {
-    let vec = map_players_to_player_game_dto(game().fetch_players());
+    let mut guard = game();
+    let players = guard.fetch_players();
+    let vec = map_players_to_player_game_dto(players);
     log::trace!("Players: {:#?}", vec);
     vec
 }
