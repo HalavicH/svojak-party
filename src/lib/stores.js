@@ -26,3 +26,6 @@ export const gamePlayers = writable([
     }
 ]);
 
+console.log("################################################");
+console.log("########## ALL STORES HAS BEEN LOADED ##########");
+console.log("################################################");

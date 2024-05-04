@@ -5,7 +5,7 @@ use error_stack::Report;
 use tauri::{command, Window};
 
 use crate::api::dto::PlayerSetupDto;
-use crate::api::events::set_window;
+use crate::api::events::{emit, Event, set_window};
 use crate::core::app_context::{app};
 
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
@@ -16,6 +16,8 @@ pub mod hw_hub;
 #[command]
 pub fn init_window_handle(window: Window) {
     set_window(window);
+    let dto = get_config_dto();
+    emit(Event::GameConfig, dto)
 }
 
 /// Provide saved game configuration

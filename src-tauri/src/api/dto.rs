@@ -10,7 +10,7 @@ pub struct PackErrorData {
 }
 
 ////////// Config ///////////
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
 pub struct ConfigDto {
     pub hub_port: String,
@@ -20,7 +20,7 @@ pub struct ConfigDto {
 }
 
 ////////// Players ///////////
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(non_snake_case)]
 pub struct PlayerSetupDto {
     pub termId: u8,

@@ -17,7 +17,7 @@ impl<'a> From<Event> for &'a str {
         match val {
             Event::Message => "message",
             Event::Error => "error",
-            Event::GameConfig => "web-users",
+            Event::GameConfig => "GameConfig",
         }
     }
 }

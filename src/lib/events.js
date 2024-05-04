@@ -1,13 +1,12 @@
-import {setupEventListener} from "./misc.js";
 import {listen} from "@tauri-apps/api/event";
 import {gameConfig} from "./stores.js";
 import {notify} from "./notifications.js";
+import {invoke} from "@tauri-apps/api/tauri";
+import {TauriApiCommand} from "./commands.js";
 
 export const TauriEvents = {
     GameConfig: 'GameConfig',
 }
-
-listenAndStoreEvent(TauriEvents.GameConfig, gameConfig);
 
 function listenAndStoreEvent(eventType, storage) {
     listen(eventType, event => {
@@ -20,17 +19,19 @@ function listenAndStoreEvent(eventType, storage) {
 }
 
 function logEvent(type, event) {
-    console.log(`New event: '${type}'. content: ${event}`);
+    console.log(`|> New event: '${type}'. content: `, event, '<|');
     notify.info(`Event: ${type}`);
 }
 
-// setupEventListener('web-users', (event) => {
-//     const users = event.payload;
-//     console.error(`Web users: ${users}`);
-// });
+export function initEventListeners() {
+    listenAndStoreEvent(TauriEvents.GameConfig, gameConfig);
 
-// listen(TauriEvents.GameConfig, (event) => {
-//     logEvent(TauriEvents.GameConfig, event);
-//     const config = event.payload;
-//     gameConfig.set(config);
-// }).then();
+    console.log("################################################");
+    console.log("##### ALL EVENT LISTENERS HAS BEEN LOADED ######");
+    console.log("################################################");
+
+    // After all event listeners are initialized we can switch on event emitters
+    invoke(TauriApiCommand.INIT_WINDOW_HANDLE).then(() => {
+        console.log("Window handle stored successfully");
+    })
+}

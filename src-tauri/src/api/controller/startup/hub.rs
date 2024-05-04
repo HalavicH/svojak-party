@@ -12,9 +12,9 @@ use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 pub fn set_hub_type(hub_type: HubType) {
     log::debug!("Got request to set hub type: {:?}", hub_type);
     emit_message(&format!("Set {:?}", hub_type));
-    let mut game = app();
+    let mut app = app();
     // send_message(&window, &format!("Set {:?}", hub_type));
-    game.select_hub_type(hub_type);
+    app.select_hub_type(hub_type);
 }
 
 
