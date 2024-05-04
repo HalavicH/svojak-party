@@ -16,7 +16,7 @@ pub fn fetch_players() -> Vec<PlayerGameDto> {
 
 #[command]
 pub fn fetch_round() -> RoundDto {
-    let round_dto = map_round_to_dto(app().get_current_round());
+    let round_dto = map_round_to_dto(app().game.get_current_round());
     log::trace!("{round_dto:#?}");
     round_dto
 }
@@ -73,7 +73,7 @@ pub fn finish_question_prematurely() -> Result<(), GameplayError> {
 
 #[command]
 pub fn init_next_round() {
-    app().init_next_round();
+    app().game.load_next_round();
 }
 
 #[command]

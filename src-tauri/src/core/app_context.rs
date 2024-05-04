@@ -3,8 +3,7 @@ use crate::core::game_entities::{
     GameContext, GamePackError, GameState, GameplayError, Player, PlayerState,
 };
 use crate::core::game_logic::start_event_listener;
-use crate::game_pack::game_pack_entites::GamePack;
-use crate::game_pack::pack_content_entities::{Question, Round};
+use crate::game_pack::pack_content_entities::{Question};
 use crate::hub_comm::common::hub_api::{HubManager, HubType};
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError, HwHubManager};
 use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
@@ -17,6 +16,7 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+use crate::game_pack::game_pack_entites::GamePack;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<Mutex<AppContext >> = Arc::new(Mutex::new(AppContext::default()));
@@ -58,6 +58,7 @@ impl Default for AppContext {
 }
 
 impl AppContext {
+    /// Setup API
     pub fn select_hub_type(&mut self, hub_type: HubType) {
         if self.hub_type == hub_type {
             log::info!("Hub is already set to: {:?}. Nothing to do", hub_type);
@@ -102,10 +103,18 @@ impl AppContext {
             })
             .expect("Poisoned")
     }
-}
 
-impl AppContext {
+    pub fn set_game_pack(&mut self, pack: GamePack) {
+        self.game_pack = pack;
+    }
+    
+    /// Game API
+    pub fn finish_game(&mut self) {
+        self.game = GameContext::default();
+    }
     pub fn start_the_game(&mut self) -> error_stack::Result<(), GameplayError> {
+        // Prepare game context
+        self.game.pack_content = self.game_pack.content.clone();
         self.update_game_state(GameState::QuestionChoosing);
 
         if self.players.len() < 2 {
@@ -181,7 +190,7 @@ impl AppContext {
         price: &i32,
     ) -> error_stack::Result<(), GamePackError> {
         log::info!("Try to remove question from category: {theme}, price: {price}");
-        let round = self.get_current_round_mut();
+        let round = self.game.get_current_round_mut();
         let theme = round
             .themes
             .get_mut(theme)
@@ -224,7 +233,7 @@ impl AppContext {
 
     pub fn has_next_question(&self) -> bool {
         // self.current.has_next_question
-        let has_new_question = self.get_current_round().questions_left > 0;
+        let has_new_question = self.game.get_current_round().questions_left > 0;
         log::info!("Has new question: {}", has_new_question);
         has_new_question
     }
@@ -339,17 +348,6 @@ impl AppContext {
         Ok(retry)
     }
 
-    pub fn get_current_round(&self) -> &Round {
-        let index = self.game.round_index;
-        let round = self
-            .game_pack
-            .content
-            .rounds
-            .get(index)
-            .expect(&format!("Expected to have round #{}", index));
-        round
-    }
-
     pub fn no_players_to_answer_left(&self) -> bool {
         let players_left = self
             .players
@@ -364,37 +362,8 @@ impl AppContext {
         players_left == 0
     }
 
-    pub fn init_next_round(&mut self) {
-        if self.is_already_last_round() {
-            log::error!("Already final round");
-            return;
-        }
-
-        self.game.round_index += 1;
-        let index = self.game.round_index;
-        let round: &Round = self
-            .game_pack
-            .content
-            .rounds
-            .get(index)
-            .expect(&format!("Expected to have round #{}", index));
-        log::info!("Next round name {}", round.name);
-
-        self.game.total_tries = 0;
-        self.game.total_wrong_answers = 0;
-        self.game.total_correct_answers = 0;
-
-        if self.is_already_last_round() {
-            self.kill_players_with_negative_balance();
-        }
-    }
-
-    fn is_already_last_round(&mut self) -> bool {
-        (self.game_pack.content.rounds.len() - 1) == self.game.round_index
-    }
-
     pub fn fetch_round_stats(&self) -> RoundStatsDto {
-        let round = self.get_current_round();
+        let round = self.game.get_current_round();
         RoundStatsDto {
             roundName: round.name.to_owned(),
             questionNumber: round.question_count,
@@ -435,7 +404,7 @@ impl AppContext {
         theme: &String,
         price: &i32,
     ) -> error_stack::Result<(Question, i32), GamePackError> {
-        let round = self.get_current_round_mut();
+        let round = self.game.get_current_round_mut();
         let question_number = round.question_count - round.questions_left;
 
         let theme = round
@@ -569,17 +538,6 @@ impl AppContext {
 
     fn get_player_keys(&self) -> Vec<u8> {
         self.players.keys().copied().collect()
-    }
-
-    fn get_current_round_mut(&mut self) -> &mut Round {
-        let index = self.game.round_index;
-        let round = self
-            .game_pack
-            .content
-            .rounds
-            .get_mut(index)
-            .expect(&format!("Expected to have round #{}", index));
-        round
     }
 
     fn update_non_target_player_states(&mut self) {

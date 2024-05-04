@@ -61,9 +61,9 @@ pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
 
     match result {
         Ok(pack) => {
-            app().game_pack = pack;
+            app().set_game_pack(pack);
 
-            let pack_info_dto = map_package_to_pack_info_dto(&app().game_pack.content);
+            let pack_info_dto = map_package_to_pack_info_dto(&app().game.pack_content);
             log::info!("Pack info: {:#?}", pack_info_dto);
             Ok(pack_info_dto)
         }
