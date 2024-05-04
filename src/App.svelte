@@ -17,11 +17,6 @@
         notify.failure(message);
         console.error(`Rust error: ${message}`);
     });
-
-    setupEventListener('web-users', (event) => {
-        const users = event.payload;
-        console.error(`Web users: ${users}`);
-    });
 </script>
 
 <main class="container">
