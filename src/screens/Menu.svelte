@@ -22,15 +22,6 @@
                 extensions: ['siq']
             }]
         })
-        // .then((filePath) => {
-        //     if (filePath === null || filePath.length === 0) {
-        //         notify.info("Canceled pack selection");
-        //         closeModal();
-        //     } else {
-        //         notify.info(`Selected game package path: ${filePath}`);
-        //         gamePackPath = filePath;
-        //     }
-        // });
 
         if (filePath === null || filePath.length === 0) {
             notify.info("Canceled pack selection");
@@ -42,14 +33,14 @@
 
         invoke(TauriApiCommand.GET_PACK_INFO, {path: filePath})
             .then((newPackInfo) => {
-                openModal(GamePackModal, {title: "", packInfo: newPackInfo})
+                openModal(GamePackModal, {packInfo: newPackInfo})
             })
             .catch((error) => {
                 console.error("Promise rejection:", error);
                 // Log the rejection payload or handle the error in any other way
                 closeModal();
                 // openPackErrorModel(error);
-                openModal(PackErrorModal, {title: "", message: error});
+                openModal(PackErrorModal, {message: error});
             });
     }
 </script>

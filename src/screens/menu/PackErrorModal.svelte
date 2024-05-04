@@ -6,7 +6,6 @@
 
     // Provided by 'modals'
     export let isOpen;
-    export let title;
     export let message;
 </script>
 

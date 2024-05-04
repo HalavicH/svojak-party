@@ -10,11 +10,8 @@
     import {closeModal, openModal} from 'svelte-modals'
     import SettingsModal from "./SettingsModal.svelte";
     import WarningBar from "../../components/WarningBar.svelte";
-    import {open} from "@tauri-apps/api/dialog";
-    import {notify} from "../../lib/notifications"
     import {invoke} from "@tauri-apps/api/tauri";
     import {TauriApiCommand} from "../../lib/commands.js";
-    import PackErrorModal from "./PackErrorModal.svelte";
 
     export let isOpen;
 
@@ -50,11 +47,14 @@
         {value: 20, title: "20min"}
     ];
 
-    let users = [
-        {id: 1, name: "Button"},
-        // {id: 2, name: "HalavicH"},
-        // {id: 3, name: "Baadtrip"},
-    ];
+    let players = [];
+    $: {
+        invoke(TauriApiCommand.FETCH_PLAYERS)
+            .then(newPlayers => {
+                console.log(`Got players`, newPlayers);
+                players = newPlayers
+            });
+    }
 
     function openSettings() {
         closeModal();
@@ -83,12 +83,13 @@
         <Row>
             <label for="round-duration">Select round duration:</label>
             <HSpacing size="1em"/>
-            <DropDown options={gameDurationOptions} handleSelection={()=>{}}/>
+            <DropDown selectedValue="" options={gameDurationOptions} handleSelection={()=>{}}/>
         </Row>
     </ItemsBlock>
 
+    <div>Players ready: {players.length}</div>
     <VSpacing size="1em"/>
-    {#if users.length < 2}
+    {#if players.length < 2}
         <WarningBar text="It's required to have at least 2 players to start"/>
         <div class="action-block">
             <Button text="Open settings" onClick={openSettings}/>
