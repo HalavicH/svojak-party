@@ -8,20 +8,18 @@
     import Table from "../../components/Table.svelte";
     import {invoke} from "@tauri-apps/api/tauri";
     import {TauriApiCommand, HubStatusOptions, hubManagerError2Msg} from "../../lib/commands"
-    import {onDestroy, onMount} from "svelte";
     import DropDown from "../../components/DropDown.svelte";
     import Row from "../../components/Row.svelte";
-    import {DFL_PLAYER_ICON} from "../../lib/misc";
     import ConfigButton from "../../components/ConfigButton.svelte";
     import Input from "../../components/TextInput.svelte";
     import {notify} from "../../lib/notifications"
+    import {gameConfig, gamePlayers} from "../../lib/stores.js";
 
     // Provided by 'modals'
     export let isOpen;
 
-    let players = [];
-    let config;
-    let hubPort;
+    let players = $gamePlayers;
+    // let config;
     let hubStatus = HubStatusOptions.NoDevice;
     let serialPorts = [];
     let radioChannel = null;
@@ -31,29 +29,23 @@
         value: "Select serial port",
     };
 
+    let hubPortUsed;
     $: console.log(`Modal HwClientsSettingsModal is ${isOpen}`);
+    $: console.log(`Hub port used: ${hubPortUsed}`);
 
     // Watch for changes in isOpen and trigger the API call if it becomes true
     $: if (isOpen) {
-        fetchConfiguration().then();
-    }
+        let config = $gameConfig;
+        hubPortUsed = config.hub_port;
 
-    // Function to fetch configuration
-    async function fetchConfiguration() {
-        try {
-            config = await invoke(TauriApiCommand.FETCH_CONFIGURATION);
-            console.log(config);
-            hubPort = config.hub_port;
-            let portsFromOs = config.available_ports.map((portName) => {
-                return {
-                    value: portName,
-                    title: portName
-                };
-            });
-            serialPorts = [emptyOption, ...portsFromOs];
-        } catch (error) {
-            console.error('Error fetching configuration:', error);
-        }
+        let portsFromOs = config.available_ports.map((portName) => {
+            return {
+                value: portName,
+                title: portName
+            };
+        });
+
+        serialPorts = [emptyOption, ...portsFromOs];
     }
 
     async function saveSettings() {
@@ -102,34 +94,34 @@
         }
     }
 
-    // Listen for players
-    let interval;
-    onMount(() => {
-        // Start the interval on mount
-        interval = setInterval(async () => {
-            if (!(hubStatus === HubStatusOptions.Detected && isOpen === true)) {
-                return;
-            }
-
-            console.log("Setup modal is opened. Polling for players");
-            try {
-                let newPlayers = await invoke(TauriApiCommand.DISCOVER_PLAYERS, {path: hubPort});
-                players = newPlayers.map(player => {
-                    player.name = `Player ${player.termId}`;
-                    player.icon = DFL_PLAYER_ICON;
-                    return player;
-                });
-                console.log("Players: ", players);
-            } catch (error) {
-                console.error('Error fetching players:', error);
-            }
-        }, 1000);
-    });
-
-    onDestroy(() => {
-        // Clean up by stopping the interval on destroy
-        clearInterval(interval);
-    });
+    // // Listen for players
+    // let interval;
+    // onMount(() => {
+    //     // Start the interval on mount
+    //     interval = setInterval(async () => {
+    //         if (!(hubStatus === HubStatusOptions.Detected && isOpen === true)) {
+    //             return;
+    //         }
+    //
+    //         console.log("Setup modal is opened. Polling for players");
+    //         try {
+    //             let newPlayers = await invoke(TauriApiCommand.DISCOVER_PLAYERS, {path: hubPort});
+    //             players = newPlayers.map(player => {
+    //                 player.name = `Player ${player.termId}`;
+    //                 player.icon = DFL_PLAYER_ICON;
+    //                 return player;
+    //             });
+    //             console.log("Players: ", players);
+    //         } catch (error) {
+    //             console.error('Error fetching players:', error);
+    //         }
+    //     }, 1000);
+    // });
+    //
+    // onDestroy(() => {
+    //     // Clean up by stopping the interval on destroy
+    //     clearInterval(interval);
+    // });
 </script>
 
 <BaseModal {isOpen}>
@@ -150,7 +142,7 @@
                     <div>Select serial device:</div>
                 </td>
                 <td>
-                    <DropDown options={serialPorts} handleSelection={discoverHub}/>
+                    <DropDown selectedValue="" options={serialPorts} handleSelection={discoverHub}/>
                 </td>
             </tr>
             </tbody>

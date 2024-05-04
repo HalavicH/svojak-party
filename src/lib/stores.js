@@ -5,9 +5,24 @@ import {listen} from "@tauri-apps/api/event";
 
 // Views
 export const currentView = writable(Views.MENU);
+
 export function navTo(view) {
     currentView.set(view);
 }
 
-// Config
-export const gameConfig = writable({});
+export const gameConfig = writable({
+    hub_port: "",
+    available_ports: [],
+    radio_channel: -1,
+    players: [],
+});
+
+export const gamePlayers = writable([
+    {
+        termId: 0,
+        icon: "",
+        name: "",
+        isUsed: false,
+    }
+]);
+
