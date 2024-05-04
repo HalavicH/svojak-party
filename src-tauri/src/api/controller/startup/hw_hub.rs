@@ -58,10 +58,10 @@ pub fn send_hub_command(request: HubRequestDto) -> Result<HubResponseDto, HubMan
     let mut hub_guard = guard.get_locked_hub_mut();
 
     let request_enum = HwHubRequest::from_debug_request(request);
-    let result = process_hub_command(&mut hub_guard, request_enum)
-        .map_err(|e| {
-            log::error!("{:?}",e);
-            e.current_context().clone() })?;
+    let result = process_hub_command(&mut hub_guard, request_enum).map_err(|e| {
+        log::error!("{:?}", e);
+        e.current_context().clone()
+    })?;
 
     let dto = HubResponseDto {
         request_frame: "Watch logs (DEBUG)".to_string(),

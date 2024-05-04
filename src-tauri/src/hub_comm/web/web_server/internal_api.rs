@@ -1,14 +1,16 @@
 #![allow(unused)]
 
-use rgb::{RGB, RGB8};
-use rocket::{routes, get, post, Shutdown, Config, State};
-use rocket::serde::json::{Json, Value};
-use rocket::serde::json::serde_json::json;
-use crate::hub_comm::web::web_server::server::{Persistence, PlayerIdentityDto, PlayerId, PlayerEvent};
-use rocket::serde::{Deserialize, Serialize};
-use rocket::time::macros::time;
 use crate::api::dto::PlayerSetupDto;
 use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};
+use crate::hub_comm::web::web_server::server::{
+    Persistence, PlayerEvent, PlayerId, PlayerIdentityDto,
+};
+use rgb::{RGB, RGB8};
+use rocket::serde::json::serde_json::json;
+use rocket::serde::json::{Json, Value};
+use rocket::serde::{Deserialize, Serialize};
+use rocket::time::macros::time;
+use rocket::{get, post, routes, Config, Shutdown, State};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Rgb8Dto {
@@ -80,7 +82,7 @@ fn get_players(state: Persistence) -> Json<Vec<PlayerIdentityDto>> {
 fn get_hub_timestamp(state: Persistence) -> Json<TimestampDto> {
     let guard = state.lock().expect("Poisoned");
     let timestamp = TimestampDto {
-        timestamp: guard.base_timestamp
+        timestamp: guard.base_timestamp,
     };
     log::info!("Timestamp to retrieve: {:?}", timestamp);
     Json::from(timestamp)
@@ -101,7 +103,11 @@ fn set_term_light_color(term_color_dto: Json<TermLightColorDto>, state: Persiste
     // TODO: Set player's color
 }
 
-#[post("/feedback-state", format = "application/json", data = "<term_feedback>")]
+#[post(
+    "/feedback-state",
+    format = "application/json",
+    data = "<term_feedback>"
+)]
 fn set_term_feedback_led(term_feedback: Json<TermFeedbackState>, state: Persistence) {
     log::info!("Received: {:?}", term_feedback);
     let mut guard = state.lock().expect("Poisoned");
@@ -142,7 +148,8 @@ fn read_config(rocket_config: &Config) -> String {
 }
 
 fn map_player_events_to_term_events(events: Vec<PlayerEvent>) -> Vec<TermEvent> {
-    events.iter()
+    events
+        .iter()
         .map(|e| TermEvent {
             term_id: e.id,
             timestamp: e.timestamp,
@@ -153,8 +160,9 @@ fn map_player_events_to_term_events(events: Vec<PlayerEvent>) -> Vec<TermEvent> 
 
 pub fn setup() -> rocket::fairing::AdHoc {
     rocket::fairing::AdHoc::on_ignite("Internal-API", |rocket| async {
-        rocket
-            .mount("/", routes![
+        rocket.mount(
+            "/",
+            routes![
                 get_players,
                 get_hub_timestamp,
                 set_hub_timestamp,
@@ -163,6 +171,7 @@ pub fn setup() -> rocket::fairing::AdHoc {
                 get_event_queue,
                 take_event_queue,
                 shutdown
-            ])
+            ],
+        )
     })
 }

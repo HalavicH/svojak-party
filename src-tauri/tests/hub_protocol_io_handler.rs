@@ -3,10 +3,10 @@ use std::io::{ErrorKind, Read, Write};
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
-use svoyak_tauri_app::hub_comm::hw::internal::api_types::HwHubRequest::*;
-use svoyak_tauri_app::hub_comm::hw::internal::api_types::{HubResponse, ResponseStatus};
-use svoyak_tauri_app::hub_comm::hw::internal::byte_handler::ByteHandler;
-use svoyak_tauri_app::hub_comm::hw::internal::hub_protocol_io_handler::*;
+use svojak_app::hub_comm::hw::internal::api_types::HwHubRequest::*;
+use svojak_app::hub_comm::hw::internal::api_types::{HubResponse, ResponseStatus};
+use svojak_app::hub_comm::hw::internal::byte_handler::ByteHandler;
+use svojak_app::hub_comm::hw::internal::hub_protocol_io_handler::*;
 
 const MOCK_ID: u8 = 6;
 const MOCK_TID: u8 = 0;
@@ -36,7 +36,9 @@ fn test_virtual_pipe_communication() {
 
     // HUB -> host
     let message_from_hub = "Writing from HUB to host";
-    host_handle.write_all(message_from_hub.as_bytes()).expect("Test");
+    host_handle
+        .write_all(message_from_hub.as_bytes())
+        .expect("Test");
     let mut buffer = [0_u8; 1024];
     let result_from_hub_len = device_handle.read(&mut buffer).expect("Test");
 

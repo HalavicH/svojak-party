@@ -81,7 +81,10 @@ impl HubMock {
             let stuffed = stuff_bytes(&response_frame);
 
             log::debug!("Responding with: {}", format_bytes_hex(&stuffed));
-            let _bytes_written = self.port_handle.write(&stuffed).expect("Mock HUB. Not for prod");
+            let _bytes_written = self
+                .port_handle
+                .write(&stuffed)
+                .expect("Mock HUB. Not for prod");
         }
     }
 

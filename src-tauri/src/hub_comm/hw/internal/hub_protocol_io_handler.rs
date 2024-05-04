@@ -89,8 +89,7 @@ impl HwHubCommunicationHandler {
 
     fn read_raw_response_frame(&self) -> Result<Vec<u8>, HwHubIoError> {
         let port_handle_ptr = Arc::clone(&self.port_handle);
-        let mut port_handle = port_handle_ptr.lock()
-            .expect("Mutex is poisoned");
+        let mut port_handle = port_handle_ptr.lock().expect("Mutex is poisoned");
         let mut buffer = [0; 1024];
 
         // Give HUB some time to perform operation
@@ -121,15 +120,18 @@ impl HwHubCommunicationHandler {
             log::trace!("Byte: {}", byte[0]);
             port_handle
                 .read_exact(&mut byte)
-                .into_report().change_context(HwHubIoError::NoResponseFromHub)
+                .into_report()
+                .change_context(HwHubIoError::NoResponseFromHub)
                 .attach_printable("Probably timeout")?;
         }
         // Handle start byte
         byte_handler.handle_byte(byte[0]);
 
         loop {
-            port_handle.read_exact(&mut byte)
-                .into_report().change_context(HwHubIoError::NoResponseFromHub)
+            port_handle
+                .read_exact(&mut byte)
+                .into_report()
+                .change_context(HwHubIoError::NoResponseFromHub)
                 .attach_printable("Probably timeout")?;
             byte_handler.handle_byte(byte[0]);
 

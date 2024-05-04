@@ -56,7 +56,6 @@ pub struct ThemesDto {
     pub themes_list: Vec<ThemeDto>,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct RoundDto {
     pub name: String,

@@ -1,7 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[allow(unused_imports)]
-
 use rocket::futures::io::Window;
 use svojak_app::api::controller::gameplay::*;
 use svojak_app::api::controller::startup::hub::*;

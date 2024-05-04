@@ -4,7 +4,6 @@ use crate::core::game_entities::{game, Player};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use std::collections::HashMap;
 
-
 use crate::hub_comm::hw::hw_hub_manager::discover_serial_ports;
 
 use super::dto::PlayerSetupDto;
@@ -23,7 +22,8 @@ pub fn get_config_dto() -> ConfigDto {
 }
 
 pub fn map_players_to_players_setup_dto(players: &Vec<Player>) -> Vec<PlayerSetupDto> {
-        players.iter()
+    players
+        .iter()
         .map(|p| PlayerSetupDto {
             icon: p.icon.clone(),
             isUsed: p.is_used,

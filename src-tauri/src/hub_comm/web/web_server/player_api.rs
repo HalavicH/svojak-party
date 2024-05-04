@@ -1,13 +1,15 @@
 #![allow(unused)]
 
-use rocket::{routes, post, get};
-use rocket::serde::json::{Json, Value};
+use crate::hub_comm::hw::hw_hub_manager::get_epoch_ms;
+use crate::hub_comm::web::web_server::server::{
+    Persistence, PlayerEvent, PlayerId, PlayerIdentityDto,
+};
 use rocket::fairing::AdHoc;
 use rocket::http::Status;
 use rocket::serde::json::serde_json::json;
+use rocket::serde::json::{Json, Value};
+use rocket::{get, post, routes};
 use rocket_client_addr::ClientAddr;
-use crate::hub_comm::hw::hw_hub_manager::get_epoch_ms;
-use crate::hub_comm::web::web_server::server::{Persistence, PlayerEvent, PlayerId, PlayerIdentityDto};
 
 #[get("/ip-loopback")]
 fn ip_loopback(addr: ClientAddr) -> Value {
@@ -17,7 +19,10 @@ fn ip_loopback(addr: ClientAddr) -> Value {
 }
 
 #[post("/register", data = "<player>")]
-fn register_player(player: Json<PlayerIdentityDto>, state: Persistence) -> Result<Json<PlayerIdentityDto>, Status> {
+fn register_player(
+    player: Json<PlayerIdentityDto>,
+    state: Persistence,
+) -> Result<Json<PlayerIdentityDto>, Status> {
     log::info!("Got player registration attempt: {:?}", player);
 
     let mut guard = state.lock().expect("Poisoned");
@@ -42,7 +47,7 @@ fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, 
         return Err(Status::Unauthorized);
     }
 
-    if  guard.players.get(&event.id).is_none() {
+    if guard.players.get(&event.id).is_none() {
         log::warn!("Not known Id: {}", event.id);
         return Err(Status::Unauthorized);
     }
@@ -63,11 +68,6 @@ fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, 
 
 pub fn setup() -> AdHoc {
     AdHoc::on_ignite("Player-API", |rocket| async {
-        rocket
-            .mount("/", routes![
-                register_player,
-                process_event,
-                ip_loopback
-            ])
+        rocket.mount("/", routes![register_player, process_event, ip_loopback])
     })
 }

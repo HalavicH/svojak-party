@@ -5,7 +5,7 @@ use tauri::command;
 
 use crate::api::dto::PlayerSetupDto;
 
-use crate::game_pack::game_pack_loader::{load_game_pack};
+use crate::game_pack::game_pack_loader::load_game_pack;
 
 pub mod hub;
 pub mod hw_hub;
@@ -66,8 +66,7 @@ pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
                 .split("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 .collect::<Vec<&str>>();
             let &details = split.get(0).unwrap_or(&"");
-            let html_details = ansi_to_html::convert_escaped(details)
-                .unwrap_or_else(|e| {
+            let html_details = ansi_to_html::convert_escaped(details).unwrap_or_else(|e| {
                 log::error!("Can't map ASNI to HTML for {}\nError {}", details, e);
                 details.to_string()
             });

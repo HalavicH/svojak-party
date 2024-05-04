@@ -12,7 +12,7 @@ use crate::hub_comm::hw::internal::api_types::{
 };
 use crate::hub_comm::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
 use crate::hub_comm::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
-use error_stack::{bail, IntoReport, Report, report, Result, ResultExt};
+use error_stack::{bail, IntoReport, Report, Result, ResultExt};
 use rgb::RGB8;
 use serde::Serialize;
 use serialport::SerialPort;
@@ -104,6 +104,23 @@ impl HwHubManager {
 }
 
 impl HubManager for HwHubManager {
+    fn get_hub_address(&self) -> String {
+        self.port_name.clone()
+    }
+    fn probe(&mut self, port: &str) -> Result<HubStatus, HubManagerError> {
+        if let Some(hub) = &self.hub_io_handler {
+            log::info!("Previous HUB io handle found: {:?}. Erasing", hub);
+            self.hub_io_handler = None;
+        }
+
+        self.port_name = port.to_owned();
+        self.setup_hub_connection(port)?;
+
+        self.init_timestamp()?;
+        self.set_hub_timestamp(self.base_timestamp)?;
+        self.status = HubStatus::Detected;
+        Ok(self.status.clone())
+    }
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
         if !self.status.is_live() {
             bail!(HubManagerError::NotInitializedError)
@@ -146,6 +163,7 @@ impl HubManager for HwHubManager {
 
         Ok(timestamp)
     }
+
     fn set_hub_timestamp(&self, timestamp: u32) -> Result<(), HubManagerError> {
         log::info!("Setting timestamp of 0x{:X?}", timestamp);
         let handle = self.get_hub_handle_or_err()?;
@@ -157,6 +175,7 @@ impl HubManager for HwHubManager {
 
         map_status_to_result(response.status)
     }
+
     fn set_term_light_color(&self, term_id: u8, color: RGB8) -> Result<(), HubManagerError> {
         log::info!("Setting terminal #{} light color to: {:?}", term_id, color);
         let handle = self.get_hub_handle_or_err()?;
@@ -206,7 +225,9 @@ impl HubManager for HwHubManager {
             log::trace!("Chunk {:?}", chunk);
 
             let term_id = chunk[0];
-            let bytes = chunk[1..5].try_into().into_report()
+            let bytes = chunk[1..5]
+                .try_into()
+                .into_report()
                 .change_context(HubManagerError::InternalError)?;
             let timestamp = u32::from_le_bytes(bytes);
             let state_byte = chunk[5];
@@ -230,10 +251,6 @@ impl HubManager for HwHubManager {
         Ok(events)
     }
 
-    fn get_hub_address(&self) -> String {
-        self.port_name.clone()
-    }
-
     fn radio_channel(&self) -> i32 {
         self.radio_channel
     }
@@ -243,21 +260,6 @@ impl HubManager for HwHubManager {
             .hub_io_handler
             .as_ref()
             .ok_or(HubManagerError::NotInitializedError)?)
-    }
-
-    fn probe(&mut self, port: &str) -> Result<HubStatus, HubManagerError> {
-        if let Some(hub) = &self.hub_io_handler {
-            log::info!("Previous HUB io handle found: {:?}. Erasing", hub);
-            self.hub_io_handler = None;
-        }
-
-        self.port_name = port.to_owned();
-        self.setup_hub_connection(port)?;
-
-        self.init_timestamp()?;
-        self.set_hub_timestamp(self.base_timestamp)?;
-        self.status = HubStatus::Detected;
-        Ok(self.status.clone())
     }
 
     fn setup_hub_connection(&mut self, port: &str) -> Result<(), HubManagerError> {
@@ -328,8 +330,7 @@ fn map_status_to_result(status: ResponseStatus) -> Result<(), HubManagerError> {
 
 /// Queries OS for all available serial ports
 pub fn discover_serial_ports() -> Vec<String> {
-    let ports = serialport::available_ports()
-        .expect("Couldn't discover ports");
+    let ports = serialport::available_ports().expect("Couldn't discover ports");
     let mut ports_vec = vec![VIRTUAL_HUB_PORT.to_owned()];
 
     log::info!("Serial ports: {:?}", ports);

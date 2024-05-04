@@ -4,9 +4,9 @@ use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};
 use crate::hub_comm::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
 use error_stack::{Report, Result};
 use rgb::RGB8;
+use serde::Deserialize;
 use std::default::Default;
 use std::fmt::Debug;
-use serde::Deserialize;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Deserialize)]
 pub enum HubType {

@@ -1,7 +1,7 @@
 use crate::hub_comm::common::hub_api::HubManager;
 use error_stack::{IntoReport, Report, Result, ResultExt};
 use std::collections::HashMap;
-use std::sync::atomic::{Ordering};
+use std::sync::atomic::Ordering;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, RwLock, RwLockReadGuard};
 use std::thread;
@@ -32,10 +32,7 @@ impl GameContext {
         let (event_tx, event_rx) = mpsc::channel();
         self.event_queue = Some(event_rx);
 
-        start_event_listener(
-            self.get_hub_ref().clone(),
-            event_tx
-        );
+        start_event_listener(self.get_hub_ref().clone(), event_tx);
 
         let ts = get_epoch_ms().expect("No epoch today");
         self.allow_answer_timestamp.swap(ts, Ordering::Relaxed);
@@ -119,7 +116,8 @@ impl GameContext {
 
     pub fn finish_question_prematurely(&mut self) -> Result<(), GameplayError> {
         self.current.answer_allowed = false;
-        self.allow_answer_timestamp.swap(u32::MAX, Ordering::Relaxed);
+        self.allow_answer_timestamp
+            .swap(u32::MAX, Ordering::Relaxed);
 
         self.current.total_tries += 1;
         self.current.total_wrong_answers += 1;
@@ -195,7 +193,8 @@ impl GameContext {
         }
 
         self.current.answer_allowed = false;
-        self.allow_answer_timestamp.swap(u32::MAX, Ordering::Relaxed);
+        self.allow_answer_timestamp
+            .swap(u32::MAX, Ordering::Relaxed);
 
         let active_player_id = self.get_active_player_id();
         log::info!(
@@ -251,7 +250,11 @@ impl GameContext {
 
     pub fn get_current_round(&self) -> &Round {
         let index = self.current.round_index;
-        let round = self.game_pack.content.rounds.get(index)
+        let round = self
+            .game_pack
+            .content
+            .rounds
+            .get(index)
             .expect(&format!("Expected to have round #{}", index));
         round
     }
@@ -389,7 +392,8 @@ impl GameContext {
             };
 
             let base_timestamp = self.allow_answer_timestamp.load(Ordering::Relaxed);
-            let mut events: Vec<TermEvent> = events.iter()
+            let mut events: Vec<TermEvent> = events
+                .iter()
                 .filter(|&e| {
                     return if e.timestamp >= base_timestamp {
                         log::info!("After answer allowed. Event {:?}", e);
@@ -397,7 +401,7 @@ impl GameContext {
                     } else {
                         log::info!("Answer too early. Event {:?}", e);
                         false
-                    }
+                    };
                 })
                 .map(|e| e.clone())
                 .collect();
@@ -475,7 +479,11 @@ impl GameContext {
 
     fn get_current_round_mut(&mut self) -> &mut Round {
         let index = self.current.round_index;
-        let round = self.game_pack.content.rounds.get_mut(index)
+        let round = self
+            .game_pack
+            .content
+            .rounds
+            .get_mut(index)
             .expect(&format!("Expected to have round #{}", index));
         round
     }
@@ -526,7 +534,7 @@ impl GameContext {
 
 pub fn start_event_listener(
     hub: Arc<RwLock<Box<dyn HubManager>>>,
-    sender: Sender<TermEvent>
+    sender: Sender<TermEvent>,
 ) -> JoinHandle<()> {
     log::info!("Starting event listener");
 
@@ -535,10 +543,7 @@ pub fn start_event_listener(
     })
 }
 
-fn listen_hub_events(
-    hub: Arc<RwLock<Box<dyn HubManager>>>,
-    sender: Sender<TermEvent>
-) {
+fn listen_hub_events(hub: Arc<RwLock<Box<dyn HubManager>>>, sender: Sender<TermEvent>) {
     loop {
         log::debug!("############# NEW ITERATION ###############");
         sleep(Duration::from_millis(EVT_POLLING_INTERVAL_MS));
@@ -562,7 +567,7 @@ fn listen_hub_events(
 fn process_term_event(
     hub_guard: &RwLockReadGuard<Box<dyn HubManager>>,
     e: &TermEvent,
-    sender: &Sender<TermEvent>
+    sender: &Sender<TermEvent>,
 ) {
     hub_guard
         .set_term_feedback_led(e.term_id, &e.state)
@@ -570,8 +575,8 @@ fn process_term_event(
             log::error!("Can't set term_feedback let. Err {:?}", error);
         });
 
-
-    sender.send((*e).clone())
+    sender
+        .send((*e).clone())
         .map_err(|e| {
             log::error!("Can't send the event: {}", e);
         })

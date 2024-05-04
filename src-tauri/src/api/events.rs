@@ -15,13 +15,14 @@ impl<'a> From<Event> for &'a str {
         match val {
             Event::Message => "message",
             Event::Error => "error",
-            Event::WebUsers => "web-users"
+            Event::WebUsers => "web-users",
         }
     }
 }
 
 pub fn send_event<S: Serialize + Clone>(window: &Window, event: Event, message: S) {
-    window.emit(event.into(), message)
+    window
+        .emit(event.into(), message)
         .map_err(|e| format!("Failed to send message: {}", e))
         .expect("Expected to send message to the front-end")
 }

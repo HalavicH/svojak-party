@@ -8,21 +8,22 @@ use thiserror::Error;
 use std::sync::mpsc::Receiver;
 
 use crate::api::dto::QuestionType;
+use crate::core::game_entities::HubStatus::Detected;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::hub_comm::common::hub_api::{HubManager, HubType};
 use crate::hub_comm::hw::hw_hub_manager::HwHubManager;
 use crate::hub_comm::hw::internal::api_types::TermEvent;
+use crate::hub_comm::web::web_hub_manager::WebHubManager;
 use error_stack::Report;
 use serde::{Deserialize, Serialize};
-use crate::core::game_entities::HubStatus::Detected;
-use crate::hub_comm::web::web_hub_manager::WebHubManager;
 
 lazy_static::lazy_static! {
     static ref CONTEXT: Arc<Mutex<GameContext>> = Arc::new(Mutex::new(GameContext::default()));
 }
 
 pub fn game() -> MutexGuard<'static, GameContext> {
-    CONTEXT.lock()
+    CONTEXT
+        .lock()
         .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
         .expect("Mutex is poisoned")
 }

@@ -1,13 +1,13 @@
 #![allow(unused)]
 
-use rocket::{Build, Rocket};
-use rocket::State;
-use std::collections::HashMap;
-use std::sync::{Mutex};
-use rocket::form::FromForm;
-use rocket::fs::{FileServer, relative};
-use rocket::serde::{Deserialize, Serialize};
 use crate::hub_comm::web::web_server::{internal_api, player_api};
+use rocket::form::FromForm;
+use rocket::fs::{relative, FileServer};
+use rocket::serde::{Deserialize, Serialize};
+use rocket::State;
+use rocket::{Build, Rocket};
+use std::collections::HashMap;
+use std::sync::Mutex;
 
 pub type PlayerId = u8;
 
@@ -38,17 +38,11 @@ pub struct ServerState {
 
 impl ServerState {
     pub fn has_player_name(&self, name: &String) -> bool {
-        let players_with_such_name = self.players.values()
-            .filter(|&p| {
-                p.name.eq(name)
-            })
-            .count();
+        let players_with_such_name = self.players.values().filter(|&p| p.name.eq(name)).count();
         players_with_such_name > 0
     }
     pub fn is_known_ip(&self, ip: &String) -> bool {
-        self.players.values()
-            .filter(|&p| p.ip == *ip)
-            .count() > 0
+        self.players.values().filter(|&p| p.ip == *ip).count() > 0
     }
 
     pub fn add_player(&mut self, mut player: PlayerIdentityDto) -> PlayerIdentityDto {
@@ -70,7 +64,9 @@ impl ServerState {
     }
 
     pub fn get_by_ip(&self, ip: &String) -> Option<PlayerIdentityDto> {
-        let players: Vec<PlayerIdentityDto> = self.players.values()
+        let players: Vec<PlayerIdentityDto> = self
+            .players
+            .values()
             .filter(|&p| p.ip == *ip)
             .map(|p| p.clone())
             .collect();
@@ -85,7 +81,6 @@ impl ServerState {
 
 pub type SharedServerState = Mutex<ServerState>;
 pub type Persistence<'a> = &'a State<Mutex<ServerState>>;
-
 
 pub fn setup() -> rocket::fairing::AdHoc {
     rocket::fairing::AdHoc::on_ignite("Persistence-API", |rocket| async {
