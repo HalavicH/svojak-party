@@ -111,7 +111,7 @@ impl Default for GameContext {
     fn default() -> Self {
         Self {
             hub_type: HubType::default(),
-            hub: Arc::new(RwLock::new(Box::new(HwHubManager::default()))),
+            hub: Arc::new(RwLock::new(Box::<HwHubManager>::default())),
             players: HashMap::default(),
             game_pack: GamePack::default(),
             current: CurrentContext::default(),
@@ -132,16 +132,16 @@ impl GameContext {
         match hub_type {
             HubType::HwHub => {
                 log::info!("||| --> Selecting SERIAL hub <---");
-                self.hub = Arc::new(RwLock::new(Box::new(HwHubManager::default())))
+                self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
             }
             HubType::WebHub => {
                 log::info!("||| --> Selecting WEB hub <---");
-                self.hub = Arc::new(RwLock::new(Box::new(WebHubManager::default())))
+                self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
     }
     pub fn drop_hub(&mut self) {
-        self.hub = Arc::new(RwLock::new(Box::new(HwHubManager::default())))
+        self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
     }
     pub fn get_hub_ref(&self) -> &Arc<RwLock<Box<dyn HubManager>>> {
         &self.hub

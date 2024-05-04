@@ -35,7 +35,7 @@ impl HwHubRequest {
     pub fn from_debug_request(request: HubRequestDto) -> Self {
         let x = request.param2.to_ne_bytes();
         let rgb = RGB8::new(x[0], x[1], x[2]);
-        let state = if request.param2 != 0 { true } else { false };
+        let state = request.param2 != 0;
         match request.cmd.as_str() {
             "set_timestamp" => HwHubRequest::SetTimestamp(request.param1),
             "get_timestamp" => HwHubRequest::GetTimestamp,

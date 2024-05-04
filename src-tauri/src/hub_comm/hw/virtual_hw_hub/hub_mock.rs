@@ -247,6 +247,6 @@ fn generate_random_numbers() -> Vec<u8> {
         set.insert(num);
     }
 
-    numbers.extend(set.into_iter());
+    numbers.extend(set);
     numbers
 }

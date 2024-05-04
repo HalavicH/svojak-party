@@ -12,7 +12,7 @@ use super::dto::PlayerSetupDto;
 pub fn get_config_dto() -> ConfigDto {
     let context = game();
     let hub_guard = context.get_unlocked_hub();
-    let players = context.players.values().cloned().collect();
+    let players: Vec<Player> = context.players.values().cloned().collect();
     ConfigDto {
         available_ports: discover_serial_ports(),
         hub_port: hub_guard.get_hub_address(),
@@ -21,7 +21,7 @@ pub fn get_config_dto() -> ConfigDto {
     }
 }
 
-pub fn map_players_to_players_setup_dto(players: &Vec<Player>) -> Vec<PlayerSetupDto> {
+pub fn map_players_to_players_setup_dto(players: &[Player]) -> Vec<PlayerSetupDto> {
     players
         .iter()
         .map(|p| PlayerSetupDto {
@@ -34,7 +34,7 @@ pub fn map_players_to_players_setup_dto(players: &Vec<Player>) -> Vec<PlayerSetu
 }
 
 /// Takes whole game context and maps to config which contains only required elements
-pub fn update_players(players: &Vec<Player>) {
+pub fn update_players(players: &[Player]) {
     let mut context = game();
 
     context.players = players.iter().fold(HashMap::new(), |mut map, player| {
@@ -106,14 +106,14 @@ pub fn map_players_to_player_game_dto(players: &HashMap<u8, Player>) -> Vec<Play
 /// ```
 /// use std::collections::HashMap;
 /// use serde::Serialize;
-/// use svoyak_tauri_app::api::mapper::map_round_to_dto;
-/// use svoyak_tauri_app::game_pack::pack_content_entities::{Round, RoundType, Theme};
+/// use svojak_app::api::mapper::map_round_to_dto;
+/// use svojak_app::game_pack::pack_content_entities::{Round, Theme};
 ///
 /// // Assume proper implementations for RoundType and Theme structs.
 ///
 /// let round = Round {
 ///     name: "1".to_string(),
-///     round_type: RoundType::Normal,
+///     round_type: "normal".to_string(),
 ///     themes: HashMap::new(),
 ///     question_count: 30,
 ///     questions_left: 27,

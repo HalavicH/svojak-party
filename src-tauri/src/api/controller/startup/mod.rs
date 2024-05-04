@@ -1,3 +1,4 @@
+use error_stack::Report;
 use crate::api::dto::{ConfigDto, PackErrorData, PackInfoDto};
 use crate::api::mapper::{get_config_dto, map_package_to_pack_info_dto, update_players};
 use crate::core::game_entities::{game, GameplayError, Player, PlayerState};
@@ -5,7 +6,7 @@ use tauri::command;
 
 use crate::api::dto::PlayerSetupDto;
 
-use crate::game_pack::game_pack_loader::load_game_pack;
+use crate::game_pack::game_pack_loader::{GamePackLoadingError, load_game_pack};
 
 pub mod hub;
 pub mod hw_hub;
@@ -26,7 +27,7 @@ pub fn fetch_configuration() -> ConfigDto {
 pub fn save_players(players: Vec<PlayerSetupDto>) {
     log::debug!("Updating game context with new config: {players:#?}");
 
-    let player_entities = players
+    let player_entities: Vec<Player> = players
         .iter()
         .map(|player| Player {
             icon: player.icon.clone(),
@@ -59,27 +60,31 @@ pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
             Ok(pack_info_dto)
         }
         Err(err) => {
-            log::error!("\n{err:?}");
-
-            let stack_trace = format!("{:?}", err);
-            let split = stack_trace
-                .split("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-                .collect::<Vec<&str>>();
-            let &details = split.get(0).unwrap_or(&"");
-            let html_details = ansi_to_html::convert_escaped(details).unwrap_or_else(|e| {
-                log::error!("Can't map ASNI to HTML for {}\nError {}", details, e);
-                details.to_string()
-            });
-
-            let data = PackErrorData {
-                path,
-                cause: err.current_context().to_string(),
-                details: html_details,
-            };
-
-            Err(data)
+            handle_pack_info_error(path, err)
         }
     }
+}
+
+fn handle_pack_info_error(path: String, err: Report<GamePackLoadingError>) -> Result<PackInfoDto, PackErrorData> {
+    log::error!("\n{err:?}");
+
+    let stack_trace = format!("{:?}", err);
+    let split = stack_trace
+        .split("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        .collect::<Vec<&str>>();
+    let &details = split.first().unwrap_or(&"");
+    let html_details = ansi_to_html::convert_escaped(details).unwrap_or_else(|e| {
+        log::error!("Can't map ASNI to HTML for {}\nError {}", details, e);
+        details.to_string()
+    });
+
+    let data = PackErrorData {
+        path,
+        cause: err.current_context().to_string(),
+        details: html_details,
+    };
+
+    Err(data)
 }
 
 #[command]

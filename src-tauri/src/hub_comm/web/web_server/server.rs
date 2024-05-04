@@ -17,6 +17,7 @@ pub struct PlayerEvent {
     pub id: PlayerId,
     pub ip: String,
     pub timestamp: u32,
+    // TODO: rename to is_button_pressed
     pub state: bool,
 }
 
@@ -68,14 +69,14 @@ impl ServerState {
             .players
             .values()
             .filter(|&p| p.ip == *ip)
-            .map(|p| p.clone())
+            .cloned()
             .collect();
 
         if players.is_empty() {
             return None;
         }
 
-        return Some(players[0].clone());
+        Some(players[0].clone())
     }
 }
 

@@ -38,22 +38,23 @@ fn register_player(
 
 #[post("/event", format = "application/json", data = "<event>")]
 fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, Status> {
-    log::info!("Received event {:?}", event);
+    log::debug!("Received event {:?}", event);
 
-    let mut guard = state.lock().expect("Poisoned");
+    let mut state_guard = state.lock()
+        .unwrap_or_else(|err| {panic!("Can't aquire state: {err}")});
 
-    if !guard.is_known_ip(&event.ip) {
+    if !state_guard.is_known_ip(&event.ip) {
         log::warn!("Not known IP: {}", event.ip);
         return Err(Status::Unauthorized);
     }
 
-    if guard.players.get(&event.id).is_none() {
+    if !state_guard.players.contains_key(&event.id) {
         log::warn!("Not known Id: {}", event.id);
         return Err(Status::Unauthorized);
     }
 
     // TODO: Move to the gameplay
-    let color = if event.state == true {
+    let color = if event.state {
         "#00FFFF"
     } else {
         "#000000"
@@ -61,7 +62,7 @@ fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, 
 
     let mut event = event.0;
     event.timestamp = get_epoch_ms().expect("Failed to get epoch");
-    guard.push_event(event);
+    state_guard.push_event(event);
 
     Ok(json!({"color": color}))
 }

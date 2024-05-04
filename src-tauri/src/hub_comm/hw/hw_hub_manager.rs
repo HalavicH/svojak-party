@@ -119,7 +119,7 @@ impl HubManager for HwHubManager {
         self.init_timestamp()?;
         self.set_hub_timestamp(self.base_timestamp)?;
         self.status = HubStatus::Detected;
-        Ok(self.status.clone())
+        Ok(self.status)
     }
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
         if !self.status.is_live() {
@@ -128,12 +128,16 @@ impl HubManager for HwHubManager {
         let mut players = vec![];
 
         for term_id in 1..MAX_TERMINAL_CNT {
-            if self.ping_terminal(term_id).is_ok() {
-                log::debug!("Terminal #{} is alive", term_id);
-                let mut player = Player::default();
-                player.term_id = term_id;
-                players.push(player);
+            if self.ping_terminal(term_id).is_err() {
+                continue;
             }
+            
+            log::debug!("Terminal #{} is alive", term_id);
+            let player = Player {
+                term_id,
+                ..Default::default()
+            };
+            players.push(player);
         }
 
         Ok(players)

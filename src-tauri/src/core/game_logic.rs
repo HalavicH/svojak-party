@@ -397,15 +397,15 @@ impl GameContext {
             let mut events: Vec<TermEvent> = events
                 .iter()
                 .filter(|&e| {
-                    return if e.timestamp >= base_timestamp {
+                    if e.timestamp >= base_timestamp {
                         log::info!("After answer allowed. Event {:?}", e);
                         true
                     } else {
                         log::info!("Answer too early. Event {:?}", e);
                         false
-                    };
+                    }
                 })
-                .map(|e| e.clone())
+                .cloned()
                 .collect();
 
             events.sort_by(|e1, e2| e1.timestamp.cmp(&e2.timestamp));

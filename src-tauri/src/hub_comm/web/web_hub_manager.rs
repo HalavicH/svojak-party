@@ -41,14 +41,13 @@ impl Default for WebHubManager {
         log::info!("Configuring manager to call port {}", port);
         log::info!("###################################");
 
-        let manager = Self {
+        Self {
             port,
             base_url: Url::from_str(&endpoint).expect("Bad base url"),
             server_handle: None,
             client: Default::default(),
             rt: Runtime::new().expect("No runtime - no game :D"),
-        };
-        manager
+        }
     }
 }
 
@@ -134,10 +133,11 @@ impl HubManager for WebHubManager {
         let players = players
             .iter()
             .map(|p| {
-                let mut player = Player::default();
-                player.term_id = p.id;
-                player.name = p.name.clone();
-                player
+                Player {
+                    term_id: p.id,
+                    name: p.name.clone(),
+                    ..Default::default()
+                }
             })
             .collect();
 
@@ -250,24 +250,20 @@ impl HubManager for WebHubManager {
 fn get_ipv4_interfaces_ip(port: &String) -> Vec<String> {
     let network_interfaces = NetworkInterface::show().unwrap();
     let localhost = Ipv4Addr::from_str("127.0.0.1").unwrap();
-    let mut ips: Vec<String> = vec![];
+    let mut ip_list: Vec<String> = vec![];
 
     for itf in network_interfaces.iter() {
         itf.addr.iter().for_each(|a| match a {
             Addr::V4(ip) => {
-                if localhost != ip.ip {
-                    println!("{:#?}", ip.ip);
-                    ips.push(format!(
-                        "Interface: {} --> {}:{}",
-                        itf.name,
-                        ip.ip.to_string(),
-                        port
-                    ));
+                if localhost == ip.ip {
+                    return;
                 }
+                println!("Discovered interface with IP: {:#?}", ip.ip);
+                ip_list.push(format!("Interface: {} --> {}:{}", itf.name, ip.ip, port));
             }
             Addr::V6(_) => {}
         });
     }
 
-    return ips;
+    ip_list
 }
