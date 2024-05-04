@@ -1,10 +1,15 @@
 <script>
     export let options;
-    console.log(options);
+    export let handleSelection;
+
+    console.log("Drop-down-menu:")
+    function handleChange(event) {
+        const selectedValue = event.target.value;
+        handleSelection(selectedValue);
+    }
 </script>
 
-
-<select name="size">
+<select name="size" on:change={handleChange}>
     {#each options as opt}
         <option value={opt.value}>{opt.title}</option>
     {/each}

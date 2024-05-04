@@ -1,23 +1,15 @@
 <script>
-    import Row from "./Row.svelte";
-    import DropDown from "./DropDown.svelte";
-    import HSpacing from "./utils/HSpacing.svelte";
-
     export let title;
 </script>
 
-<div class="items-block">
-    <p class="items-block-title">{title}</p>
+<div>
+    <p>{title}</p>
     <slot/>
 </div>
 
 
 <style>
-    p {
-        margin: 0.5em;
-    }
-
-    .items-block {
+    div {
         background-color: var(--items-block-color);
         border: 1px solid var(--items-block-border-color);
         border-radius: inherit;
@@ -27,12 +19,12 @@
         flex-direction: column;
     }
 
-    .items-block-title {
+    p {
         display: flex;
         flex-direction: row;
         justify-content: center;
 
-        margin-top: 5px;
+        margin: 5px 0.5em 0.5em;
 
         color: var(--title-text-color);
         font-style: italic;

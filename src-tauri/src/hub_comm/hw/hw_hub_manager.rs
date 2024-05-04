@@ -12,7 +12,7 @@ use crate::hub_comm::hw::internal::api_types::{
 };
 use crate::hub_comm::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
 use crate::hub_comm::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
-use error_stack::{IntoReport, Report, Result, ResultExt};
+use error_stack::{bail, IntoReport, Report, report, Result, ResultExt};
 use rgb::RGB8;
 use serde::Serialize;
 use serialport::SerialPort;
@@ -24,7 +24,7 @@ const MAX_TERMINAL_CNT: u8 = 10;
 pub enum HubManagerError {
     #[error("Api not supported for this type of HUB")]
     ApiNotSupported,
-    #[error("Hub not initialized")]
+    #[error("Hub is not initialized")]
     NotInitializedError,
     #[error("Serial port error")]
     SerialPortError,
@@ -43,6 +43,7 @@ pub struct HwHubManager {
     port_name: String,
     hub_io_handler: Option<HwHubCommunicationHandler>,
     baudrate: u32,
+    status: HubStatus,
     radio_channel: i32,
     base_timestamp: u32,
 }
@@ -53,6 +54,7 @@ impl Default for HwHubManager {
             port_name: String::default(),
             radio_channel: 0,
             baudrate: 200_000,
+            status: HubStatus::NoDevice,
             base_timestamp: 0,
             hub_io_handler: None,
         }
@@ -103,6 +105,9 @@ impl HwHubManager {
 
 impl HubManager for HwHubManager {
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
+        if !self.status.is_live() {
+            bail!(HubManagerError::NotInitializedError)
+        }
         let mut players = vec![];
 
         for term_id in 1..MAX_TERMINAL_CNT {
@@ -251,7 +256,8 @@ impl HubManager for HwHubManager {
 
         self.init_timestamp()?;
         self.set_hub_timestamp(self.base_timestamp)?;
-        Ok(HubStatus::Detected)
+        self.status = HubStatus::Detected;
+        Ok(self.status.clone())
     }
 
     fn setup_hub_connection(&mut self, port: &str) -> Result<(), HubManagerError> {

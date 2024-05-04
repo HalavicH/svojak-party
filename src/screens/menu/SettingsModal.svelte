@@ -8,6 +8,7 @@
     import WebClientsSettingsModal from "./WebClientsSettingsModal.svelte";
     import {invoke} from "@tauri-apps/api/tauri";
     import {HubType, TauriApiCommand} from "../../lib/commands"
+    import HwClientsSettingsModal from "./HwClientsSettingsModal.svelte";
 
     // Provided by 'modals'
     export let isOpen;
@@ -17,7 +18,7 @@
     async function openPhysicalClientsSettings() {
         invoke(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.HwHub}).then();
         closeModal();
-        // openModal(PhysicalClientsSettingsModal);
+        openModal(HwClientsSettingsModal);
     }
 
     function openWebClientsSettings() {

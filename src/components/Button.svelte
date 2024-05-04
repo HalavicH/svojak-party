@@ -3,6 +3,7 @@
 
     export let id = "";
     export let text = "Button";
+    export let style = "";
     export let onClick = () => {};
 
     function handleClick() {
@@ -10,7 +11,7 @@
     }
 </script>
 
-<button id={id} type="button" on:click={handleClick}>{text}</button>
+<button id={id} type="button" {style} on:click={handleClick}>{text}</button>
 
 <style>
     button {
@@ -28,7 +29,12 @@
     }
 
     button:hover {
-        filter: drop-shadow(0 0 0.4em #747bff);
-        transition: all 0.25s;
+        border-color: #396cd8;
+        filter: drop-shadow(0 0 0.3em #24c8db);
+    }
+
+    button:active {
+        border-color: #396cd8;
+        background-color: var(--primary-button-active-color);
     }
 </style>

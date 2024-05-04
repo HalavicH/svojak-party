@@ -83,7 +83,7 @@
         <Row>
             <label for="round-duration">Select round duration:</label>
             <HSpacing size="1em"/>
-            <DropDown options={gameDurationOptions}/>
+            <DropDown options={gameDurationOptions} handleSelection={()=>{}}/>
         </Row>
     </ItemsBlock>
 

@@ -39,6 +39,22 @@ export const HubStatusOptions = {
     NoDevice: 'NoDevice',
 }
 
+export const HubManagerError = {
+    ApiNotSupported: 'ApiNotSupported',
+    NotInitializedError: 'NotInitializedError',
+    SerialPortError: 'SerialPortError',
+    HttpCommunicationError: 'HttpCommunicationError',
+    NoResponseFromHub: 'NoResponseFromHub',
+    NoResponseFromTerminal: 'NoResponseFromTerminal',
+    InternalError: 'InternalError',
+};
 
-// Example usage:
-// invoke(TauriApiCommand.SET_HUB_TYPE);
+export function hubManagerError2Msg(err) {
+    if (HubManagerError.ApiNotSupported === err) return 'Api not supported for this type of HUB';
+    if (HubManagerError.NotInitializedError === err) return 'Hub is not initialized';
+    if (HubManagerError.SerialPortError === err) return 'Serial port error';
+    if (HubManagerError.HttpCommunicationError === err) return 'HTTP communication error';
+    if (HubManagerError.NoResponseFromHub === err) return 'No response from hub';
+    if (HubManagerError.NoResponseFromTerminal === err) return 'No response from terminal';
+    if (HubManagerError.InternalError === err) return 'Internal error';
+}

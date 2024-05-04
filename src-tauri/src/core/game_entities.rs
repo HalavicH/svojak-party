@@ -14,6 +14,7 @@ use crate::hub_comm::hw::hw_hub_manager::HwHubManager;
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 use error_stack::Report;
 use serde::{Deserialize, Serialize};
+use crate::core::game_entities::HubStatus::Detected;
 use crate::hub_comm::web::web_hub_manager::WebHubManager;
 
 lazy_static::lazy_static! {
@@ -71,11 +72,17 @@ impl Player {
     }
 }
 
-#[derive(Debug, Serialize, PartialEq, Default)]
+#[derive(Debug, Serialize, PartialEq, Default, Copy, Clone)]
 pub enum HubStatus {
     Detected,
     #[default]
     NoDevice,
+}
+
+impl HubStatus {
+    pub fn is_live(&self) -> bool {
+        *self == Detected
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Error)]
