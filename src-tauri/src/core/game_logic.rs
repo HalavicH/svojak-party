@@ -353,6 +353,7 @@ impl GameContext {
             .ok_or(GamePackError::ThemeNotPresent)
             .into_report()
             .attach_printable(format!("Can't find theme: {theme:?}"))?;
+        let theme_name = theme.name.clone();
 
         let question = theme
             .get_question(price)
@@ -363,11 +364,12 @@ impl GameContext {
             ))?
             .clone();
 
-        self.current.question_theme = theme.name.clone();
+        self.current.question_theme = theme_name;
         self.current.question_type = question.question_type.clone();
         self.current.question_price = question.price;
         Ok((question, question_number))
     }
+
 
     fn get_fastest_click_from_hub(&mut self) -> Result<u8, HubManagerError> {
         let Some(receiver) = &self.event_queue else {
