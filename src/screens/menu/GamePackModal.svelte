@@ -12,6 +12,8 @@
     import WarningBar from "../../components/WarningBar.svelte";
     import {invoke} from "@tauri-apps/api/tauri";
     import {TauriApiCommand} from "../../lib/commands.js";
+    import {navTo} from "../../lib/stores.js";
+    import {Views} from "../views.js";
 
     export let isOpen;
 
@@ -60,6 +62,11 @@
         closeModal();
         openModal(SettingsModal);
     }
+
+    function startTheGame() {
+        console.log("Start pressed");
+        navTo(Views.QUIZ);
+    }
 </script>
 
 <BaseModal {isOpen}>
@@ -96,7 +103,7 @@
         </div>
     {:else}
         <div class="action-block">
-            <Button text="Start the game" onClick={() => {console.log("Start pressed");}}/>
+            <Button text="Start the game" onClick={startTheGame}/>
         </div>
     {/if}
 
