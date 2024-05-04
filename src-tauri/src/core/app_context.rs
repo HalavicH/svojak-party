@@ -14,10 +14,10 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
-use std::thread::sleep;
+use std::thread::{JoinHandle, sleep, spawn};
 use std::time::{Duration, Instant};
 use tauri::Window;
-use crate::api::events::emit_app_context;
+use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
 use crate::game_pack::game_pack_entites::GamePack;
 
@@ -45,6 +45,8 @@ pub struct AppContext {
     // Comm entities
     pub hub_type: HubType,
     hub: Arc<RwLock<Box<dyn HubManager>>>,
+    player_poling_thread_handle: Option<JoinHandle<()>>,
+
     // pub window: Arc<RwLock<Box<Option<Window>>>>,
     // Game entities
     pub game_pack: GamePack,
@@ -69,6 +71,7 @@ impl Default for AppContext {
             player_event_listener: None,
             allow_answer_timestamp: Arc::new(AtomicU32::default()),
             // window: Arc::new(RwLock::new(Box::<Option<Window>>::default())),
+            player_poling_thread_handle: None,
         }
     }
 }
@@ -94,9 +97,9 @@ impl AppContext {
         }
         emit_app_context(map_app_context(self));
     }
-    pub fn discover_hub(&mut self, path: String) -> String{
+    pub fn discover_hub(&mut self, path: String) -> String {
         let result = self.get_locked_hub_mut().probe(&path);
-        emit_app_context(map_app_context(self));
+        self.run_polling_for_players();
         match result {
             Ok(()) => "Detected".to_string(),
             Err(error_stack) => {
@@ -109,6 +112,82 @@ impl AppContext {
                 }
             }
         }
+    }
+
+    /// Players polling
+    fn run_polling_for_players(&mut self) {
+        if self.player_poling_thread_handle.is_some() {
+            log::info!("Player polling thread already started");
+            return;
+        } else {
+            log::info!("I promise there's no stuff saved!");
+        }
+
+        let handle = spawn(move || {
+            loop {
+                Self::discover_and_save_players();
+                sleep(Duration::from_secs(2));
+            }
+        });
+
+        log::info!("Saving new thread handle");
+        self.player_poling_thread_handle = Some(handle)
+    }
+    fn discover_and_save_players() {
+        log::debug!("############# NEW PLAYER POLLING ITERATION ###############");
+        let mut app_guard = app_mut();
+        let result = {
+            let mut guard = app_guard.get_locked_hub_mut();
+            guard.discover_players()
+        };
+        match result {
+            Ok(detected_players) => {
+                Self::compare_and_merge(&mut app_guard, &detected_players);
+            }
+            Err(error) => {
+                log::error!("Can't discover players: {:?}", error);
+            }
+        }
+        log::debug!("");
+    }
+
+    fn compare_and_merge(app_guard: &mut AppContext, detected_players: &[Player]) {
+        let det_pl_cnt = detected_players.len();
+        log::debug!("Detected {} players", det_pl_cnt);
+        if app_guard.new_players_found(detected_players) {
+            log::info!("New players found! Merging");
+            emit_message(format!("New players detected! Total number: {}", det_pl_cnt));
+            app_guard.merge_players(detected_players);
+            emit_app_context(map_app_context(app_guard));
+        }
+    }
+
+    fn new_players_found(&self, detected_players: &[Player]) -> bool {
+        if detected_players.len() > self.players.len() {
+            return true;
+        }
+
+        let current_players_ids: Vec<u8> = self.players.keys().cloned().collect();
+        // emit_message(format!("Current player ids: {current_players_ids:?}"));
+        // let vec: Vec<u8> = detected_players.iter().map(|p| p.term_id).collect();
+        // emit_message(format!("Detected player ids: {:?}", vec));
+
+        for detected_player in detected_players {
+            if !current_players_ids.contains(&detected_player.term_id) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+
+    fn merge_players(&mut self, detected_players: &[Player]) {
+        // TODO: make actual merge instead of simple re-assign
+        self.players = detected_players
+            .iter()
+            .map(|p| { (p.term_id, p.clone()) })
+            .collect();
     }
 
     pub fn drop_hub(&mut self) {

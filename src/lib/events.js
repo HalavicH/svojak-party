@@ -1,5 +1,5 @@
 import {listen} from "@tauri-apps/api/event";
-import {gameConfig} from "./stores.js";
+import {gameContext} from "./stores.js";
 import {notify} from "./notifications.js";
 import {invoke} from "@tauri-apps/api/tauri";
 import {TauriApiCommand} from "./commands.js";
@@ -24,7 +24,7 @@ function logEvent(type, event) {
 }
 
 export function initEventListeners() {
-    listenAndStoreEvent(TauriEvents.GameConfig, gameConfig);
+    listenAndStoreEvent(TauriEvents.GameConfig, gameContext);
 
     console.log("################################################");
     console.log("##### ALL EVENT LISTENERS HAS BEEN LOADED ######");

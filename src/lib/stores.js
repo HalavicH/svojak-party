@@ -10,20 +10,22 @@ export function navTo(view) {
     currentView.set(view);
 }
 
-export const gameConfig = writable({
+export const gameContext = writable({
     hub_port: "",
     available_ports: [],
     radio_channel: -1,
-    players: [],
+    players: [
+        {
+            termId: 0,
+            icon: "",
+            name: "",
+            isUsed: false,
+        }
+    ],
 });
 
 export const gamePlayers = writable([
-    {
-        termId: 0,
-        icon: "",
-        name: "",
-        isUsed: false,
-    }
+
 ]);
 
 console.log("################################################");

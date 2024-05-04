@@ -13,12 +13,12 @@
     import ConfigButton from "../../components/ConfigButton.svelte";
     import Input from "../../components/TextInput.svelte";
     import {notify} from "../../lib/notifications"
-    import {gameConfig, gamePlayers} from "../../lib/stores.js";
+    import {gameContext, gamePlayers} from "../../lib/stores.js";
 
     // Provided by 'modals'
     export let isOpen;
 
-    let players = $gamePlayers;
+    let players;
     // let config;
     let hubStatus = HubStatusOptions.NoDevice;
     let serialPorts = [];
@@ -35,9 +35,9 @@
 
     // Watch for changes in isOpen and trigger the API call if it becomes true
     $: if (isOpen) {
-        let config = $gameConfig;
+        let config = $gameContext;
         hubPortUsed = config.hub_port;
-
+        players = config.players;
         let portsFromOs = config.available_ports.map((portName) => {
             return {
                 value: portName,
