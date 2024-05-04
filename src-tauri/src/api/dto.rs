@@ -47,7 +47,7 @@ pub struct PlayerScoreDto {
 }
 
 ////////// Pack info ///////////
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
 pub struct PackInfoDto {
     pub packName: String,

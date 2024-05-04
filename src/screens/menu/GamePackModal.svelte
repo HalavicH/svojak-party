@@ -10,37 +10,12 @@
     import {closeModal, openModal} from 'svelte-modals'
     import SettingsModal from "./SettingsModal.svelte";
     import WarningBar from "../../components/WarningBar.svelte";
-    import {invoke} from "@tauri-apps/api/tauri";
-    import {TauriApiCommand} from "../../lib/commands.js";
-    import {navTo} from "../../lib/stores.js";
+    import {gameContext, gamePackInfo, navTo} from "../../lib/stores.js";
     import {Views} from "../views.js";
 
     export let isOpen;
 
-    export let packInfo = {
-        packName: 'Zlyj reper Zenyk',
-        packAuthor: 'Zlyj reper Zenyk',
-        packRounds: 3,
-        packTopics: 3,
-        packQuestions: 69,
-        packTopicList: [
-            'Beer',
-            'Pone',
-            'Music',
-            'Movies',
-            'Fallout',
-            'Beer',
-            'Pone',
-            'Music',
-            'Movies',
-            'Fallout',
-            'Beer',
-            'Pone',
-            'Music',
-            'Movies',
-            'Fallout',
-        ],
-    };
+    export let packInfo = $gamePackInfo;
 
     // Static
     let gameDurationOptions = [
@@ -49,14 +24,7 @@
         {value: 20, title: "20min"}
     ];
 
-    let players = [];
-    $: {
-        invoke(TauriApiCommand.FETCH_PLAYERS)
-            .then(newPlayers => {
-                console.log(`Got players`, newPlayers);
-                players = newPlayers
-            });
-    }
+    let players = $gameContext.players;
 
     function openSettings() {
         closeModal();

@@ -5,7 +5,7 @@ use error_stack::Report;
 use tauri::{command, Window};
 
 use crate::api::dto::PlayerSetupDto;
-use crate::api::events::{emit, emit_app_context, Event, set_window};
+use crate::api::events::{emit, emit_app_context, emit_pack_info, Event, set_window};
 use crate::core::app_context::{app, app_mut};
 
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
@@ -49,7 +49,7 @@ pub fn save_players(players: Vec<PlayerSetupDto>) {
 
 /// Load game pack into the game
 #[command]
-pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
+pub fn init_game_pack(path: String) -> Result<(), PackErrorData> {
     log::info!("Obtained package path: {}", path);
 
     let result = load_game_pack(path.as_str());
@@ -58,9 +58,12 @@ pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
         Ok(pack) => {
             app_mut().set_game_pack(pack);
 
-            let pack_info_dto = map_package_to_pack_info_dto(&app().game.pack_content);
+            let package = &app().game_pack.content;
+            log::info!("Pack content: {:#?}", package);
+            let pack_info_dto = map_package_to_pack_info_dto(package);
             log::info!("Pack info: {:#?}", pack_info_dto);
-            Ok(pack_info_dto)
+            emit_pack_info(pack_info_dto);
+            Ok(())
         }
         Err(err) => handle_pack_info_error(path, err),
     }
@@ -69,7 +72,7 @@ pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
 fn handle_pack_info_error(
     path: String,
     err: Report<GamePackLoadingError>,
-) -> Result<PackInfoDto, PackErrorData> {
+) -> Result<(), PackErrorData> {
     log::error!("\n{err:?}");
 
     let stack_trace = format!("{:?}", err);

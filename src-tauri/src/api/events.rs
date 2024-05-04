@@ -4,13 +4,14 @@ use serde::Serialize;
 use crate::core::app_context::{app};
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use tauri::Window;
-use crate::api::dto::AppContextDto;
+use crate::api::dto::{AppContextDto, PackInfoDto};
 use crate::api::mapper::get_app_context_dto;
 
 pub enum Event {
     Message,
     Error,
     GameConfig,
+    PackInfo,
 }
 
 /// Impl enum to &str conversion
@@ -20,13 +21,18 @@ impl<'a> From<Event> for &'a str {
             Event::Message => "message",
             Event::Error => "error",
             Event::GameConfig => "GameConfig",
+            Event::PackInfo => "PackInfo",
         }
     }
 }
 
 /// Game specific events 
-    pub fn emit_app_context(config: AppContextDto) {
-    emit(Event::GameConfig, config)
+pub fn emit_app_context(config: AppContextDto) {
+    emit(Event::GameConfig, config);
+}
+
+pub fn emit_pack_info(pack_info: PackInfoDto) {
+    emit(Event::PackInfo, pack_info);
 }
 
 /// Generic API

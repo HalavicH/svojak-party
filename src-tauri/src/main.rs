@@ -16,7 +16,7 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-                // Window setup api    
+                // Window setup api
                 init_window_handle,
                 // Event requests
                 request_context_update,
@@ -27,9 +27,9 @@ fn main() {
                 set_hub_radio_channel,
                 discover_players,
                 save_players,
-                get_pack_info,
+                init_game_pack,
                 save_round_duration,
-                get_pack_info,
+                init_game_pack,
                 start_the_game,
                 // Debug API
                 setup_hub_connection,

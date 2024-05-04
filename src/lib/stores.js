@@ -24,9 +24,31 @@ export const gameContext = writable({
     ],
 });
 
-export const gamePlayers = writable([
-
-]);
+export const gamePlayers = writable([]);
+export const gamePackInfo = writable({
+    packName: 'Zlyj reper Zenyk',
+    packAuthor: 'Zlyj reper Zenyk',
+    packRounds: 3,
+    packTopics: 3,
+    packQuestions: 69,
+    packTopicList: [
+        'Beer',
+        'Pone',
+        'Music',
+        'Movies',
+        'Fallout',
+        'Beer',
+        'Pone',
+        'Music',
+        'Movies',
+        'Fallout',
+        'Beer',
+        'Pone',
+        'Music',
+        'Movies',
+        'Fallout',
+    ],
+});
 
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");

@@ -36,9 +36,9 @@
             notify.info(`Selected game package path: ${filePath}`);
         }
 
-        invoke(TauriApiCommand.GET_PACK_INFO, {path: filePath})
-            .then((newPackInfo) => {
-                openModal(GamePackModal, {packInfo: newPackInfo})
+        invoke(TauriApiCommand.INIT_GAME_PACK, {path: filePath})
+            .then(() => {
+                openModal(GamePackModal)
             })
             .catch((error) => {
                 console.error("Promise rejection:", error);
