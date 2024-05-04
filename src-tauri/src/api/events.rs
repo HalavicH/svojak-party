@@ -1,6 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
 use serde::Serialize;
+use crate::core::app_context::{app};
+use std::sync::{Arc, Mutex, MutexGuard};
 use tauri::Window;
 
 pub enum Event {
@@ -20,19 +22,30 @@ impl<'a> From<Event> for &'a str {
     }
 }
 
-pub fn send_event<S: Serialize + Clone>(window: &Window, event: Event, message: S) {
-    window
-        .emit(event.into(), message)
-        .map_err(|e| format!("Failed to send message: {}", e))
-        .expect("Expected to send message to the front-end")
+pub fn emit_message<S: Serialize + Clone>(message: S) {
+    emit(Event::Message, message);
 }
 
-#[allow(dead_code)]
-pub fn send_message(window: &Window, message: &str) {
-    send_event(window, Event::Message, message)
+pub fn emit<S: Serialize + Clone>(event: Event, message: S) {
+    if let Some(window) = window().as_ref() {
+        window
+            .emit(event.into(), message)
+            .map_err(|e| format!("Failed to send message: {}", e))
+            .expect("Expected to send message to the front-end")
+    }
 }
 
-#[allow(dead_code)]
-pub fn send_error(window: &Window, message: &str) {
-    send_event(window, Event::Error, message)
+lazy_static::lazy_static! {
+    static ref WINDOW: Arc<Mutex<Option<Window>>> = Arc::new(Mutex::new(Option::default()));
+}
+
+pub fn window() -> MutexGuard<'static, Option<Window>> {
+    WINDOW.lock()
+        .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
+        .expect("Mutex is poisoned")
+}
+
+pub fn set_window(window: Window) {
+    let mut guard = WINDOW.lock().expect("Mutex is poisoned");
+    *guard = Some(window);
 }

@@ -1,4 +1,8 @@
 export const TauriApiCommand = {
+    // Window setup api
+    INIT_WINDOW_HANDLE: 'init_window_handle',
+
+    /////////// LEGACY API ////////////
     // Startup API
     SET_HUB_TYPE: 'set_hub_type',
     FETCH_CONFIGURATION: 'fetch_configuration',

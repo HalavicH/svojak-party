@@ -15,35 +15,37 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            // Startup API
-            set_hub_type,
-            fetch_configuration,
-            discover_hub,
-            set_hub_radio_channel,
-            discover_players,
-            save_players,
-            get_pack_info,
-            save_round_duration,
-            get_pack_info,
-            start_the_game,
-            // Debug API
-            setup_hub_connection,
-            send_raw_request_frame,
-            send_hub_command,
-            // Gameplay API
-            fetch_players,
-            fetch_round,
-            get_question_data,
-            allow_answer,
-            get_fastest_click,
-            answer_question,
-            has_next_question,
-            finish_question_prematurely,
-            init_next_round,
-            send_pip_victim,
-            get_active_player_id,
-            is_allow_answer_required,
-            fetch_round_stats
+                // Window setup api    
+                init_window_handle,
+                // Startup API
+                set_hub_type,
+                fetch_configuration,
+                discover_hub,
+                set_hub_radio_channel,
+                discover_players,
+                save_players,
+                get_pack_info,
+                save_round_duration,
+                get_pack_info,
+                start_the_game,
+                // Debug API
+                setup_hub_connection,
+                send_raw_request_frame,
+                send_hub_command,
+                // Gameplay API
+                fetch_players,
+                fetch_round,
+                get_question_data,
+                allow_answer,
+                get_fastest_click,
+                answer_question,
+                has_next_question,
+                finish_question_prematurely,
+                init_next_round,
+                send_pip_victim,
+                get_active_player_id,
+                is_allow_answer_required,
+                fetch_round_stats
         ])
         .run(tauri::generate_context!())
         .expect("Can't start Tauri app");

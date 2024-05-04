@@ -2,22 +2,21 @@ use crate::api::dto::{ConfigDto, PackErrorData, PackInfoDto};
 use crate::api::mapper::{get_config_dto, map_package_to_pack_info_dto, update_players};
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
 use error_stack::Report;
-use tauri::{command};
+use tauri::{command, Window};
 
 use crate::api::dto::PlayerSetupDto;
-use crate::core::app_context::app;
+use crate::api::events::set_window;
+use crate::core::app_context::{app};
 
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 
 pub mod hub;
 pub mod hw_hub;
 
-// #[command]
-// pub fn store_window_handle(window: Window) {
-//     let guard = game();
-//     let map = &guard.players;
-//
-// }
+#[command]
+pub fn init_window_handle(window: Window) {
+    set_window(window);
+}
 
 /// Provide saved game configuration
 #[command]

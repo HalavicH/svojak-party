@@ -1,5 +1,5 @@
 use crate::api::dto::PlayerSetupDto;
-use crate::api::events::send_message;
+use crate::api::events::{emit_message};
 use crate::api::mapper::map_players_to_players_setup_dto;
 use crate::core::app_context::app;
 use tauri::{command, Window};
@@ -9,12 +9,14 @@ use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 
 /// Set hub type to web or serial
 #[command]
-pub fn set_hub_type(window: Window, hub_type: HubType) {
+pub fn set_hub_type(hub_type: HubType) {
     log::debug!("Got request to set hub type: {:?}", hub_type);
+    emit_message(&format!("Set {:?}", hub_type));
     let mut game = app();
-    send_message(&window, &format!("Set {:?}", hub_type));
+    // send_message(&window, &format!("Set {:?}", hub_type));
     game.select_hub_type(hub_type);
 }
+
 
 /// Tries to detect hub at given serial port. If successful saves port name
 #[command]

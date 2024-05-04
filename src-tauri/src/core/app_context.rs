@@ -16,10 +16,11 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+use tauri::Window;
 use crate::game_pack::game_pack_entites::GamePack;
 
 lazy_static::lazy_static! {
-    static ref GAME_CONTEXT: Arc<Mutex<AppContext >> = Arc::new(Mutex::new(AppContext::default()));
+    static ref GAME_CONTEXT: Arc<Mutex<AppContext>> = Arc::new(Mutex::new(AppContext::default()));
 }
 
 pub fn app() -> MutexGuard<'static, AppContext> {
@@ -31,12 +32,16 @@ pub fn app() -> MutexGuard<'static, AppContext> {
 
 #[derive(Debug)]
 pub struct AppContext {
-    // Comm
+    // Comm entities
     pub hub_type: HubType,
     hub: Arc<RwLock<Box<dyn HubManager>>>,
-    pub players: HashMap<u8, Player>,
+    // pub window: Arc<RwLock<Box<Option<Window>>>>,
+    // Game entities
     pub game_pack: GamePack,
     pub game: GameContext,
+
+    pub players: HashMap<u8, Player>,
+    // TODO: move to game
     pub player_event_listener: Option<Receiver<TermEvent>>,
     pub allow_answer_timestamp: Arc<AtomicU32>,
 }
@@ -53,6 +58,7 @@ impl Default for AppContext {
             game: GameContext::default(),
             player_event_listener: None,
             allow_answer_timestamp: Arc::new(AtomicU32::default()),
+            // window: Arc::new(RwLock::new(Box::<Option<Window>>::default())),
         }
     }
 }
@@ -107,7 +113,7 @@ impl AppContext {
     pub fn set_game_pack(&mut self, pack: GamePack) {
         self.game_pack = pack;
     }
-    
+
     /// Game API
     pub fn finish_game(&mut self) {
         self.game = GameContext::default();

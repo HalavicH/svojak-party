@@ -5,6 +5,12 @@
     import {Views} from "./screens/views.js";
     import Quiz from "./screens/Quiz.svelte";
     import {currentView} from "./lib/stores"
+    import {invoke} from "@tauri-apps/api/tauri";
+    import {TauriApiCommand} from "./lib/commands.js";
+
+    invoke(TauriApiCommand.INIT_WINDOW_HANDLE).then(() => {
+        console.log("Window handle stored successfully");
+    })
 
     setupEventListener('message', (event) => {
         const message = event.payload;
