@@ -9,7 +9,7 @@
     }
 
     $: {
-        if (selectedValue !== undefined) {
+        if (selectedValue !== undefined || selectedValue !== "") {
             const selectElement = document.getElementById('selectElement');
             if (selectElement) {
                 selectElement.value = selectedValue;

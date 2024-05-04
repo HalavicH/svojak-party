@@ -12,8 +12,6 @@
 
     // Provided by 'modals'
     export let isOpen;
-    export let title;
-    export let message;
 
     async function openPhysicalClientsSettings() {
         invoke(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.HwHub}).then();
