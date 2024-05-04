@@ -40,8 +40,9 @@ fn register_player(
 fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, Status> {
     log::debug!("Received event {:?}", event);
 
-    let mut state_guard = state.lock()
-        .unwrap_or_else(|err| {panic!("Can't aquire state: {err}")});
+    let mut state_guard = state
+        .lock()
+        .unwrap_or_else(|err| panic!("Can't aquire state: {err}"));
 
     if !state_guard.is_known_ip(&event.ip) {
         log::warn!("Not known IP: {}", event.ip);
@@ -54,11 +55,7 @@ fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, 
     }
 
     // TODO: Move to the gameplay
-    let color = if event.state {
-        "#00FFFF"
-    } else {
-        "#000000"
-    };
+    let color = if event.state { "#00FFFF" } else { "#000000" };
 
     let mut event = event.0;
     event.timestamp = get_epoch_ms().expect("Failed to get epoch");

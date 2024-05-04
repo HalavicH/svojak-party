@@ -5,7 +5,7 @@ use std::default::Default;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use thiserror::Error;
 
-use crate::core::game_entities::{HubStatus, Player};
+use crate::core::game_entities::{Player};
 use crate::hub_comm::common::hub_api::HubManager;
 use crate::hub_comm::hw::internal::api_types::{
     HwHubIoError, HwHubRequest, ResponseStatus, TermButtonState, TermEvent,
@@ -126,14 +126,14 @@ impl HubManager for HwHubManager {
         if !self.is_initialized {
             bail!(HubManagerError::NotInitializedError)
         }
-        
+
         let mut players = vec![];
 
         for term_id in 1..MAX_TERMINAL_CNT {
             if self.ping_terminal(term_id).is_err() {
                 continue;
             }
-            
+
             log::debug!("Terminal #{} is alive", term_id);
             let player = Player {
                 term_id,

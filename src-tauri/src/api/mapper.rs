@@ -1,6 +1,7 @@
 use crate::api::dto::{ConfigDto, QuestionDataDto, QuestionSceneDto, RoundDto, TopicDto};
 use crate::api::dto::{PackInfoDto, PlayerGameDto, QuestionDto};
-use crate::core::game_entities::{game, Player};
+use crate::core::app_context::app;
+use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use std::collections::HashMap;
 
@@ -10,7 +11,7 @@ use super::dto::PlayerSetupDto;
 
 /// Takes whole game context and maps to config which contains only required elements
 pub fn get_config_dto() -> ConfigDto {
-    let context = game();
+    let context = app();
     let hub_guard = context.get_unlocked_hub();
     let players: Vec<Player> = context.players.values().cloned().collect();
     ConfigDto {
@@ -35,7 +36,7 @@ pub fn map_players_to_players_setup_dto(players: &[Player]) -> Vec<PlayerSetupDt
 
 /// Takes whole game context and maps to config which contains only required elements
 pub fn update_players(players: &[Player]) {
-    let mut context = game();
+    let mut context = app();
 
     context.players = players.iter().fold(HashMap::new(), |mut map, player| {
         map.insert(player.term_id, player.clone());

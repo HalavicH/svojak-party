@@ -1,15 +1,23 @@
-use error_stack::Report;
 use crate::api::dto::{ConfigDto, PackErrorData, PackInfoDto};
 use crate::api::mapper::{get_config_dto, map_package_to_pack_info_dto, update_players};
-use crate::core::game_entities::{game, GameplayError, Player, PlayerState};
-use tauri::command;
+use crate::core::game_entities::{GameplayError, Player, PlayerState};
+use error_stack::Report;
+use tauri::{command};
 
 use crate::api::dto::PlayerSetupDto;
+use crate::core::app_context::app;
 
-use crate::game_pack::game_pack_loader::{GamePackLoadingError, load_game_pack};
+use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 
 pub mod hub;
 pub mod hw_hub;
+
+// #[command]
+// pub fn store_window_handle(window: Window) {
+//     let guard = game();
+//     let map = &guard.players;
+//
+// }
 
 /// Provide saved game configuration
 #[command]
@@ -53,19 +61,20 @@ pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
 
     match result {
         Ok(pack) => {
-            game().game_pack = pack;
+            app().game_pack = pack;
 
-            let pack_info_dto = map_package_to_pack_info_dto(&game().game_pack.content);
+            let pack_info_dto = map_package_to_pack_info_dto(&app().game_pack.content);
             log::info!("Pack info: {:#?}", pack_info_dto);
             Ok(pack_info_dto)
         }
-        Err(err) => {
-            handle_pack_info_error(path, err)
-        }
+        Err(err) => handle_pack_info_error(path, err),
     }
 }
 
-fn handle_pack_info_error(path: String, err: Report<GamePackLoadingError>) -> Result<PackInfoDto, PackErrorData> {
+fn handle_pack_info_error(
+    path: String,
+    err: Report<GamePackLoadingError>,
+) -> Result<PackInfoDto, PackErrorData> {
     log::error!("\n{err:?}");
 
     let stack_trace = format!("{:?}", err);
@@ -95,7 +104,7 @@ pub fn save_round_duration(round_minutes: i32) {
 #[command]
 pub fn start_the_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
-    game().start_the_game().map_err(|e| {
+    app().start_the_game().map_err(|e| {
         log::error!("{:#?}", e);
         e.current_context().clone()
     })

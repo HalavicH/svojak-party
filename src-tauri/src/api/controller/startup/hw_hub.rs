@@ -1,9 +1,9 @@
 use std::sync::RwLockWriteGuard;
 
 use crate::api::dto::{HubRequestDto, HubResponseDto};
+use crate::core::app_context::app;
 use tauri::command;
 
-use crate::core::game_entities::game;
 use crate::hub_comm::common::hub_api::HubManager;
 
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
@@ -13,7 +13,7 @@ use crate::hub_comm::hw::internal::api_types::{HwHubIoError, HwHubRequest};
 #[command]
 pub fn set_hub_radio_channel(channel_id: i32) -> Result<(), HubManagerError> {
     log::info!("Got channel id: {channel_id}");
-    let guard = game();
+    let guard = app();
     let hub_guard = guard.get_locked_hub_mut();
 
     hub_guard
@@ -28,7 +28,7 @@ pub fn set_hub_radio_channel(channel_id: i32) -> Result<(), HubManagerError> {
 #[command]
 pub fn setup_hub_connection(port_name: String) -> Result<(), HubManagerError> {
     log::info!("Trying to open HUB connection");
-    let game_ctx = game();
+    let game_ctx = app();
     let mut hub = game_ctx.get_locked_hub_mut();
     hub.setup_hub_connection(&port_name).map_err(|e| {
         log::error!("Operation failed: {:?}", e);
@@ -39,7 +39,7 @@ pub fn setup_hub_connection(port_name: String) -> Result<(), HubManagerError> {
 #[command]
 pub fn send_raw_request_frame(request_frame: Vec<u8>) -> Result<Vec<u8>, HwHubIoError> {
     log::info!("Sending raw frame request to HUB");
-    let guard = game();
+    let guard = app();
     let hub_guard = guard.get_locked_hub_mut();
     let Ok(handler) = hub_guard.hub_io_handler() else {
         return Err(HwHubIoError::NotInitializedError);
@@ -54,7 +54,7 @@ pub fn send_raw_request_frame(request_frame: Vec<u8>) -> Result<Vec<u8>, HwHubIo
 #[command]
 pub fn send_hub_command(request: HubRequestDto) -> Result<HubResponseDto, HubManagerError> {
     log::info!("Sending request to HUB.\n{:#?}", request);
-    let guard = game();
+    let guard = app();
     let mut hub_guard = guard.get_locked_hub_mut();
 
     let request_enum = HwHubRequest::from_debug_request(request);

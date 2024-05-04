@@ -6,7 +6,7 @@ use tauri::Window;
 pub enum Event {
     Message,
     Error,
-    WebUsers,
+    GameConfig,
 }
 
 /// Impl enum to &str conversion
@@ -15,7 +15,7 @@ impl<'a> From<Event> for &'a str {
         match val {
             Event::Message => "message",
             Event::Error => "error",
-            Event::WebUsers => "web-users",
+            Event::GameConfig => "web-users",
         }
     }
 }
