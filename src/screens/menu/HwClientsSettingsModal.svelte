@@ -28,7 +28,7 @@
 
     const emptyOption = {
         title: "Select serial port",
-        value: ""
+        value: "Select serial port",
     };
 
     $: console.log(`Modal HwClientsSettingsModal is ${isOpen}`);
@@ -74,10 +74,16 @@
             });
     }
 
-    async function openSerialPort(portName) {
+    async function discoverHub(portName) {
+        if (portName === emptyOption.title) {
+            console.log(`Skipping placeholder option`);
+            notify.warning("Empty option");
+            return;
+        }
+
+        notify.info(`Discovering hub: ${portName}`)
         console.log(`Discovering hub: ${portName}`);
         hubStatus = await invoke(TauriApiCommand.DISCOVER_HUB, {path: portName});
-        console.log(`Hub status: ${hubStatus}`)
     }
 
     function captureInput(text) {
@@ -144,7 +150,7 @@
                     <div>Select serial device:</div>
                 </td>
                 <td>
-                    <DropDown options={serialPorts} handleSelection={openSerialPort}/>
+                    <DropDown options={serialPorts} handleSelection={discoverHub}/>
                 </td>
             </tr>
             </tbody>

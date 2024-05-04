@@ -18,17 +18,23 @@ pub fn set_hub_type(window: Window, hub_type: HubType) {
 
 /// Tries to detect hub at given serial port. If successful saves port name
 #[command]
-pub fn discover_hub(path: String) -> Result<HubStatus, HubManagerError> {
+pub fn discover_hub(path: String) -> String {
     let guard = game();
     let result = guard.get_locked_hub_mut().probe(&path);
     match result {
-        Ok(status) => {
-            log::info!("Hub status: {:?}", status);
-            Ok(status)
+        Ok(()) => {
+            "Detected".to_string()
         }
         Err(error_stack) => {
             log::error!("Can't open port: {:?}", error_stack);
-            Err(error_stack.current_context().clone())
+            let error_case = error_stack.current_context().clone();
+            match error_case {
+                HubManagerError::NoResponseFromHub => {"No Device".to_string()}
+                HubManagerError::SerialPortError => {"Serial Port Error".to_string()}
+                _ => {
+                    error_case.to_string()
+                }
+            }
         }
     }
 }

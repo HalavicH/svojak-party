@@ -1,19 +1,29 @@
 <script>
     export let options;
     export let handleSelection;
+    export let selectedValue;
 
-    console.log("Drop-down-menu:")
     function handleChange(event) {
         const selectedValue = event.target.value;
         handleSelection(selectedValue);
     }
+
+    $: {
+        if (selectedValue !== undefined) {
+            const selectElement = document.getElementById('selectElement');
+            if (selectElement) {
+                selectElement.value = selectedValue;
+            }
+        }
+    }
 </script>
 
-<select name="size" on:change={handleChange}>
+<select id="selectElement" name="size" on:change={handleChange}>
     {#each options as opt}
         <option value={opt.value}>{opt.title}</option>
     {/each}
 </select>
+
 
 <style>
     select {

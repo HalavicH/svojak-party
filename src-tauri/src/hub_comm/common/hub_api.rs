@@ -18,7 +18,7 @@ pub enum HubType {
 pub trait HubManager: Debug + Send + Sync {
     // Common
     fn get_hub_address(&self) -> String;
-    fn probe(&mut self, port: &str) -> Result<HubStatus, HubManagerError>;
+    fn probe(&mut self, port: &str) -> Result<(), HubManagerError>;
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError>;
     fn get_hub_timestamp(&self) -> Result<u32, HubManagerError>;
     fn set_hub_timestamp(&self, timestamp: u32) -> Result<(), HubManagerError>;

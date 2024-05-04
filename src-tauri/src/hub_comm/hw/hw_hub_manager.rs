@@ -43,7 +43,7 @@ pub struct HwHubManager {
     port_name: String,
     hub_io_handler: Option<HwHubCommunicationHandler>,
     baudrate: u32,
-    status: HubStatus,
+    is_initialized: bool,
     radio_channel: i32,
     base_timestamp: u32,
 }
@@ -51,10 +51,11 @@ pub struct HwHubManager {
 impl Default for HwHubManager {
     fn default() -> Self {
         Self {
+            baudrate: 200_000,
+            // Default
             port_name: String::default(),
             radio_channel: 0,
-            baudrate: 200_000,
-            status: HubStatus::NoDevice,
+            is_initialized: false,
             base_timestamp: 0,
             hub_io_handler: None,
         }
@@ -107,7 +108,7 @@ impl HubManager for HwHubManager {
     fn get_hub_address(&self) -> String {
         self.port_name.clone()
     }
-    fn probe(&mut self, port: &str) -> Result<HubStatus, HubManagerError> {
+    fn probe(&mut self, port: &str) -> Result<(), HubManagerError> {
         if let Some(hub) = &self.hub_io_handler {
             log::info!("Previous HUB io handle found: {:?}. Erasing", hub);
             self.hub_io_handler = None;
@@ -118,13 +119,14 @@ impl HubManager for HwHubManager {
 
         self.init_timestamp()?;
         self.set_hub_timestamp(self.base_timestamp)?;
-        self.status = HubStatus::Detected;
-        Ok(self.status)
+        self.is_initialized = true;
+        Ok(())
     }
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
-        if !self.status.is_live() {
+        if !self.is_initialized {
             bail!(HubManagerError::NotInitializedError)
         }
+        
         let mut players = vec![];
 
         for term_id in 1..MAX_TERMINAL_CNT {

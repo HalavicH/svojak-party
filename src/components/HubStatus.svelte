@@ -1,14 +1,23 @@
 <script>
     export let hubStatus = "Undefined";
-    let statusStyle = "";
+    let statusClass = "";
+
+    function toClass(hubStatusStr) {
+        switch (hubStatusStr) {
+            case "Serial Port Error": return "serial-port-error";
+            case "No Device": return "unknown-device";
+            case "Detected": return "detected";
+            default: return "undefined";
+        }
+    }
+
     $: {
-        statusStyle = hubStatus === "Serial Port Error" ? "serial-port-error" : "";
-        statusStyle = hubStatus === "Unknown Device" ? "unknown-device" : "";
-        statusStyle = hubStatus === "Detected" ? "detected" : "";
+        statusClass = toClass(hubStatus);
+        console.log(`For input ${hubStatus} picked class: ${statusClass}`)
     }
 </script>
 
-<div class="hub-status {statusStyle}">{hubStatus}</div>
+<div class="hub-status {statusClass}">{hubStatus}</div>
 
 <style>
     /************ Statuses ************/

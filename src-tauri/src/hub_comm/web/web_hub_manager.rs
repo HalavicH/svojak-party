@@ -94,18 +94,18 @@ impl HubManager for WebHubManager {
         get_ipv4_interfaces_ip(&self.port).join("\n")
     }
 
-    fn probe(&mut self, _port: &str) -> Result<HubStatus, HubManagerError> {
+    fn probe(&mut self, _port: &str) -> Result<(), HubManagerError> {
         if self.server_handle.is_some() {
             log::debug!("Web HUB already initialized. Nothing to do");
             self.get_hub_timestamp()?;
-            return Ok(HubStatus::Detected);
+            return Ok(());
         }
 
         self.start_hub_server();
         for i in 0..50 {
             sleep(Duration::from_millis(RETRY_INTERVAL_MS));
             match self.get_hub_timestamp() {
-                Ok(_) => return Ok(HubStatus::Detected),
+                Ok(_) => return Ok(()),
                 Err(err) => {
                     log::warn!("Can't reach web hub for {i} try. Err: {:?}", err);
                 }
