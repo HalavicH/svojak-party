@@ -1,13 +1,13 @@
 use crate::api::dto::{PlayerGameDto, QuestionDataDto, QuestionType, RoundDto, RoundStatsDto};
 use crate::api::mapper::*;
-use crate::core::app_context::app;
+use crate::core::app_context::{app, app_mut};
 use crate::core::game_entities::GameplayError;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 use tauri::command;
 
 #[command]
 pub fn fetch_players() -> Vec<PlayerGameDto> {
-    let mut guard = app();
+    let mut guard = app_mut();
     let players = guard.fetch_players();
     let vec = map_players_to_player_game_dto(players);
     log::trace!("Players: {:#?}", vec);
@@ -23,7 +23,7 @@ pub fn fetch_round() -> RoundDto {
 
 #[command]
 pub fn get_question_data(topic: String, price: i32) -> Result<QuestionDataDto, GameplayError> {
-    let (question, q_num) = app().get_pack_question(&topic, &price).map_err(|e| {
+    let (question, q_num) = app_mut().get_pack_question(&topic, &price).map_err(|e| {
         log::error!("Can't get question data: {:#?}", e);
         e.current_context().clone()
     })?;
@@ -33,7 +33,7 @@ pub fn get_question_data(topic: String, price: i32) -> Result<QuestionDataDto, G
 
 #[command]
 pub fn allow_answer() -> Result<(), HubManagerError> {
-    app().allow_answer().map_err(|e| {
+    app_mut().allow_answer().map_err(|e| {
         log::error!("{:?}", e);
         e.current_context().clone()
     })
@@ -41,7 +41,7 @@ pub fn allow_answer() -> Result<(), HubManagerError> {
 
 #[command]
 pub fn get_fastest_click() -> Result<i32, GameplayError> {
-    let id = app().get_fastest_click_player_id().map_err(|e| {
+    let id = app_mut().get_fastest_click_player_id().map_err(|e| {
         log::error!("{:?}", e);
         e.current_context().clone()
     })?;
@@ -52,7 +52,7 @@ pub fn get_fastest_click() -> Result<i32, GameplayError> {
 pub fn answer_question(answered_correctly: bool) -> Result<bool, GameplayError> {
     log::debug!("Answered correctly: {answered_correctly}");
 
-    app().answer_question(answered_correctly).map_err(|e| {
+    app_mut().answer_question(answered_correctly).map_err(|e| {
         log::error!("Failed to answer question: {:?}", e);
         e.current_context().clone()
     })
@@ -65,7 +65,7 @@ pub fn has_next_question() -> bool {
 
 #[command]
 pub fn finish_question_prematurely() -> Result<(), GameplayError> {
-    app().finish_question_prematurely().map_err(|e| {
+    app_mut().finish_question_prematurely().map_err(|e| {
         log::error!("Operation failed: {:?}", e);
         e.current_context().clone()
     })
@@ -73,7 +73,7 @@ pub fn finish_question_prematurely() -> Result<(), GameplayError> {
 
 #[command]
 pub fn init_next_round() {
-    app().game.load_next_round();
+    app_mut().game.load_next_round();
 }
 
 #[command]

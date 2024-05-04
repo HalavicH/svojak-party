@@ -12,7 +12,7 @@ pub struct PackErrorData {
 ////////// Config ///////////
 #[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
-pub struct ConfigDto {
+pub struct AppContextDto {
     pub hub_port: String,
     pub available_ports: Vec<String>,
     pub radio_channel: i32,

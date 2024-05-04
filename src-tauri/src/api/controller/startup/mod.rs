@@ -1,31 +1,25 @@
-use crate::api::dto::{ConfigDto, PackErrorData, PackInfoDto};
-use crate::api::mapper::{get_config_dto, map_package_to_pack_info_dto, update_players};
+use crate::api::dto::{AppContextDto, PackErrorData, PackInfoDto};
+use crate::api::mapper::{get_app_context_dto, map_package_to_pack_info_dto, update_players};
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
 use error_stack::Report;
 use tauri::{command, Window};
 
 use crate::api::dto::PlayerSetupDto;
-use crate::api::events::{emit, Event, set_window};
-use crate::core::app_context::{app};
+use crate::api::events::{emit, emit_app_context, Event, set_window};
+use crate::core::app_context::{app, app_mut};
 
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 
 pub mod hub;
 pub mod hw_hub;
-
-#[command]
-pub fn init_window_handle(window: Window) {
-    set_window(window);
-    let dto = get_config_dto();
-    emit(Event::GameConfig, dto)
-}
+pub mod context;
 
 /// Provide saved game configuration
 #[command]
-pub fn fetch_configuration() -> ConfigDto {
+pub fn fetch_configuration() -> AppContextDto {
     log::info!("Fetching config");
 
-    let config = get_config_dto();
+    let config = get_app_context_dto();
     log::info!("Config: {:#?}", config);
 
     config
@@ -62,7 +56,7 @@ pub fn get_pack_info(path: String) -> Result<PackInfoDto, PackErrorData> {
 
     match result {
         Ok(pack) => {
-            app().set_game_pack(pack);
+            app_mut().set_game_pack(pack);
 
             let pack_info_dto = map_package_to_pack_info_dto(&app().game.pack_content);
             log::info!("Pack info: {:#?}", pack_info_dto);
@@ -105,7 +99,7 @@ pub fn save_round_duration(round_minutes: i32) {
 #[command]
 pub fn start_the_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
-    app().start_the_game().map_err(|e| {
+    app_mut().start_the_game().map_err(|e| {
         log::error!("{:#?}", e);
         e.current_context().clone()
     })

@@ -1,6 +1,7 @@
 export const TauriApiCommand = {
     // Window setup api
     INIT_WINDOW_HANDLE: 'init_window_handle',
+    REQUEST_CONTEXT_UPDATE: 'request_context_update',
 
     /////////// LEGACY API ////////////
     // Startup API

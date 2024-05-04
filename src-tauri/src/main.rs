@@ -5,6 +5,7 @@ use rocket::futures::io::Window;
 use svojak_app::api::controller::gameplay::*;
 use svojak_app::api::controller::startup::hub::*;
 use svojak_app::api::controller::startup::hw_hub::*;
+use svojak_app::api::controller::startup::context::*;
 use svojak_app::api::controller::startup::*;
 use svojak_app::core::app_context::app;
 
@@ -17,6 +18,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
                 // Window setup api    
                 init_window_handle,
+                // Event requests
+                request_context_update,
                 // Startup API
                 set_hub_type,
                 fetch_configuration,

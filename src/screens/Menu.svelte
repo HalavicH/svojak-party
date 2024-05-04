@@ -9,6 +9,11 @@
     import {invoke} from "@tauri-apps/api/tauri";
     import {TauriApiCommand} from "../lib/commands.js";
     import PackErrorModal from "./menu/PackErrorModal.svelte";
+    import {onMount} from "svelte";
+
+    onMount(async () => {
+        await invoke(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
+    })
 
     function openSetup() {
         openModal(SettingsModal)

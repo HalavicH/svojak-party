@@ -1,20 +1,25 @@
-use crate::api::dto::{ConfigDto, QuestionDataDto, QuestionSceneDto, RoundDto, TopicDto};
+use crate::api::dto::{AppContextDto, QuestionDataDto, QuestionSceneDto, RoundDto, TopicDto};
 use crate::api::dto::{PackInfoDto, PlayerGameDto, QuestionDto};
-use crate::core::app_context::app;
+use crate::core::app_context::{app, app_mut, AppContext};
 use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use std::collections::HashMap;
+use std::sync::RwLockReadGuard;
 
 use crate::hub_comm::hw::hw_hub_manager::discover_serial_ports;
 
 use super::dto::PlayerSetupDto;
 
 /// Takes whole game context and maps to config which contains only required elements
-pub fn get_config_dto() -> ConfigDto {
+pub fn get_app_context_dto() -> AppContextDto {
     let context = app();
+    map_app_context(&context)
+}
+
+pub fn map_app_context(context: &AppContext) -> AppContextDto {
     let hub_guard = context.get_unlocked_hub();
     let players: Vec<Player> = context.players.values().cloned().collect();
-    ConfigDto {
+    AppContextDto {
         available_ports: discover_serial_ports(),
         hub_port: hub_guard.get_hub_address(),
         radio_channel: hub_guard.radio_channel(),
@@ -36,7 +41,7 @@ pub fn map_players_to_players_setup_dto(players: &[Player]) -> Vec<PlayerSetupDt
 
 /// Takes whole game context and maps to config which contains only required elements
 pub fn update_players(players: &[Player]) {
-    let mut context = app();
+    let mut context = app_mut();
 
     context.players = players.iter().fold(HashMap::new(), |mut map, player| {
         map.insert(player.term_id, player.clone());

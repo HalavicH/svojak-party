@@ -17,15 +17,25 @@ use std::sync::{mpsc, Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWri
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 use tauri::Window;
+use crate::api::events::emit_app_context;
+use crate::api::mapper::map_app_context;
 use crate::game_pack::game_pack_entites::GamePack;
 
 lazy_static::lazy_static! {
-    static ref GAME_CONTEXT: Arc<Mutex<AppContext>> = Arc::new(Mutex::new(AppContext::default()));
+    static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
+
 }
 
-pub fn app() -> MutexGuard<'static, AppContext> {
+pub fn app_mut() -> RwLockWriteGuard<'static, AppContext> {
     GAME_CONTEXT
-        .lock()
+        .write()
+        .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
+        .expect("Mutex is poisoned")
+}
+
+pub fn app() -> RwLockReadGuard<'static, AppContext> {
+    GAME_CONTEXT
+        .read()
         .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
         .expect("Mutex is poisoned")
 }
@@ -42,7 +52,7 @@ pub struct AppContext {
 
     pub players: HashMap<u8, Player>,
     // TODO: move to game
-    pub player_event_listener: Option<Receiver<TermEvent>>,
+    pub player_event_listener: Option<Arc<Mutex<Receiver<TermEvent>>>>,
     pub allow_answer_timestamp: Arc<AtomicU32>,
 }
 
@@ -82,7 +92,25 @@ impl AppContext {
                 self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
+        emit_app_context(map_app_context(self));
     }
+    pub fn discover_hub(&mut self, path: String) -> String{
+        let result = self.get_locked_hub_mut().probe(&path);
+        emit_app_context(map_app_context(self));
+        match result {
+            Ok(()) => "Detected".to_string(),
+            Err(error_stack) => {
+                log::error!("Can't open port: {:?}", error_stack);
+                let error_case = error_stack.current_context().clone();
+                match error_case {
+                    HubManagerError::NoResponseFromHub => "No Device".to_string(),
+                    HubManagerError::SerialPortError => "Serial Port Error".to_string(),
+                    _ => error_case.to_string(),
+                }
+            }
+        }
+    }
+
     pub fn drop_hub(&mut self) {
         self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
     }
@@ -129,7 +157,7 @@ impl AppContext {
         }
 
         let (event_tx, event_rx) = mpsc::channel();
-        self.player_event_listener = Some(event_rx);
+        self.player_event_listener = Some(Arc::new(Mutex::new(event_rx)));
 
         start_event_listener(self.get_hub_ref().clone(), event_tx);
 
@@ -445,12 +473,13 @@ impl AppContext {
         let timeout = Duration::from_secs(10);
         let fastest_click: Option<u8> = None;
 
+        let receiver_guard = receiver.lock().expect("Mutex poisoned");
         loop {
             if start_time.elapsed() >= timeout {
                 return Err(Report::new(HubManagerError::NoResponseFromTerminal));
             }
 
-            let events = match Self::get_events(receiver) {
+            let events = match Self::get_events(&receiver_guard) {
                 Ok(events) => events,
                 Err(_) => {
                     sleep(Duration::from_millis(100));

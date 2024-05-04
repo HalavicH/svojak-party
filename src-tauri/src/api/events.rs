@@ -2,8 +2,10 @@
 
 use serde::Serialize;
 use crate::core::app_context::{app};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use tauri::Window;
+use crate::api::dto::AppContextDto;
+use crate::api::mapper::get_app_context_dto;
 
 pub enum Event {
     Message,
@@ -22,6 +24,12 @@ impl<'a> From<Event> for &'a str {
     }
 }
 
+/// Game specific events 
+    pub fn emit_app_context(config: AppContextDto) {
+    emit(Event::GameConfig, config)
+}
+
+/// Generic API
 pub fn emit_message<S: Serialize + Clone>(message: S) {
     emit(Event::Message, message);
 }
@@ -36,16 +44,16 @@ pub fn emit<S: Serialize + Clone>(event: Event, message: S) {
 }
 
 lazy_static::lazy_static! {
-    static ref WINDOW: Arc<Mutex<Option<Window>>> = Arc::new(Mutex::new(Option::default()));
+    static ref WINDOW: Arc<RwLock<Option<Window>>> = Arc::new(RwLock::new(Option::default()));
 }
 
-pub fn window() -> MutexGuard<'static, Option<Window>> {
-    WINDOW.lock()
+pub fn window() -> RwLockReadGuard<'static, Option<Window>> {
+    WINDOW.read()
         .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
         .expect("Mutex is poisoned")
 }
 
 pub fn set_window(window: Window) {
-    let mut guard = WINDOW.lock().expect("Mutex is poisoned");
+    let mut guard = WINDOW.write().expect("Mutex is poisoned");
     *guard = Some(window);
 }
