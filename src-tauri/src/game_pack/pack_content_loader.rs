@@ -177,8 +177,9 @@ fn map_atoms(a: &AtomDto) -> Atom {
     }
 }
 
-fn map_question(q: &QuestionDto) -> Question {
+fn map_question(q: &QuestionDto, topic: String) -> Question {
     Question {
+        topic,
         price: q.price,
         scenario: {
             q.scenario
@@ -187,22 +188,22 @@ fn map_question(q: &QuestionDto) -> Question {
                 .map(map_atoms)
                 .collect::<Vec<Atom>>()
         },
-        right_answer: q.right.answer.clone(),
+        correct_answer: q.right.answer.clone(),
         // TODO: Set random pip
         question_type: QuestionType::Normal,
     }
 }
 
-fn map_theme(t: &ThemeDto) -> (String, Theme) {
+fn map_theme(t: &ThemeDto) -> (String, Topic) {
     (
         t.name.clone(),
-        Theme {
+        Topic {
             name: t.name.clone(),
             questions: {
                 t.questions
                     .questions_list
                     .iter()
-                    .map(|q| (q.price, { map_question(q) }))
+                    .map(|q| (q.price, { map_question(q, t.name.clone()) }))
                     .collect::<HashMap<i32, Question>>()
             },
         },
@@ -218,7 +219,7 @@ fn map_round(r: &RoundDto) -> Round {
                 .themes_list
                 .iter()
                 .map(map_theme)
-                .collect::<HashMap<String, Theme>>()
+                .collect::<HashMap<String, Topic>>()
         },
         questions_left: -1,
         question_count: -1,

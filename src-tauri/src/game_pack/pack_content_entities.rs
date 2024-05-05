@@ -20,19 +20,20 @@ pub struct Atom {
 
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Question {
+    pub topic: String,
     pub scenario: Vec<Atom>,
-    pub right_answer: String,
+    pub correct_answer: String,
     pub question_type: QuestionType,
     pub price: i32,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Theme {
+pub struct Topic {
     pub name: String,
     pub questions: HashMap<i32, Question>,
 }
 
-impl Theme {
+impl Topic {
     pub fn pop_question(&mut self, price: &i32) -> Option<Question> {
         self.questions.remove(price)
     }
@@ -46,7 +47,7 @@ impl Theme {
 pub struct Round {
     pub name: String,
     pub round_type: String,
-    pub themes: HashMap<String, Theme>,
+    pub themes: HashMap<String, Topic>,
     pub question_count: i32,
     pub normal_question_count: i32,
     pub pip_question_count: i32,

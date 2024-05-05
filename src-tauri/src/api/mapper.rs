@@ -100,7 +100,7 @@ pub fn map_players_to_player_dto(players: Vec<&Player>) -> Vec<PlayerDto> {
 /// use std::collections::HashMap;
 /// use serde::Serialize;
 /// use svojak_app::api::mapper::map_round_to_dto;
-/// use svojak_app::game_pack::pack_content_entities::{Round, Theme};
+/// use svojak_app::game_pack::pack_content_entities::{Round, Topic};
 ///
 /// // Assume proper implementations for RoundType and Theme structs.
 ///
@@ -166,6 +166,6 @@ pub fn map_question_to_question_dto(
                 mediaType: a.atom_type.clone(),
             })
             .collect(),
-        answer: question.right_answer.clone(),
+        answer: question.correct_answer.clone(),
     }
 }
