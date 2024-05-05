@@ -15,9 +15,9 @@ pub struct GameContext {
     pub pack_content: PackContent,
     pub players: Vec<Player>,
     /// Game State
+    pub game_state: GameState,
     pub round_index: usize,
     pub active_player_id: u8,
-    pub game_state: GameState,
     pub click_for_answer_allowed: bool,
     pub answer_allowed: bool,
     /// Current question
@@ -28,11 +28,11 @@ pub struct GameContext {
     pub round_stats: GameStats,
 }
 
-trait Game {
-    fn start();
-    /// 
-    fn select_question(topic: &String, price: &i32) -> Result<(), >;
-}
+// trait Game {
+//     fn start();
+//     /// 
+//     fn select_question(topic: &String, price: &i32) -> Result<(), >;
+// }
 
 impl GameContext {
     pub fn new(pack_content: PackContent, players: Vec<Player>) -> Self {

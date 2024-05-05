@@ -338,8 +338,8 @@ impl AppContext {
         self.allow_answer_timestamp
             .swap(u32::MAX, Ordering::Relaxed);
 
-        self.game.total_tries += 1;
-        self.game.total_wrong_answers += 1;
+        self.game.round_stats.total_tries += 1;
+        self.game.round_stats.total_wrong_answers += 1;
 
         let theme = self.game.question_theme.clone();
         let price = self.game.question_price;
@@ -432,7 +432,7 @@ impl AppContext {
                 .ok_or(GameplayError::PlayerNotPresent)?;
             if answered_correctly {
                 active_player.stats.correct_num += 1;
-                self.game.total_correct_answers += 1;
+                self.game.round_stats.total_correct_answers += 1;
                 active_player.stats.score += self.game.question_price;
                 active_player.state = PlayerState::AnsweredCorrectly;
             } else {
@@ -440,7 +440,7 @@ impl AppContext {
                 active_player.stats.score -= self.game.question_price;
                 active_player.state = PlayerState::AnsweredWrong;
             }
-            self.game.total_tries += 1;
+            self.game.round_stats.total_tries += 1;
             active_player.stats.total_tries += 1;
             active_player.clone()
         };
@@ -449,7 +449,7 @@ impl AppContext {
 
         if self.no_players_to_answer_left() {
             log::info!("Nobody answered question correctly");
-            self.game.total_wrong_answers += 1;
+            self.game.round_stats.total_wrong_answers += 1;
         }
 
         let theme = self.game.question_theme.clone();
@@ -491,9 +491,9 @@ impl AppContext {
             questionNumber: round.question_count,
             normalQuestionNum: round.normal_question_count,
             pigInPokeQuestionNum: round.pip_question_count,
-            totalCorrectAnswers: self.game.total_correct_answers,
-            totalWrongAnswers: self.game.total_wrong_answers,
-            totalTries: self.game.total_tries,
+            totalCorrectAnswers: self.game.round_stats.total_correct_answers,
+            totalWrongAnswers: self.game.round_stats.total_wrong_answers,
+            totalTries: self.game.round_stats.total_tries,
             roundTime: "Not tracked".to_owned(),
             players: self
                 .players
