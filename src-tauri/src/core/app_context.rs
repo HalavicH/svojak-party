@@ -235,7 +235,7 @@ impl AppContext {
     pub fn start_the_game(&mut self) -> error_stack::Result<(), GameplayError> {
         // Prepare game context
         self.game.pack_content = self.game_pack.content.clone();
-        self.update_game_state(GameState::QuestionChoosing);
+        self.update_game_state(GameState::ChooseQuestion);
 
         if self.players.len() < 2 {
             log::info!("Not enough players to run the game.");
@@ -301,7 +301,7 @@ impl AppContext {
             .get_question(theme, price)
             .change_context(GameplayError::PackElementNotPresent)?;
 
-        self.update_game_state(GameState::QuestionSelected);
+        self.update_game_state(GameState::DisplayQuestion);
 
         Ok((question, question_number))
     }
@@ -345,7 +345,7 @@ impl AppContext {
         let price = self.game.question_price;
         log::info!(">>> Trying to remove question from category: {theme}, price: {price}");
 
-        self.update_game_state(GameState::QuestionChoosing);
+        self.update_game_state(GameState::ChooseQuestion);
         self.update_non_target_player_states();
 
         self.remove_question(&theme, &price)
@@ -460,7 +460,7 @@ impl AppContext {
             log::info!("Removing question from the pack");
 
             retry = false;
-            self.update_game_state(GameState::QuestionChoosing);
+            self.update_game_state(GameState::ChooseQuestion);
             self.update_non_target_player_states();
 
             self.remove_question(&theme, &price)
@@ -681,7 +681,7 @@ impl AppContext {
                 p.state = PlayerState::Inactive;
             }
 
-            if *game_state == GameState::QuestionChoosing
+            if *game_state == GameState::ChooseQuestion
                 || (p.state != PlayerState::Dead && p.state != PlayerState::Inactive)
             {
                 log::trace!("Player with id {} becomes idle", id);

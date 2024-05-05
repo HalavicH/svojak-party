@@ -95,12 +95,39 @@ pub enum GameplayError {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum GameState {
     #[default]
+    /// Configuring players and game pack.
+    /// Next state: `ChooseQuestion` (when game started)
     SetupAndLoading,
-    QuestionChoosing,
-    QuestionSelected,
-    AnswerAllowed,
-    AnswerRequested,
-    AnswerWrong,
-    AnswerCorrect,
+
+    /// When game instantiated & started this is the first state
+    /// Next state: `DisplayQuestion` (when question selected)
+    ChooseQuestion,
+
+    /// When question selected everyone reads it, but can't answer until host allows
+    /// Next state: `WaitingForAnswerRequests` (when host press 'Allow answer' button
+    DisplayQuestion,
+
+    /// Host allowed answering the question, from now players can send answer requests
+    /// Next state: `AnswerAttemptReceived` (when first event from active player received)
+    WaitingForAnswerRequests,
+
+    /// The quickest player pushed 'Answer' button first, and now he has right to try answer the question
+    /// Next state: `WrongAnswer` - if verbal answer from player was wrong (when host press button "Wrong answer")
+    ///        or : `CorrectAnswer` - if verbal answer from player was correct (when host press button "Correct answer")
+    AnswerAttemptReceived,
+
+    // TBD: Actually I don't think that answering actions require state. We need to debate on that
+    /// Player answered question wrong - player's score is reduced by question price, player can't answer
+    /// this question anymore, and remaining players will try to compete for the next try to answer it
+    /// Next state: `DisplayQuestion` - if 1+ players who not answered left (when host presses "Next try")
+    ///        or : `NoPlayersToAnswerLeft` - if all players failed to answer the question correctly (when host presses "Next question")
+    WrongAnswer,
+
+    /// Player answered question correctly - player receives +score, question is resolved
+    /// Next state: `ChooseQuestion` (when  host presses "Next Question")
+    CorrectAnswer,
+
+    /// All players answered question wrong and no players left - correct answer is displayed on the screen
+    /// Next state: `ChooseQuestion` (when  host presses "Next Question")
     NoPlayersToAnswerLeft,
 }

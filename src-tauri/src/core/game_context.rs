@@ -1,11 +1,19 @@
 use crate::api::dto::QuestionType;
-use crate::core::game_entities::GameState;
+use crate::core::game_entities::{GameState, Player};
 use crate::game_pack::pack_content_entities::{PackContent, Round};
 
 #[derive(Default, Debug)]
+pub struct GameStats {
+    pub total_correct_answers: i32,
+    pub total_wrong_answers: i32,
+    pub total_tries: i32,
+}
+
+#[derive(Default, Debug)]
 pub struct GameContext {
-    /// Content
+    /// Entities
     pub pack_content: PackContent,
+    pub players: Vec<Player>,
     /// Game State
     pub round_index: usize,
     pub active_player_id: u8,
@@ -17,13 +25,33 @@ pub struct GameContext {
     pub question_price: i32,
     pub question_type: QuestionType,
     /// Stats
-    pub total_correct_answers: i32,
-    pub total_wrong_answers: i32,
-    pub total_tries: i32,
+    pub round_stats: GameStats,
+}
+
+trait Game {
+    fn start();
+    /// 
+    fn select_question(topic: &String, price: &i32) -> Result<(), >;
 }
 
 impl GameContext {
-    /// Getters / Setters
+    pub fn new(pack_content: PackContent, players: Vec<Player>) -> Self {
+        Self {
+            pack_content,
+            players,
+            ..GameContext::default()
+        }
+    }
+
+    pub fn start(&mut self) {
+        self.game_state = GameState::ChooseQuestion;
+    }
+}
+
+/// Deprecated API
+
+/// Getters / Setters
+impl GameContext {
     pub fn active_player_id(&self) -> u8 {
         self.active_player_id
     }
@@ -36,8 +64,10 @@ impl GameContext {
     pub fn set_game_state(&mut self, game_state: GameState) {
         self.game_state = game_state;
     }
+}
 
-    /// Game API
+/// Game API
+impl GameContext {
     pub fn get_current_round(&self) -> &Round {
         let index = self.round_index;
         let round = self
@@ -67,9 +97,9 @@ impl GameContext {
             .expect(&format!("Expected to have round #{}", index));
         log::info!("Next round name {}", round.name);
 
-        self.total_tries = 0;
-        self.total_wrong_answers = 0;
-        self.total_correct_answers = 0;
+        self.round_stats.total_tries = 0;
+        self.round_stats.total_wrong_answers = 0;
+        self.round_stats.total_correct_answers = 0;
 
         if self.is_already_last_round() {
             todo!("Wire kill_players_with_negative_balance");
