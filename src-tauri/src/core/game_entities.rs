@@ -141,6 +141,21 @@ impl Default for GameState {
     }
 }
 
+impl GameState {
+    pub fn get_state_name(&self) -> &str {
+        match self {
+            GameState::SetupAndLoading(_) => { "SetupAndLoading" }
+            GameState::ChooseQuestion(_) => { "ChooseQuestion" }
+            GameState::DisplayQuestion(_) => { "DisplayQuestion" }
+            GameState::WaitingForAnswerRequests(_) => { "WaitingForAnswerRequests" }
+            GameState::AnswerAttemptReceived(_) => { "AnswerAttemptReceived" }
+            GameState::EndQuestion(_) => { "EndQuestion" }
+            GameState::CheckEndOfRound(_) => { "CheckEndOfRound" }
+            GameState::CalcStatsAndStartNextRound(_) => { "CalcStatsAndStartNextRound" }
+        }
+    }
+}
+
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OldGameState {
     #[default]

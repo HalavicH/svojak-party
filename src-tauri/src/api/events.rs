@@ -41,6 +41,10 @@ pub fn emit_message<S: Serialize + Clone>(message: S) {
     emit(Event::Message, message);
 }
 
+pub fn emit_error<S: Serialize + Clone>(message: S) {
+    emit(Event::Error, message);
+}
+
 pub fn emit<S: Serialize + Clone>(event: Event, message: S) {
     if let Some(window) = window().as_ref() {
         window

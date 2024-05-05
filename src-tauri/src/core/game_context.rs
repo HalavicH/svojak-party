@@ -61,6 +61,7 @@ pub struct GameContext<State = SetupAndLoading> {
     round_stats: GameStats,
     events: Option<Arc<Mutex<Box<Receiver<TermEvent>>>>>,
     allow_answer_timestamp: u32,
+    round_duration_min: i32,
 }
 
 impl Default for GameContext {
@@ -79,6 +80,7 @@ impl Default for GameContext {
             round_stats: Default::default(),
             events: None,
             allow_answer_timestamp: 0,
+            round_duration_min: 0,
         }
     }
 }
@@ -102,6 +104,7 @@ impl<State> GameContext<State> {
             round_stats: self.round_stats,
             events: self.events,
             allow_answer_timestamp: self.allow_answer_timestamp,
+            round_duration_min: self.round_duration_min,
         }
     }
 
@@ -133,6 +136,9 @@ impl GameContext<SetupAndLoading> {
     pub fn setup(&mut self, pack_content: PackContent, players: HashMap<u8, Player>) {
         self.pack_content = pack_content;
         self.players = players;
+    }
+    pub fn set_round_duration(&mut self, round_duration_min: i32) {
+        self.round_duration_min = round_duration_min;
     }
     pub fn start(self, event_rx: Receiver<TermEvent>) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
         let mut game = self.transition();

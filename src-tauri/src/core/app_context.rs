@@ -1,5 +1,5 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
-use crate::api::events::{emit_app_context, emit_message};
+use crate::api::events::{emit_app_context, emit_error, emit_message};
 use crate::api::mapper::map_app_context;
 use crate::core::game_entities::{GamePackError, GameplayError, Player, PlayerState, DEFAULT_ICON, OldGameState, GameState};
 use crate::core::game_logic::start_event_listener;
@@ -113,6 +113,14 @@ impl AppContext {
 
 /// Setup API
 impl AppContext {
+    pub fn save_round_duration(&mut self, round_duration_minutes: i32) {
+        if let GameState::SetupAndLoading(game) = &mut self.game_state {
+            game.set_round_duration(round_duration_minutes)
+        } else {
+            let string = format!("Can't setup round duration. Expected game state of 'GameState::SetupAndLoading', found: {}", self.game_state.get_state_name());
+            emit_error(string);
+        }
+    }
     pub fn select_hub_type(&mut self, hub_type: HubType) {
         if self.hub_type == hub_type {
             log::info!("Hub is already set to: {:?}. Nothing to do", hub_type);
