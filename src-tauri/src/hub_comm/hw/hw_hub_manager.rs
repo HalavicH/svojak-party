@@ -5,7 +5,7 @@ use std::default::Default;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use thiserror::Error;
 
-use crate::core::game_entities::{Player};
+use crate::core::game_entities::Player;
 use crate::hub_comm::common::hub_api::HubManager;
 use crate::hub_comm::hw::internal::api_types::{
     HwHubIoError, HwHubRequest, ResponseStatus, TermButtonState, TermEvent,

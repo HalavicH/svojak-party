@@ -1,9 +1,12 @@
 use crate::api::dto::{PlayerStatsDto, RoundStatsDto};
+use crate::api::events::{emit_app_context, emit_message};
+use crate::api::mapper::map_app_context;
 use crate::core::game_entities::{
     GameContext, GamePackError, GameState, GameplayError, Player, PlayerState,
 };
 use crate::core::game_logic::start_event_listener;
-use crate::game_pack::pack_content_entities::{Question};
+use crate::game_pack::game_pack_entites::GamePack;
+use crate::game_pack::pack_content_entities::Question;
 use crate::hub_comm::common::hub_api::{HubManager, HubType};
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError, HwHubManager};
 use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
@@ -13,13 +16,9 @@ use error_stack::{IntoReport, Report, ResultExt};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::mpsc::Receiver;
-use std::sync::{mpsc, Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
-use std::thread::{JoinHandle, sleep, spawn};
+use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
-use tauri::Window;
-use crate::api::events::{emit_app_context, emit_message};
-use crate::api::mapper::map_app_context;
-use crate::game_pack::game_pack_entites::GamePack;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -123,11 +122,9 @@ impl AppContext {
             log::info!("I promise there's no stuff saved!");
         }
 
-        let handle = spawn(move || {
-            loop {
-                Self::discover_and_save_players();
-                sleep(Duration::from_secs(2));
-            }
+        let handle = spawn(move || loop {
+            Self::discover_and_save_players();
+            sleep(Duration::from_secs(2));
         });
 
         log::info!("Saving new thread handle");
@@ -156,7 +153,10 @@ impl AppContext {
         log::debug!("Detected {} players", det_pl_cnt);
         if app_guard.new_players_found(detected_players) {
             log::info!("New players found! Merging");
-            emit_message(format!("New players detected! Total number: {}", det_pl_cnt));
+            emit_message(format!(
+                "New players detected! Total number: {}",
+                det_pl_cnt
+            ));
             app_guard.merge_players(detected_players);
             emit_app_context(map_app_context(app_guard));
         }
@@ -181,12 +181,11 @@ impl AppContext {
         false
     }
 
-
     fn merge_players(&mut self, detected_players: &[Player]) {
         // TODO: make actual merge instead of simple re-assign
         self.players = detected_players
             .iter()
-            .map(|p| { (p.term_id, p.clone()) })
+            .map(|p| (p.term_id, p.clone()))
             .collect();
     }
 
@@ -503,11 +502,7 @@ impl AppContext {
     }
 
     fn update_game_state(&mut self, new_state: GameState) {
-        log::info!(
-            "Game state {:?} -> {:?}",
-            self.game.game_state(),
-            new_state
-        );
+        log::info!("Game state {:?} -> {:?}", self.game.game_state(), new_state);
         self.game.set_game_state(new_state);
         self.update_non_target_player_states();
     }
@@ -685,6 +680,7 @@ impl AppContext {
         });
     }
 
+    #[allow(dead_code)]
     fn kill_players_with_negative_balance(&mut self) {
         self.players.iter_mut().for_each(|(_, player)| {
             if player.stats.score < 0 {
@@ -698,11 +694,10 @@ impl AppContext {
     }
 }
 
-
 #[cfg(test)]
 mod game_entities_test {
     use crate::core::app_context::AppContext;
-    use crate::core::game_entities::{Player};
+    use crate::core::game_entities::Player;
 
     #[test]
     fn test_fastest_click() {

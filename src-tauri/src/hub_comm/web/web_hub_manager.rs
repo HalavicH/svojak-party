@@ -11,7 +11,7 @@ use reqwest::Url;
 use std::net::Ipv4Addr;
 use tokio::runtime::Runtime;
 
-use crate::core::game_entities::{Player};
+use crate::core::game_entities::Player;
 use crate::hub_comm::common::hub_api::HubManager;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};

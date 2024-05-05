@@ -1,11 +1,11 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use serde::Serialize;
-use crate::core::app_context::{app};
-use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
-use tauri::Window;
 use crate::api::dto::{AppContextDto, PackInfoDto};
 use crate::api::mapper::get_app_context_dto;
+use crate::core::app_context::app;
+use serde::Serialize;
+use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
+use tauri::Window;
 
 pub enum Event {
     Message,
@@ -26,7 +26,7 @@ impl<'a> From<Event> for &'a str {
     }
 }
 
-/// Game specific events 
+/// Game specific events
 pub fn emit_app_context(config: AppContextDto) {
     emit(Event::GameConfig, config);
 }
@@ -54,7 +54,8 @@ lazy_static::lazy_static! {
 }
 
 pub fn window() -> RwLockReadGuard<'static, Option<Window>> {
-    WINDOW.read()
+    WINDOW
+        .read()
         .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
         .expect("Mutex is poisoned")
 }

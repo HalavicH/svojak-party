@@ -1,10 +1,9 @@
 use crate::hub_comm::common::hub_api::HubManager;
-use std::sync::mpsc::{Sender};
+use std::sync::mpsc::Sender;
 use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::thread;
 use std::thread::{sleep, JoinHandle};
-use std::time::{Duration};
-
+use std::time::Duration;
 
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 

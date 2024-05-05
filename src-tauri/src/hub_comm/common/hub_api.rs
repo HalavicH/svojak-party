@@ -1,4 +1,4 @@
-use crate::core::game_entities::{Player};
+use crate::core::game_entities::Player;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};
 use crate::hub_comm::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;

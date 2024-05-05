@@ -73,7 +73,7 @@ pub enum GamePackError {
 #[derive(Default, Debug)]
 pub struct GameContext {
     /// Content
-    pub pack_content: PackContent, 
+    pub pack_content: PackContent,
     /// Game State
     pub round_index: usize,
     pub active_player_id: u8,
@@ -104,7 +104,7 @@ impl GameContext {
     pub fn set_game_state(&mut self, game_state: GameState) {
         self.game_state = game_state;
     }
-    
+
     /// Game API
     pub fn get_current_round(&self) -> &Round {
         let index = self.round_index;

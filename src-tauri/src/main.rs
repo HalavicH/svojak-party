@@ -3,9 +3,9 @@
 #[allow(unused_imports)]
 use rocket::futures::io::Window;
 use svojak_app::api::controller::gameplay::*;
+use svojak_app::api::controller::startup::context::*;
 use svojak_app::api::controller::startup::hub::*;
 use svojak_app::api::controller::startup::hw_hub::*;
-use svojak_app::api::controller::startup::context::*;
 use svojak_app::api::controller::startup::*;
 use svojak_app::core::app_context::app;
 
@@ -16,39 +16,39 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-                // Window setup api
-                init_window_handle,
-                // Event requests
-                request_context_update,
-                // Startup API
-                set_hub_type,
-                fetch_configuration,
-                discover_hub,
-                set_hub_radio_channel,
-                discover_players,
-                save_players,
-                init_game_pack,
-                save_round_duration,
-                init_game_pack,
-                start_the_game,
-                // Debug API
-                setup_hub_connection,
-                send_raw_request_frame,
-                send_hub_command,
-                // Gameplay API
-                fetch_players,
-                fetch_round,
-                get_question_data,
-                allow_answer,
-                get_fastest_click,
-                answer_question,
-                has_next_question,
-                finish_question_prematurely,
-                init_next_round,
-                send_pip_victim,
-                get_active_player_id,
-                is_allow_answer_required,
-                fetch_round_stats
+            // Window setup api
+            init_window_handle,
+            // Event requests
+            request_context_update,
+            // Startup API
+            set_hub_type,
+            fetch_configuration,
+            discover_hub,
+            set_hub_radio_channel,
+            discover_players,
+            save_players,
+            init_game_pack,
+            save_round_duration,
+            init_game_pack,
+            start_the_game,
+            // Debug API
+            setup_hub_connection,
+            send_raw_request_frame,
+            send_hub_command,
+            // Gameplay API
+            fetch_players,
+            fetch_round,
+            get_question_data,
+            allow_answer,
+            get_fastest_click,
+            answer_question,
+            has_next_question,
+            finish_question_prematurely,
+            init_next_round,
+            send_pip_victim,
+            get_active_player_id,
+            is_allow_answer_required,
+            fetch_round_stats
         ])
         .run(tauri::generate_context!())
         .expect("Can't start Tauri app");
