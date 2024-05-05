@@ -22,11 +22,11 @@
 </script>
 
 <main class="container">
-    <!--{#if $currentView === Views.MENU}-->
-<!--        <Menu/>-->
-<!--    {:else if $currentView === Views.QUIZ}-->
+    {#if $currentView === Views.MENU}
+        <Menu/>
+    {:else if $currentView === Views.QUIZ}
         <Quiz/>
-    <!--{/if}-->
+    {/if}
 </main>
 
 <style>

@@ -99,7 +99,7 @@
             {#each players as player}
                 <tr>
                     <td>
-                        <img class="player-icon" src="{player.icon}" alt="">
+                        <img class="icon" src="{player.icon}" alt="">
                     </td>
                     <td>
                         {player.name}
@@ -141,7 +141,7 @@
         margin-top: 0;
     }
 
-    .player-icon {
+    .icon {
         width: 2em;
         height: 2em;
     }

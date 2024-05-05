@@ -10,6 +10,7 @@
     import PackErrorModal from "./menu/PackErrorModal.svelte";
     import {onMount} from "svelte";
     import VSpacing from "../components/generic/VSpacing.svelte"
+    import {isRunningInTauri} from "../lib/misc.js"
 
     onMount(async () => {
         await callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
@@ -19,14 +20,22 @@
         openModal(SettingsModal)
     }
 
-    async function openGamePack() {
-        let filePath = await open({
+    async function getPackFilePath() {
+        if (!isRunningInTauri()) {
+            return "No tauri context";
+        }
+
+        return await open({
             multiple: false,
             filters: [{
                 name: 'Select game package',
                 extensions: ['siq']
             }]
-        })
+        });
+    }
+
+    async function openGamePack() {
+        let filePath = await getPackFilePath();
 
         if (filePath === null || filePath.length === 0) {
             notify.info("Canceled pack selection");
@@ -36,7 +45,7 @@
             notify.info(`Selected game package path: ${filePath}`);
         }
 
-        invoke(TauriApiCommand.INIT_GAME_PACK, {path: filePath})
+        callBackend(TauriApiCommand.INIT_GAME_PACK, {path: filePath})
             .then(() => {
                 openModal(GamePackModal)
             })
