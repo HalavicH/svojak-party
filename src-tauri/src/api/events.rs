@@ -3,10 +3,10 @@
 use crate::api::dto::{AppContextDto, PackInfoDto, RoundDto};
 use crate::api::mapper::get_app_context_dto;
 use crate::core::app_context::app;
+use crate::game_pack::pack_content_entities::Round;
 use serde::Serialize;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use tauri::Window;
-use crate::game_pack::pack_content_entities::Round;
 
 pub enum Event {
     Message,
@@ -42,7 +42,6 @@ pub fn emit_pack_info(pack_info: PackInfoDto) {
 pub fn emit_current_round(round: RoundDto) {
     emit(Event::Round, round);
 }
-
 
 /// Generic API
 pub fn emit_message<S: Serialize + Clone>(message: S) {

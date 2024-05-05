@@ -1,20 +1,15 @@
-use std::any::type_name;
-use crate::api::dto::{QuestionType, RoundDto};
-use crate::core::game_entities::{GameplayError, GameState, OldGameState, Player, PlayerState};
-use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
-use std::collections::HashMap;
-use std::fmt;
-use std::marker::PhantomData;
-use std::sync::{Arc, mpsc, Mutex, RwLock};
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::mpsc::Receiver;
-use log::log;
-use rocket::serde::{Deserialize, Serialize};
+use crate::api::dto::{QuestionType};
 use crate::api::events::emit_message;
-use crate::core::app_context::AppContext;
-use crate::core::game_logic::start_event_listener;
-use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
+use crate::core::game_entities::{GameplayError, OldGameState, Player, PlayerState};
+use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
+use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms};
 use crate::hub_comm::hw::internal::api_types::TermEvent;
+use rocket::serde::{Deserialize, Serialize};
+use std::any::type_name;
+use std::collections::HashMap;
+use std::marker::PhantomData;
+use std::sync::mpsc::Receiver;
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SetupAndLoading {}
@@ -110,7 +105,8 @@ impl<State> GameContext<State> {
     }
 
     fn full_type_to_name(next_state: &str) -> String {
-        next_state.rsplit("::")
+        next_state
+            .rsplit("::")
             .next()
             .expect("Expected to have type with :: in path")
             .replace(['"', '>'], "")
@@ -122,7 +118,8 @@ impl<State> GameContext<State> {
     }
 
     fn get_player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
-        self.players.get_mut(&term_id)
+        self.players
+            .get_mut(term_id)
             .expect("For set_active_player_by_id() it's expected to have valid 'term_id' passed")
     }
 
@@ -131,7 +128,7 @@ impl<State> GameContext<State> {
         let player = self.get_player_by_id_mut(&id);
         player.state = player_state;
     }
-    
+
     pub fn get_current_round(&self) -> &Round {
         let idx = self.current_round_index;
         &self.pack_content.rounds[idx]
@@ -142,7 +139,11 @@ impl GameContext<SetupAndLoading> {
     pub fn set_round_duration(&mut self, round_duration_min: i32) {
         self.round_duration_min = round_duration_min;
     }
-    pub fn start(self, pack_content: PackContent, event_rx: Receiver<TermEvent>) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
+    pub fn start(
+        self,
+        pack_content: PackContent,
+        event_rx: Receiver<TermEvent>,
+    ) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
         let mut game = self.transition();
         game.pack_content = pack_content;
         if game.players.len() < 2 {
@@ -156,7 +157,9 @@ impl GameContext<SetupAndLoading> {
 }
 
 impl GameContext<PickFirstQuestionChooser> {
-    pub fn pick_first_question_chooser(mut self) -> Result<GameContext<ChooseQuestion>, GameplayError> {
+    pub fn pick_first_question_chooser(
+        mut self,
+    ) -> Result<GameContext<ChooseQuestion>, GameplayError> {
         self.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
 
         let term_id = self.get_fastest_click_player_id()?;
@@ -174,7 +177,10 @@ impl GameContext<PickFirstQuestionChooser> {
         if active_players_cnt == 0 {
             return Err(GameplayError::NoActivePlayersLeft);
         } else if active_players_cnt == 1 {
-            return Ok(active_players.first().expect("Expected to have 1 user in list").term_id);
+            return Ok(active_players
+                .first()
+                .expect("Expected to have 1 user in list")
+                .term_id);
         }
 
         // let fastest_player_id = self
@@ -207,13 +213,12 @@ impl GameContext<PickFirstQuestionChooser> {
 
 impl GameContext<ChooseQuestion> {
     pub fn choose_question(self, topic: String, price: i32) -> GameContext<DisplayQuestion> {
-        let mut context = self.transition();
+        let context = self.transition();
         // context.set_
         log::info!("Picked question! Topic: {}, price: {}", topic, price);
         context
     }
 }
-
 
 ///// LEGACY
 #[derive(Default, Debug)]

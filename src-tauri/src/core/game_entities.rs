@@ -1,6 +1,9 @@
+use crate::core::game_context::{
+    AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion,
+    DisplayQuestion, EndQuestion, GameContext, SetupAndLoading, WaitingForAnswerRequests,
+};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use crate::core::game_context::{AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion, DisplayQuestion, EndQuestion, GameContext, SetupAndLoading, WaitingForAnswerRequests};
 
 use crate::core::game_entities::HubStatus::Detected;
 
@@ -145,19 +148,23 @@ impl Default for GameState {
 
 impl GameState {
     pub fn show_state_mismatch(&mut self, expected: &str) -> String {
-        format!("Expected game state of '{}', found: {}", expected, self.get_state_name())
+        format!(
+            "Expected game state of '{}', found: {}",
+            expected,
+            self.get_state_name()
+        )
     }
 
     pub fn get_state_name(&self) -> &str {
         match self {
-            GameState::SetupAndLoading(_) => { "SetupAndLoading" }
-            GameState::ChooseQuestion(_) => { "ChooseQuestion" }
-            GameState::DisplayQuestion(_) => { "DisplayQuestion" }
-            GameState::WaitingForAnswerRequests(_) => { "WaitingForAnswerRequests" }
-            GameState::AnswerAttemptReceived(_) => { "AnswerAttemptReceived" }
-            GameState::EndQuestion(_) => { "EndQuestion" }
-            GameState::CheckEndOfRound(_) => { "CheckEndOfRound" }
-            GameState::CalcStatsAndStartNextRound(_) => { "CalcStatsAndStartNextRound" }
+            GameState::SetupAndLoading(_) => "SetupAndLoading",
+            GameState::ChooseQuestion(_) => "ChooseQuestion",
+            GameState::DisplayQuestion(_) => "DisplayQuestion",
+            GameState::WaitingForAnswerRequests(_) => "WaitingForAnswerRequests",
+            GameState::AnswerAttemptReceived(_) => "AnswerAttemptReceived",
+            GameState::EndQuestion(_) => "EndQuestion",
+            GameState::CheckEndOfRound(_) => "CheckEndOfRound",
+            GameState::CalcStatsAndStartNextRound(_) => "CalcStatsAndStartNextRound",
         }
     }
 }

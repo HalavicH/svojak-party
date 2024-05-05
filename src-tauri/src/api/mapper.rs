@@ -1,6 +1,10 @@
-use crate::api::dto::{AppContextDto, QuestionDataDto, QuestionSceneDto, RoundDto, TopicDto};
+use crate::api::dto::{
+    AppContextDto, PlayerEndRoundStatsDto, QuestionDataDto, QuestionSceneDto, RoundDto,
+    RoundStatsDto, TopicDto,
+};
 use crate::api::dto::{PackInfoDto, PlayerDto, QuestionDto};
 use crate::core::app_context::{app, app_mut, AppContext};
+use crate::core::game_context::GameStats;
 use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub_comm::common::hub_api::HubManager;
@@ -67,6 +71,35 @@ pub fn map_package_to_pack_info_dto(package: &PackContent) -> PackInfoDto {
         packTopics: num_topics,
         packQuestions: num_questions,
         packTopicList: topic_list,
+    }
+}
+
+pub fn game_to_round_stats_dto(
+    round: &Round,
+    stats: &GameStats,
+    players: Vec<Player>,
+) -> RoundStatsDto {
+    RoundStatsDto {
+        roundName: round.name.to_owned(),
+        questionNumber: round.question_count,
+        normalQuestionNum: round.normal_question_count,
+        pigInPokeQuestionNum: round.pip_question_count,
+        totalCorrectAnswers: stats.total_correct_answers,
+        totalWrongAnswers: stats.total_wrong_answers,
+        totalTries: stats.total_tries,
+        roundTime: "Not tracked".to_owned(),
+        players: players
+            .iter()
+            .map(|p| PlayerEndRoundStatsDto {
+                id: p.term_id as i32,
+                name: p.name.to_owned(),
+                score: p.stats.score,
+                playerIconPath: p.icon.to_owned(),
+                totalAnswers: p.stats.total_tries,
+                answeredCorrectly: p.stats.correct_num,
+                answeredWrong: p.stats.wrong_num,
+            })
+            .collect(),
     }
 }
 

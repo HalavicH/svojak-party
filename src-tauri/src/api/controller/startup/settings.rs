@@ -1,9 +1,9 @@
 use crate::api::dto::PlayerDto;
 use crate::api::events::{emit_app_context, set_window};
 use crate::api::mapper::{get_app_context_dto, update_players};
+use crate::core::app_context::app_mut;
 use crate::core::game_entities::{Player, PlayerState};
 use tauri::{command, Window};
-use crate::core::app_context::app_mut;
 
 /// Dirty hack to capture window handle
 #[command]
