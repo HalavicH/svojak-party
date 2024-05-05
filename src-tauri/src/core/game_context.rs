@@ -1,8 +1,191 @@
+use std::any::type_name;
 use crate::api::dto::QuestionType;
-use crate::core::game_entities::{GameState, Player};
-use crate::game_pack::pack_content_entities::{PackContent, Round};
+use crate::core::game_entities::{GameplayError, GameState, Player, PlayerState};
+use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use std::collections::HashMap;
+use std::fmt;
+use std::marker::PhantomData;
+use std::sync::{Arc, mpsc, Mutex, RwLock};
+use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::mpsc::Receiver;
+use log::log;
+use crate::core::app_context::AppContext;
+use crate::core::game_logic::start_event_listener;
+use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
+use crate::hub_comm::hw::internal::api_types::TermEvent;
 
+pub struct SetupAndLoading {}
+pub struct PickFirstQuestionChooser {}
+pub struct ChooseQuestion {}
+pub struct DisplayQuestion {}
+pub struct WaitingForAnswerRequests {}
+pub struct AnswerAttemptReceived {}
+pub struct EndQuestion {}
+pub struct CheckEndOfRound {}
+pub struct CalcStatsAndStartNextRound {}
+
+#[derive(Default, Debug)]
+pub struct GameContext<State = SetupAndLoading> {
+    state: PhantomData<State>,
+    /// Entities
+    pack_content: PackContent,
+    players: HashMap<u8, Player>,
+    /// Game State
+    game_state: GameState,
+    round_index: usize,
+    active_player_id: u8,
+    // active_player: Player, // TODO
+    click_for_answer_allowed: bool,
+    answer_allowed: bool,
+    /// Current question
+    current_question: Question,
+    /// Stats
+    round_stats: GameStats,
+    events: Option<Receiver<TermEvent>>,
+    allow_answer_timestamp: u32,
+}
+
+impl GameContext {
+    pub fn new(pack_content: PackContent, players: HashMap<u8, Player>) -> GameContext<SetupAndLoading> {
+        Self {
+            state: PhantomData::<SetupAndLoading>,
+            pack_content,
+            players,
+            // Default values
+            game_state: Default::default(),
+            round_index: 0,
+            active_player_id: 0,
+            click_for_answer_allowed: false,
+            answer_allowed: false,
+            current_question: Default::default(),
+            round_stats: Default::default(),
+            events: None,
+            allow_answer_timestamp: 0,
+        }
+    }
+}
+
+/// Common implementation for every state of the `GameContext`
+impl<State> GameContext<State> {
+    pub fn transition<T>(self) -> GameContext<T> {
+        let prev_state = Self::full_type_to_name(&format!("{:?}", self.state));
+        let next_state = Self::full_type_to_name(type_name::<T>());
+        log::debug!("Game transitions '{}' -> '{}'", prev_state, next_state);
+        GameContext {
+            state: PhantomData,
+            pack_content: self.pack_content,
+            players: self.players,
+            game_state: self.game_state,
+            round_index: self.round_index,
+            active_player_id: self.active_player_id,
+            click_for_answer_allowed: self.click_for_answer_allowed,
+            answer_allowed: self.answer_allowed,
+            current_question: self.current_question,
+            round_stats: self.round_stats,
+            events: self.events,
+            allow_answer_timestamp: self.allow_answer_timestamp,
+        }
+    }
+
+    fn full_type_to_name(next_state: &str) -> String {
+        next_state.rsplit("::")
+            .next()
+            .expect("Expected to have type with :: in path")
+            .replace(['"', '>'], "")
+    }
+
+    fn set_active_player_by_id(&mut self, term_id: u8) {
+        let player = self.get_player_by_id_mut(&term_id);
+        self.active_player_id = player.term_id;
+    }
+
+    fn get_player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
+        self.players.get_mut(&term_id)
+            .expect("For set_active_player_by_id() it's expected to have valid 'term_id' passed")
+    }
+
+    fn set_active_player_state(&mut self, player_state: PlayerState) {
+        let id = self.active_player_id;
+        let player = self.get_player_by_id_mut(&id);
+        player.state = player_state;
+    }
+}
+
+impl GameContext<SetupAndLoading> {
+    pub fn start(self, event_rx: Receiver<TermEvent>) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError>{
+        let mut game = self.transition();
+        if game.players.len() < 2 {
+            log::info!("Not enough players to run the game.");
+            return Err(GameplayError::NotEnoughPlayers);
+        }
+
+        game.events = Some(event_rx);
+        Ok(game)
+    }
+}
+
+impl GameContext<PickFirstQuestionChooser> {
+    pub fn pick_first_question_chooser(mut self) -> Result<GameContext<ChooseQuestion>, GameplayError> {
+        let mut game = self;
+        game.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
+
+        let term_id = game.get_fastest_click_player_id()?;
+
+        game.set_active_player_by_id(term_id);
+        game.set_active_player_state(PlayerState::QuestionChooser);
+
+        Ok(game.transition())
+    }
+
+    fn get_fastest_click_player_id(&mut self) -> Result<u8, GameplayError> {
+        let active_players = self.get_active_players_cnt();
+        let active_players_cnt = active_players.len();
+
+        if active_players_cnt == 0 {
+            return Err(GameplayError::NoActivePlayersLeft);
+        } else if active_players_cnt == 1 {
+            return Ok(active_players.first().expect("Expected to have 1 user in list").term_id)
+        }
+
+        // let fastest_player_id = self
+        //     .get_fastest_click_from_hub()
+        //     .change_context(GameplayError::HubOperationError)?;
+        //
+        // log::info!("Fastest click from user: {}", fastest_player_id);
+        // self.game.click_for_answer_allowed = false;
+        // self.game.answer_allowed = true;
+        // self.game.set_active_player_id(fastest_player_id);
+        //
+        // self.game
+        //     .players
+        //     .get_mut(&fastest_player_id)
+        //     .ok_or(Report::new(GameplayError::PlayerNotPresent))
+        //     .attach_printable(format!("Can't find player with id {}", fastest_player_id))?
+        //     .state = PlayerState::FirstResponse;
+
+        Ok(0)
+    }
+
+    fn get_active_players_cnt(&mut self) -> Vec<Player> {
+        self.players
+            .values()
+            .filter(|&p| p.allowed_to_click())
+            .cloned()
+            .collect()
+    }
+}
+
+impl GameContext<ChooseQuestion> {
+    pub fn choose_question(self, topic: String, price: i32) -> GameContext<DisplayQuestion>{
+        let mut context = self.transition();
+        // context.set_
+        log::info!("Picked question! Topic: {}, price: {}", topic, price);
+        context
+    }
+}
+
+
+///// LEGACY
 #[derive(Default, Debug)]
 pub struct GameStats {
     pub total_correct_answers: i32,
@@ -11,7 +194,7 @@ pub struct GameStats {
 }
 
 #[derive(Default, Debug)]
-pub struct GameContext {
+pub struct OldGameContext {
     /// Entities
     pub pack_content: PackContent,
     pub players: HashMap<u8, Player>,
@@ -35,12 +218,12 @@ pub struct GameContext {
 //     fn select_question(topic: &String, price: &i32) -> Result<(), >;
 // }
 
-impl GameContext {
+impl OldGameContext {
     pub fn new(pack_content: PackContent, players: HashMap<u8, Player>) -> Self {
         Self {
             pack_content,
             players,
-            ..GameContext::default()
+            ..OldGameContext::default()
         }
     }
 
@@ -52,7 +235,7 @@ impl GameContext {
 /// Deprecated API
 
 /// Getters / Setters
-impl GameContext {
+impl OldGameContext {
     pub fn active_player_id(&self) -> u8 {
         self.active_player_id
     }
@@ -68,7 +251,7 @@ impl GameContext {
 }
 
 /// Game API
-impl GameContext {
+impl OldGameContext {
     pub fn get_current_round(&self) -> &Round {
         let index = self.round_index;
         let round = self

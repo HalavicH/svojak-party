@@ -75,7 +75,12 @@ pub enum GamePackError {
 
 #[derive(Debug, Clone, Serialize, Error)]
 pub enum GameplayError {
-    #[error("Pack element not present")]
+    #[error("Not enough players for game")]
+    NotEnoughPlayers,
+    #[error("No active players left")]
+    NoActivePlayersLeft,
+
+    #[error("HUB operation failed")]
     PackElementNotPresent,
     #[error("Player is not present")]
     PlayerNotPresent,

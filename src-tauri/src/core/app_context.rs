@@ -1,7 +1,6 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
-use crate::core::game_context::GameContext;
 use crate::core::game_entities::{
     GamePackError, GameState, GameplayError, Player, PlayerState, DEFAULT_ICON,
 };
@@ -20,10 +19,10 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
+use crate::core::game_context::OldGameContext;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
-
 }
 
 pub fn app_mut() -> RwLockWriteGuard<'static, AppContext> {
@@ -50,7 +49,7 @@ pub struct AppContext {
     // pub window: Arc<RwLock<Box<Option<Window>>>>,
     // Game entities
     pub game_pack: GamePack,
-    pub game: GameContext,
+    pub game: OldGameContext,
 
     // TODO: move to game
     pub player_event_listener: Option<Arc<Mutex<Receiver<TermEvent>>>>,
@@ -65,7 +64,7 @@ impl Default for AppContext {
             hub_type: HubType::default(),
             hub: Arc::new(RwLock::new(Box::<HwHubManager>::default())),
             game_pack: GamePack::default(),
-            game: GameContext::default(),
+            game: OldGameContext::default(),
             player_event_listener: None,
             allow_answer_timestamp: Arc::new(AtomicU32::default()),
             // window: Arc::new(RwLock::new(Box::<Option<Window>>::default())),
@@ -81,6 +80,10 @@ impl AppContext {
     }
     pub fn get_hub_ref(&self) -> &Arc<RwLock<Box<dyn HubManager>>> {
         &self.hub
+    }
+
+    pub fn get_hub(&self) -> Arc<RwLock<Box<dyn HubManager>>> {
+        self.hub.clone()
     }
 
     pub fn get_unlocked_hub(&self) -> RwLockReadGuard<Box<dyn HubManager>> {
@@ -232,7 +235,7 @@ impl AppContext {
 #[deprecated]
 impl AppContext {
     pub fn finish_game(&mut self) {
-        self.game = GameContext::default();
+        self.game = OldGameContext::default();
     }
     pub fn start_the_game(&mut self) -> error_stack::Result<(), GameplayError> {
         // Prepare game context
@@ -247,7 +250,7 @@ impl AppContext {
         let (event_tx, event_rx) = mpsc::channel();
         self.player_event_listener = Some(Arc::new(Mutex::new(event_rx)));
 
-        start_event_listener(self.get_hub_ref().clone(), event_tx);
+        start_event_listener(self.get_hub(), event_tx);
 
         let ts = get_epoch_ms().expect("No epoch today");
         self.allow_answer_timestamp.swap(ts, Ordering::Relaxed);

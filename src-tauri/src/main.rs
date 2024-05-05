@@ -1,5 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use std::collections::HashMap;
 #[allow(unused_imports)]
 use rocket::futures::io::Window;
 use svojak_app::api::controller::gameplay::*;
@@ -8,10 +10,18 @@ use svojak_app::api::controller::startup::hw_hub::*;
 use svojak_app::api::controller::startup::pack::*;
 use svojak_app::api::controller::startup::settings::*;
 use svojak_app::core::app_context::app;
+use svojak_app::core::game_context::GameContext;
+use svojak_app::game_pack::pack_content_entities::PackContent;
 
 fn main() {
     env_logger::init();
 
+    // let result = GameContext::new(PackContent::default(), HashMap::default())
+    //     .start()
+    //     .unwrap()
+    //     ;
+
+    // return;
     log_ctx_content();
 
     tauri::Builder::default()
