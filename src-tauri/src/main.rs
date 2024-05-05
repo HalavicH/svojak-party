@@ -24,7 +24,7 @@ fn main() {
             set_hub_type,
             fetch_configuration,
             discover_hub,
-            set_hub_radio_channel,
+            set_hw_hub_radio_channel,
             discover_players,
             save_players,
             init_game_pack,
@@ -32,9 +32,9 @@ fn main() {
             init_game_pack,
             start_the_game,
             // Debug API
-            setup_hub_connection,
-            send_raw_request_frame,
-            send_hub_command,
+            dbg_setup_hub_connection,
+            dbg_send_raw_request_frame,
+            dbg_send_hub_command,
             // Gameplay API
             fetch_players,
             fetch_round,

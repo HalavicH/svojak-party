@@ -28,6 +28,7 @@ impl<'a> From<Event> for &'a str {
 
 /// Game specific events
 pub fn emit_app_context(config: AppContextDto) {
+    log::debug!("Transmitting app context of: {:#?}", config);
     emit(Event::GameConfig, config);
 }
 

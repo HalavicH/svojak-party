@@ -18,7 +18,7 @@ pub fn set_hub_type(hub_type: HubType) {
 
 /// Tries to detect hub at given serial port. If successful saves port name
 #[command]
-pub fn discover_hub(path: String) -> String {
+pub fn discover_hub(path: String) {
     app_mut().discover_hub(path)
 }
 

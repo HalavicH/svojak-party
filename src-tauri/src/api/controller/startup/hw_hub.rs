@@ -13,13 +13,13 @@ use crate::hub_comm::hw::internal::api_types::{HwHubIoError, HwHubRequest};
 
 /// Calls HUB to set specific radio channel
 #[command]
-pub fn set_hub_radio_channel(channel_id: i32) -> Result<(), HubManagerError> {
+pub fn set_hw_hub_radio_channel(channel_id: i32) -> Result<(), HubManagerError> {
     log::info!("Got channel id: {channel_id}");
     let app_guard = app();
     let mut hub_guard = app_guard.get_locked_hub_mut();
 
     let result = hub_guard
-        .set_hub_radio_channel(channel_id as u8)
+        .set_hw_hub_radio_channel(channel_id as u8)
         .map_err(|e| {
             log::error!("{:#?}", e);
             e.current_context().clone()
@@ -30,7 +30,7 @@ pub fn set_hub_radio_channel(channel_id: i32) -> Result<(), HubManagerError> {
 
 /// HUB Debug API
 #[command]
-pub fn setup_hub_connection(port_name: String) -> Result<(), HubManagerError> {
+pub fn dbg_setup_hub_connection(port_name: String) -> Result<(), HubManagerError> {
     log::info!("Trying to open HUB connection");
     let game_ctx = app();
     let mut hub = game_ctx.get_locked_hub_mut();
@@ -41,7 +41,7 @@ pub fn setup_hub_connection(port_name: String) -> Result<(), HubManagerError> {
 }
 
 #[command]
-pub fn send_raw_request_frame(request_frame: Vec<u8>) -> Result<Vec<u8>, HwHubIoError> {
+pub fn dbg_send_raw_request_frame(request_frame: Vec<u8>) -> Result<Vec<u8>, HwHubIoError> {
     log::info!("Sending raw frame request to HUB");
     let guard = app();
     let hub_guard = guard.get_locked_hub_mut();
@@ -56,13 +56,13 @@ pub fn send_raw_request_frame(request_frame: Vec<u8>) -> Result<Vec<u8>, HwHubIo
 }
 
 #[command]
-pub fn send_hub_command(request: HubRequestDto) -> Result<HubResponseDto, HubManagerError> {
+pub fn dbg_send_hub_command(request: HubRequestDto) -> Result<HubResponseDto, HubManagerError> {
     log::info!("Sending request to HUB.\n{:#?}", request);
     let guard = app();
     let mut hub_guard = guard.get_locked_hub_mut();
 
     let request_enum = HwHubRequest::from_debug_request(request);
-    let result = process_hub_command(&mut hub_guard, request_enum).map_err(|e| {
+    let result = dbg_process_hub_command(&mut hub_guard, request_enum).map_err(|e| {
         log::error!("{:?}", e);
         e.current_context().clone()
     })?;
@@ -76,7 +76,7 @@ pub fn send_hub_command(request: HubRequestDto) -> Result<HubResponseDto, HubMan
     Ok(dto)
 }
 
-fn process_hub_command(
+fn dbg_process_hub_command(
     hub_guard: &mut RwLockWriteGuard<Box<dyn HubManager>>,
     request_enum: HwHubRequest,
 ) -> error_stack::Result<String, HubManagerError> {
@@ -90,7 +90,7 @@ fn process_hub_command(
             Ok(format!("Hub timestamp: {}", timestamp))
         }
         HwHubRequest::SetHubRadioChannel(channel_num) => {
-            hub_guard.set_hub_radio_channel(channel_num)?;
+            hub_guard.set_hw_hub_radio_channel(channel_num)?;
             Ok("Set hub radio channel successfully".to_owned())
         }
         HwHubRequest::SetTermRadioChannel(term_id, channel_num) => {

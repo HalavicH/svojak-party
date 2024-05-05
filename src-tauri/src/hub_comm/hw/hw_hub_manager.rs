@@ -64,6 +64,10 @@ impl Default for HwHubManager {
 }
 
 impl HwHubManager {
+    fn set_hub_status(&mut self, new: HubStatus) {
+        log::debug!("New hub status: '{:#?}' for hub on port: '{}'", new, self.port_name);
+        self.hub_status = new;
+    }
     fn setup_physical_serial_connection(
         &mut self,
         port: &str,
@@ -105,6 +109,7 @@ impl HwHubManager {
     }
 
     fn init_hw_hub(&mut self, port: &str) -> Result<(), HubManagerError> {
+        log::debug!("Initializing hub on port: {}", port);
         if let Some(hub) = &self.hub_io_handler {
             log::info!("Previous HUB io handle found: {:?}. Erasing", hub);
             self.hub_io_handler = None;
@@ -124,7 +129,8 @@ impl HubManager for HwHubManager {
         self.port_name.clone()
     }
     fn probe(&mut self, port: &str) -> Result<(), HubManagerError> {
-        self.hub_status = match self.init_hw_hub(port) {
+        let result = self.init_hw_hub(port);
+        let hub_status = match &result {
             Ok(_) => HubStatus::Detected,
             Err(err) => match err.current_context() {
                 HubManagerError::SerialPortError => HubStatus::SerialPortError,
@@ -132,8 +138,9 @@ impl HubManager for HwHubManager {
                 _ => HubStatus::UnknownError,
             },
         };
-        
-        Ok(())
+        self.set_hub_status(hub_status);
+
+        result
     }
 
     fn get_hub_status(&self) -> HubStatus {
@@ -302,7 +309,7 @@ impl HubManager for HwHubManager {
         Ok(())
     }
 
-    fn set_hub_radio_channel(&mut self, channel_num: u8) -> Result<(), HubManagerError> {
+    fn set_hw_hub_radio_channel(&mut self, channel_num: u8) -> Result<(), HubManagerError> {
         log::info!("Setting hub radio channel to: {}", channel_num);
         let handle = self.get_hub_handle_or_err()?;
 

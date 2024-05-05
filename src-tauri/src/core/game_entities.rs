@@ -1,9 +1,12 @@
+use std::string::ToString;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::api::dto::QuestionType;
 use crate::core::game_entities::HubStatus::Detected;
 use crate::game_pack::pack_content_entities::{PackContent, Round};
+
+pub const DEFAULT_ICON: &str = "default";
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum PlayerState {

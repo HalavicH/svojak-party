@@ -17,7 +17,7 @@ export const TauriApiCommand = {
     // Startup API
     SET_HUB_TYPE: 'set_hub_type',
     DISCOVER_HUB: 'discover_hub',
-    SET_HUB_RADIO_CHANNEL: 'set_hub_radio_channel',
+    SET_HW_HUB_RADIO_CHANNEL: 'set_hw_hub_radio_channel',
     SAVE_PLAYERS: 'save_players',
     INIT_GAME_PACK: 'init_game_pack',
     SAVE_ROUND_DURATION: 'save_round_duration',
@@ -74,4 +74,5 @@ export function hubManagerError2Msg(err) {
     if (HubManagerError.NoResponseFromHub === err) return 'No response from hub';
     if (HubManagerError.NoResponseFromTerminal === err) return 'No response from terminal';
     if (HubManagerError.InternalError === err) return 'Internal error';
+    return err;
 }

@@ -13,20 +13,16 @@
     import Input from "../../components/generic/TextInput.svelte";
     import {notify} from "../../lib/notifications"
     import {gameContext, gamePlayers} from "../../lib/stores.js";
+    import {DFL_PLAYER_ICON} from "../../lib/misc.js"
 
     // Provided by 'modals'
     export let isOpen;
 
     let players;
     // let config;
-    let hubStatus = HubStatusOptions.NoDevice;
+    let hubStatus;
     let serialPorts = [];
     let radioChannel = null;
-
-    const emptyOption = {
-        title: "Select serial port",
-        value: "Select serial port",
-    };
 
     let hubPortUsed;
     $: console.log(`Modal HwClientsSettingsModal is ${isOpen}`);
@@ -36,17 +32,20 @@
     $: if (isOpen) {
         let config = $gameContext;
         hubPortUsed = config.hubPort;
-        players = config.players;
+        players = config.players.map(p => {
+            if (p.iconPath === "default") {
+                p.iconPath = DFL_PLAYER_ICON;
+            }
+            return p;
+        });
         hubStatus = config.hubStatus;
         radioChannel = config.radioChannel;
-        let portsFromOs = config.availablePorts.map((portName) => {
+        serialPorts = config.availablePorts.map((portName) => {
             return {
                 value: portName,
                 title: portName
             };
         });
-
-        serialPorts = [emptyOption, ...portsFromOs];
     }
 
     async function saveSettings() {
@@ -61,22 +60,16 @@
             return;
         }
 
-        callBackend(TauriApiCommand.SET_HUB_RADIO_CHANNEL, {channelId: radioChannel})
+        callBackend(TauriApiCommand.SET_HW_HUB_RADIO_CHANNEL, {channelId: radioChannel})
             .catch(error => {
                 notify.failure(hubManagerError2Msg(error));
             });
     }
 
     async function discoverHub(portName) {
-        if (portName === emptyOption.title) {
-            console.log(`Skipping placeholder option`);
-            notify.warning("Empty option");
-            return;
-        }
-
         notify.info(`Discovering hub: ${portName}`)
         console.log(`Discovering hub: ${portName}`);
-        hubStatus = await callBackend(TauriApiCommand.DISCOVER_HUB, {path: portName});
+        callBackend(TauriApiCommand.DISCOVER_HUB, {path: portName}).then();
     }
 
     function captureInput(text) {

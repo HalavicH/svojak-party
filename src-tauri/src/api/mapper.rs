@@ -76,7 +76,7 @@ pub fn map_players_to_player_dto(players: Vec<&Player>) -> Vec<PlayerDto> {
         .map(|&player| PlayerDto {
             id: player.term_id as i32,
             iconPath: player.icon.clone(),
-            name: player.icon.clone(),
+            name: player.name.clone(),
             score: player.stats.score,
             state: player.state.clone(),
             isUsed: player.is_used,

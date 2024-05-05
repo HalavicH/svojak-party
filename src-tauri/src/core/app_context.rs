@@ -1,9 +1,7 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
-use crate::core::game_entities::{
-    GameContext, GamePackError, GameState, GameplayError, Player, PlayerState,
-};
+use crate::core::game_entities::{GameContext, GamePackError, GameState, GameplayError, Player, PlayerState, DEFAULT_ICON};
 use crate::core::game_logic::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::game_pack::pack_content_entities::Question;
@@ -19,6 +17,7 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
+use log::log;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -96,21 +95,15 @@ impl AppContext {
         }
         emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
     }
-    pub fn discover_hub(&mut self, path: String) -> String {
+    pub fn discover_hub(&mut self, path: String) {
+        log::debug!("Requested HUB change. Removing players as outdated: {:#?}", self.players);
+        self.players = HashMap::new();
         let result = self.get_locked_hub_mut().probe(&path);
-        self.run_polling_for_players();
         match result {
-            Ok(()) => "Detected".to_string(),
-            Err(error_stack) => {
-                log::error!("Can't open port: {:?}", error_stack);
-                let error_case = error_stack.current_context().clone();
-                match error_case {
-                    HubManagerError::NoResponseFromHub => "No Device".to_string(),
-                    HubManagerError::SerialPortError => "Serial Port Error".to_string(),
-                    _ => error_case.to_string(),
-                }
-            }
+            Ok(_) => self.run_polling_for_players(),
+            Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err)
         }
+        emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
     }
 
     /// Players polling
@@ -118,9 +111,9 @@ impl AppContext {
         if self.player_poling_thread_handle.is_some() {
             log::info!("Player polling thread already started");
             return;
-        } else {
-            log::info!("I promise there's no stuff saved!");
         }
+        
+        log::info!("Initial setup of player polling thread");
 
         let handle = spawn(move || loop {
             Self::discover_and_save_players();
@@ -185,7 +178,14 @@ impl AppContext {
         // TODO: make actual merge instead of simple re-assign
         self.players = detected_players
             .iter()
-            .map(|p| (p.term_id, p.clone()))
+            .map(|p| {
+                let player = Player{
+                    name: format!("Player {}", p.term_id),
+                    icon: DEFAULT_ICON.to_string(),
+                    ..p.to_owned()
+                };
+                (p.term_id, player) 
+            })
             .collect();
     }
 
