@@ -1,7 +1,10 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
-use crate::core::game_entities::{GamePackError, GameState, GameplayError, Player, PlayerState, DEFAULT_ICON};
+use crate::core::game_context::GameContext;
+use crate::core::game_entities::{
+    GamePackError, GameState, GameplayError, Player, PlayerState, DEFAULT_ICON,
+};
 use crate::core::game_logic::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::game_pack::pack_content_entities::Question;
@@ -17,8 +20,6 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
-use log::log;
-use crate::core::game_context::GameContext;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -132,12 +133,15 @@ impl AppContext {
     }
 
     pub fn discover_hub(&mut self, path: String) {
-        log::debug!("Requested HUB change. Removing players as outdated: {:#?}", self.players);
+        log::debug!(
+            "Requested HUB change. Removing players as outdated: {:#?}",
+            self.players
+        );
         self.players = HashMap::new();
         let result = self.get_locked_hub_mut().probe(&path);
         match result {
             Ok(_) => self.run_polling_for_players(),
-            Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err)
+            Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err),
         }
         emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
     }

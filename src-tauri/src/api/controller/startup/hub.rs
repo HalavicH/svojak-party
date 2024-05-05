@@ -1,10 +1,8 @@
-use crate::api::dto::PlayerDto;
 use crate::api::events::emit_message;
-use crate::core::app_context::{app, app_mut};
+use crate::core::app_context::{app_mut};
 use tauri::command;
 
 use crate::hub_comm::common::hub_api::HubType;
-use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 
 /// Set hub type to web or serial
 #[command]

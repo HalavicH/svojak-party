@@ -30,7 +30,7 @@ pub struct GameContext {
 
 // trait Game {
 //     fn start();
-//     /// 
+//     ///
 //     fn select_question(topic: &String, price: &i32) -> Result<(), >;
 // }
 

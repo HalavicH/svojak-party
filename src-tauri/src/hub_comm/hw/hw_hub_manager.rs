@@ -13,7 +13,6 @@ use crate::hub_comm::hw::internal::api_types::{
 use crate::hub_comm::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
 use crate::hub_comm::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
 use error_stack::{bail, IntoReport, Report, Result, ResultExt};
-use log::log;
 use rgb::RGB8;
 use serde::Serialize;
 use serialport::SerialPort;
@@ -65,7 +64,11 @@ impl Default for HwHubManager {
 
 impl HwHubManager {
     fn set_hub_status(&mut self, new: HubStatus) {
-        log::debug!("New hub status: '{:#?}' for hub on port: '{}'", new, self.port_name);
+        log::debug!(
+            "New hub status: '{:#?}' for hub on port: '{}'",
+            new,
+            self.port_name
+        );
         self.hub_status = new;
     }
     fn setup_physical_serial_connection(
@@ -144,7 +147,7 @@ impl HubManager for HwHubManager {
     }
 
     fn get_hub_status(&self) -> HubStatus {
-        self.hub_status.clone()
+        self.hub_status
     }
 
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {

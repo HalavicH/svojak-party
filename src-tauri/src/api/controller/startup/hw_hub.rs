@@ -1,10 +1,10 @@
 use std::sync::RwLockWriteGuard;
 
 use crate::api::dto::{HubRequestDto, HubResponseDto};
+use crate::api::events::emit_app_context;
+use crate::api::mapper::{map_app_context};
 use crate::core::app_context::app;
 use tauri::command;
-use crate::api::events::emit_app_context;
-use crate::api::mapper::{get_app_context_dto, map_app_context};
 
 use crate::hub_comm::common::hub_api::HubManager;
 

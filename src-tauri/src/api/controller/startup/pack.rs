@@ -1,8 +1,7 @@
-use crate::api::dto::{AppContextDto, PackErrorData};
+use crate::api::dto::{PackErrorData};
 use crate::api::events::emit_pack_info;
-use crate::api::mapper::{get_app_context_dto, map_package_to_pack_info_dto};
+use crate::api::mapper::{map_package_to_pack_info_dto};
 use crate::core::app_context::{app, app_mut};
-use crate::core::game_entities::GameplayError;
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use error_stack::Report;
 use tauri::command;

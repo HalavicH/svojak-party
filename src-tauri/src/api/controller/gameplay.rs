@@ -1,10 +1,8 @@
-use crate::api::dto::{PlayerDto, QuestionDataDto, QuestionType, RoundDto, RoundStatsDto};
-use crate::api::mapper::*;
-use crate::core::app_context::{app, app_mut};
+use crate::api::dto::{QuestionDataDto};
+use crate::core::app_context::{app_mut};
 use crate::core::game_entities::GameplayError;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 use tauri::command;
-
 
 /// Start the game with selected players and game pack
 #[command]
@@ -24,7 +22,7 @@ pub fn select_question(topic: String, price: i32) -> Result<QuestionDataDto, Gam
     //     log::error!("Can't get question data: {:#?}", e);
     //     e.current_context().clone()
     // })?;
-    // 
+    //
     // Ok(map_question_to_question_dto(topic, question, q_num))
 }
 
