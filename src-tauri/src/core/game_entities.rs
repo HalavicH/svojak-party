@@ -119,6 +119,17 @@ pub enum GameState {
     /// Any player answered the question correctly or all players answered question wrong.
     /// In this case correct answer is displayed on the screen
     /// At this point intermediate player stats can be displayed
-    /// Next state: `ChooseQuestion` (when  host presses "Next Question")
+    /// Next state: `CheckEndOfRound` (when host presses "Next Question")
     EndQuestion,
+
+    /// Check if the round is over. If all questions in the round are answered, proceed to round-end actions.
+    /// Next state: `CalcStatsAndStartNextRound` (when round is over)
+    ///        or : `DisplayQuestion` (when round is not over)
+    CheckEndOfRound,
+
+    /// Display round statistics, eliminate players with negative scores, etc.
+    /// Start the next round by resetting game state and proceeding to question selection.
+    /// Next state: `ChooseQuestion` (when host presses "Start Next Round")
+    CalcStatsAndStartNextRound,
 }
+
