@@ -52,7 +52,6 @@ pub struct AppContext {
     pub game_pack: GamePack,
     pub game: GameContext,
 
-    pub players: HashMap<u8, Player>,
     // TODO: move to game
     pub player_event_listener: Option<Arc<Mutex<Receiver<TermEvent>>>>,
     pub allow_answer_timestamp: Arc<AtomicU32>,
@@ -65,7 +64,6 @@ impl Default for AppContext {
         Self {
             hub_type: HubType::default(),
             hub: Arc::new(RwLock::new(Box::<HwHubManager>::default())),
-            players: HashMap::default(),
             game_pack: GamePack::default(),
             game: GameContext::default(),
             player_event_listener: None,
@@ -135,9 +133,9 @@ impl AppContext {
     pub fn discover_hub(&mut self, path: String) {
         log::debug!(
             "Requested HUB change. Removing players as outdated: {:#?}",
-            self.players
+            self.game.players
         );
-        self.players = HashMap::new();
+        self.game.players = HashMap::new();
         let result = self.get_locked_hub_mut().probe(&path);
         match result {
             Ok(_) => self.run_polling_for_players(),
@@ -196,11 +194,11 @@ impl AppContext {
     }
 
     fn is_new_players_found(&self, detected_players: &[Player]) -> bool {
-        if detected_players.len() > self.players.len() {
+        if detected_players.len() > self.game.players.len() {
             return true;
         }
 
-        let current_players_ids: Vec<u8> = self.players.keys().cloned().collect();
+        let current_players_ids: Vec<u8> = self.game.players.keys().cloned().collect();
         // emit_message(format!("Current player ids: {current_players_ids:?}"));
         // let vec: Vec<u8> = detected_players.iter().map(|p| p.term_id).collect();
         // emit_message(format!("Detected player ids: {:?}", vec));
@@ -216,7 +214,7 @@ impl AppContext {
 
     fn merge_players(&mut self, detected_players: &[Player]) {
         // TODO: make actual merge instead of simple re-assign
-        self.players = detected_players
+        self.game.players = detected_players
             .iter()
             .map(|p| {
                 let player = Player {
@@ -241,7 +239,7 @@ impl AppContext {
         self.game.pack_content = self.game_pack.content.clone();
         self.update_game_state(GameState::ChooseQuestion);
 
-        if self.players.len() < 2 {
+        if self.game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::PlayerNotPresent).into_report();
         }
@@ -259,7 +257,8 @@ impl AppContext {
             Err(err) => {
                 log::error!("{:#?}", err);
 
-                self.players
+                self.game
+                    .players
                     .values()
                     .next()
                     .ok_or(GameplayError::PlayerNotPresent)
@@ -271,6 +270,7 @@ impl AppContext {
 
         self.game.set_active_player_id(q_picker_id);
         let player = self
+            .game
             .players
             .get_mut(&self.game.active_player_id())
             .ok_or(GameplayError::PlayerNotPresent)
@@ -282,7 +282,7 @@ impl AppContext {
     #[deprecated]
     pub fn fetch_players(&mut self) -> &HashMap<u8, Player> {
         self.update_non_target_player_states();
-        &self.players
+        &self.game.players
     }
 
     #[deprecated]
@@ -378,6 +378,7 @@ impl AppContext {
 
     pub fn get_fastest_click_player_id(&mut self) -> error_stack::Result<u8, GameplayError> {
         let players_allowed_to_click_num = self
+            .game
             .players
             .values()
             .filter(|&p| p.allowed_to_click())
@@ -397,7 +398,8 @@ impl AppContext {
         self.game.answer_allowed = true;
         self.game.set_active_player_id(fastest_player_id);
 
-        self.players
+        self.game
+            .players
             .get_mut(&fastest_player_id)
             .ok_or(Report::new(GameplayError::PlayerNotPresent))
             .attach_printable(format!("Can't find player with id {}", fastest_player_id))?
@@ -431,6 +433,7 @@ impl AppContext {
 
         let response_player = {
             let active_player = self
+                .game
                 .players
                 .get_mut(&active_player_id)
                 .ok_or(GameplayError::PlayerNotPresent)?;
@@ -476,6 +479,7 @@ impl AppContext {
 
     pub fn no_players_to_answer_left(&self) -> bool {
         let players_left = self
+            .game
             .players
             .iter()
             .filter(|(_, p)| {
@@ -500,6 +504,7 @@ impl AppContext {
             totalTries: self.game.round_stats.total_tries,
             roundTime: "Not tracked".to_owned(),
             players: self
+                .game
                 .players
                 .values()
                 .map(|p| PlayerEndRoundStatsDto {
@@ -614,7 +619,7 @@ impl AppContext {
                 continue;
             }
 
-            let Some(player) = self.players.get(&e.term_id) else {
+            let Some(player) = self.game.players.get(&e.term_id) else {
                 log::debug!("Unknown terminal id {} event. Skipping: {:?}", e.term_id, e);
                 continue;
             };
@@ -660,14 +665,14 @@ impl AppContext {
     }
 
     fn get_player_keys(&self) -> Vec<u8> {
-        self.players.keys().copied().collect()
+        self.game.players.keys().copied().collect()
     }
 
     fn update_non_target_player_states(&mut self) {
-        let game_state = self.game.game_state();
+        let game_state = self.game.game_state().clone();
         let active_id = self.get_active_player_id();
 
-        self.players.iter_mut().for_each(|(id, p)| {
+        self.game.players.iter_mut().for_each(|(id, p)| {
             log::debug!(
                 "Game state: {:?}. Player: {}:{:?}",
                 game_state,
@@ -685,7 +690,7 @@ impl AppContext {
                 p.state = PlayerState::Inactive;
             }
 
-            if *game_state == GameState::ChooseQuestion
+            if game_state == GameState::ChooseQuestion
                 || (p.state != PlayerState::Dead && p.state != PlayerState::Inactive)
             {
                 log::trace!("Player with id {} becomes idle", id);
@@ -696,7 +701,7 @@ impl AppContext {
 
     #[allow(dead_code)]
     fn kill_players_with_negative_balance(&mut self) {
-        self.players.iter_mut().for_each(|(_, player)| {
+        self.game.players.iter_mut().for_each(|(_, player)| {
             if player.stats.score < 0 {
                 log::info!(
                     "Killing player {:?} because of the negative balance",
@@ -716,10 +721,10 @@ mod game_entities_test {
     #[test]
     fn test_fastest_click() {
         let mut ctx = AppContext::default();
-        ctx.players.insert(1, Player::default());
-        ctx.players.insert(2, Player::default());
-        ctx.players.insert(3, Player::default());
-        ctx.players.insert(4, Player::default());
+        ctx.game.players.insert(1, Player::default());
+        ctx.game.players.insert(2, Player::default());
+        ctx.game.players.insert(3, Player::default());
+        ctx.game.players.insert(4, Player::default());
         let i = ctx.get_fastest_click_player_id().expect("Test");
         log::info!("Fastest click from: {i}");
     }

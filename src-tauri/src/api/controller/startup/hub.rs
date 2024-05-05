@@ -1,5 +1,5 @@
 use crate::api::events::emit_message;
-use crate::core::app_context::{app_mut};
+use crate::core::app_context::app_mut;
 use tauri::command;
 
 use crate::hub_comm::common::hub_api::HubType;

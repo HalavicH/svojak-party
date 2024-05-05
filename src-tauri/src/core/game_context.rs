@@ -1,6 +1,7 @@
 use crate::api::dto::QuestionType;
 use crate::core::game_entities::{GameState, Player};
 use crate::game_pack::pack_content_entities::{PackContent, Round};
+use std::collections::HashMap;
 
 #[derive(Default, Debug)]
 pub struct GameStats {
@@ -13,7 +14,7 @@ pub struct GameStats {
 pub struct GameContext {
     /// Entities
     pub pack_content: PackContent,
-    pub players: Vec<Player>,
+    pub players: HashMap<u8, Player>,
     /// Game State
     pub game_state: GameState,
     pub round_index: usize,
@@ -35,7 +36,7 @@ pub struct GameContext {
 // }
 
 impl GameContext {
-    pub fn new(pack_content: PackContent, players: Vec<Player>) -> Self {
+    pub fn new(pack_content: PackContent, players: HashMap<u8, Player>) -> Self {
         Self {
             pack_content,
             players,

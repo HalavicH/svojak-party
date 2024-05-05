@@ -21,7 +21,7 @@ pub fn map_app_context(context: &AppContext, hub: &Box<dyn HubManager>) -> AppCo
         hubPort: hub.get_hub_address(),
         radioChannel: hub.radio_channel(),
         hubStatus: hub.get_hub_status(),
-        players: map_players_to_player_dto(context.players.values().collect()),
+        players: map_players_to_player_dto(context.game.players.values().collect()),
     }
 }
 
@@ -29,7 +29,7 @@ pub fn map_app_context(context: &AppContext, hub: &Box<dyn HubManager>) -> AppCo
 pub fn update_players(players: &[Player]) {
     let mut context = app_mut();
 
-    context.players = players.iter().fold(HashMap::new(), |mut map, player| {
+    context.game.players = players.iter().fold(HashMap::new(), |mut map, player| {
         map.insert(player.term_id, player.clone());
         map
     });
