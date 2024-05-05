@@ -1,3 +1,14 @@
+import {invoke} from "@tauri-apps/api/tauri";
+import {isRunningInTauri} from "./misc.js";
+
+export async function callBackend(apiCommand, params) {
+    if (!isRunningInTauri()) {
+        console.warn(`No Tauri context!\nSkipping Tauri API call: '${apiCommand}' with payload: '${params}'`);
+        return;
+    }
+    await invoke(apiCommand, params)
+}
+
 export const TauriApiCommand = {
     // Window setup api
     INIT_WINDOW_HANDLE: 'init_window_handle',

@@ -1,11 +1,10 @@
 <script>
     import Menu from "./screens/Menu.svelte";
     import {notify} from "./lib/notifications"
-    import {setupEventListener} from "./lib/misc"
     import {Views} from "./screens/views.js";
     import Quiz from "./screens/Quiz.svelte";
     import {currentView} from "./lib/stores"
-    import {initEventListeners} from "./lib/events.js";
+    import {initEventListeners, setupEventListener} from "./lib/events.js";
 
     setupEventListener('message', (event) => {
         const message = event.payload;

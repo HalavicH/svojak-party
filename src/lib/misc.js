@@ -1,16 +1,13 @@
-import {listen} from "@tauri-apps/api/event";
-import {onDestroy, onMount} from "svelte";
-
 export const DFL_PLAYER_ICON = "/bc-logo.png";
 
-export function setupEventListener(eventName, callback) {
-    let unlisten;
-
-    onMount(async () => {
-        unlisten = await listen(eventName, callback);
-    });
-
-    onDestroy(() => {
-        unlisten();
-    });
+export function isRunningInTauri() {
+    return window.tauri !== undefined;
 }
+
+// Check if the application is running within Tauri
+if (isRunningInTauri()) {
+    console.log('Running within Tauri');
+} else {
+    console.log('Running standalone');
+}
+

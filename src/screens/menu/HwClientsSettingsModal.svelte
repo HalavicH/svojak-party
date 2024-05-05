@@ -6,8 +6,7 @@
     import HubStatus from "../../components/HubStatus.svelte";
     import ActionsBlock from "../../components/generic/ActionsBlock.svelte";
     import Table from "../../components/generic/Table.svelte";
-    import {invoke} from "@tauri-apps/api/tauri";
-    import {TauriApiCommand, HubStatusOptions, hubManagerError2Msg} from "../../lib/commands"
+    import {TauriApiCommand, HubStatusOptions, hubManagerError2Msg, callBackend} from "../../lib/commands"
     import DropDown from "../../components/generic/DropDown.svelte";
     import Row from "../../components/generic/Row.svelte";
     import ConfigButton from "../../components/ConfigButton.svelte";
@@ -51,7 +50,7 @@
     async function saveSettings() {
         console.log("Saved!");
         closeModal();
-        await invoke(TauriApiCommand.SAVE_PLAYERS, {players});
+        await callBackend(TauriApiCommand.SAVE_PLAYERS, {players});
     }
 
     async function setRadioChannel() {
@@ -60,7 +59,7 @@
             return;
         }
 
-        invoke(TauriApiCommand.SET_HUB_RADIO_CHANNEL, {channelId: radioChannel})
+        callBackend(TauriApiCommand.SET_HUB_RADIO_CHANNEL, {channelId: radioChannel})
             .catch(error => {
                 notify.failure(hubManagerError2Msg(error));
             });
@@ -75,7 +74,7 @@
 
         notify.info(`Discovering hub: ${portName}`)
         console.log(`Discovering hub: ${portName}`);
-        hubStatus = await invoke(TauriApiCommand.DISCOVER_HUB, {path: portName});
+        hubStatus = await callBackend(TauriApiCommand.DISCOVER_HUB, {path: portName});
     }
 
     function captureInput(text) {

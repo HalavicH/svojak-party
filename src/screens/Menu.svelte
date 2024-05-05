@@ -6,13 +6,12 @@
     import GamePackModal from "./menu/GamePackModal.svelte";
     import {open} from "@tauri-apps/api/dialog";
     import {notify} from "../lib/notifications.js";
-    import {invoke} from "@tauri-apps/api/tauri";
-    import {TauriApiCommand} from "../lib/commands.js";
+    import {callBackend, TauriApiCommand} from "../lib/commands.js";
     import PackErrorModal from "./menu/PackErrorModal.svelte";
     import {onMount} from "svelte";
 
     onMount(async () => {
-        await invoke(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
+        await callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
     })
 
     function openSetup() {

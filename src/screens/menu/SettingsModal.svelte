@@ -6,21 +6,20 @@
     import ItemsBlock from "../../components/generic/ItemsBlock.svelte";
     import Row from "../../components/generic/Row.svelte";
     import WebClientsSettingsModal from "./WebClientsSettingsModal.svelte";
-    import {invoke} from "@tauri-apps/api/tauri";
-    import {HubType, TauriApiCommand} from "../../lib/commands"
+    import {callBackend, HubType, TauriApiCommand} from "../../lib/commands"
     import HwClientsSettingsModal from "./HwClientsSettingsModal.svelte";
 
     // Provided by 'modals'
     export let isOpen;
 
     async function openPhysicalClientsSettings() {
-        invoke(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.HwHub}).then();
+        callBackend(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.HwHub}).then();
         closeModal();
         openModal(HwClientsSettingsModal);
     }
 
     function openWebClientsSettings() {
-        invoke(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.WebHub}).then();
+        callBackend(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.WebHub}).then();
         closeModal();
         openModal(WebClientsSettingsModal);
     }

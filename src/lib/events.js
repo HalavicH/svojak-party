@@ -1,15 +1,38 @@
 import {listen} from "@tauri-apps/api/event";
 import {gameContext, gamePackInfo} from "./stores.js";
 import {notify} from "./notifications.js";
-import {invoke} from "@tauri-apps/api/tauri";
-import {TauriApiCommand} from "./commands.js";
+import {callBackend, TauriApiCommand} from "./commands.js";
+import {isRunningInTauri} from "./misc.js";
+import {onDestroy, onMount} from "svelte";
 
 export const TauriEvents = {
     GameConfig: 'GameConfig',
     PackInfo: 'PackInfo',
 }
 
+export function setupEventListener(eventType, callback) {
+    if (!isRunningInTauri()) {
+        console.warn(`No Tauri context!\nSkipped '${eventType}' event listener setup. Callback:\n\t${callback}\nwon't be executed`);
+        return;
+    }
+
+    let unlisten;
+
+    onMount(async () => {
+        unlisten = await listen(eventType, callback);
+    });
+
+    onDestroy(() => {
+        unlisten();
+    });
+}
+
 function listenAndStoreEvent(eventType, storage) {
+    if (!isRunningInTauri()) {
+        console.warn(`No Tauri context!\nSkipped '${eventType}' event listener setup. Storage won't be updated`);
+        return;
+    }
+
     listen(eventType, event => {
         logEvent(eventType, event);
         const payload = event.payload;
@@ -33,7 +56,7 @@ export function initEventListeners() {
     console.log("################################################");
 
     // After all event listeners are initialized we can switch on event emitters
-    invoke(TauriApiCommand.INIT_WINDOW_HANDLE).then(() => {
+    callBackend(TauriApiCommand.INIT_WINDOW_HANDLE).then(() => {
         console.log("Window handle stored successfully");
     })
 }
