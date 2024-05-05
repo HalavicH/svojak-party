@@ -1,7 +1,7 @@
 use crate::api::dto::PlayerDto;
 use crate::api::events::{emit_app_context, set_window};
-use crate::api::mapper::{get_app_context_dto, update_players};
-use crate::core::app_context::app_mut;
+use crate::api::mapper::{get_app_context_dto};
+use crate::core::app_context::{app, app_mut};
 use crate::core::game_entities::{Player, PlayerState};
 use tauri::{command, Window};
 
@@ -36,7 +36,7 @@ pub fn save_players(players: Vec<PlayerDto>) {
 
     log::info!("Converted players: {:#?}", player_entities);
 
-    update_players(&player_entities)
+    app_mut().update_players(&player_entities)
 }
 
 /// Store round duration

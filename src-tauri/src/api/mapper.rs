@@ -25,18 +25,8 @@ pub fn map_app_context(context: &AppContext, hub: &Box<dyn HubManager>) -> AppCo
         hubPort: hub.get_hub_address(),
         radioChannel: hub.radio_channel(),
         hubStatus: hub.get_hub_status(),
-        players: map_players_to_player_dto(context.__old_game.players.values().collect()),
+        players: map_players_to_player_dto(context.game_state.get_players_ref().values().collect()),
     }
-}
-
-/// Takes whole game context and maps to config which contains only required elements
-pub fn update_players(players: &[Player]) {
-    let mut context = app_mut();
-
-    context.__old_game.players = players.iter().fold(HashMap::new(), |mut map, player| {
-        map.insert(player.term_id, player.clone());
-        map
-    });
 }
 
 pub fn map_package_to_pack_info_dto(package: &PackContent) -> PackInfoDto {
