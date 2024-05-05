@@ -13,6 +13,7 @@ pub mod core {
     pub mod app_context;
     pub mod game_entities;
     pub mod game_logic;
+    pub mod game_context;
 }
 
 pub mod game_pack {

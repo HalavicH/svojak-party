@@ -1,7 +1,7 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
-use crate::core::game_entities::{GameContext, GamePackError, GameState, GameplayError, Player, PlayerState, DEFAULT_ICON};
+use crate::core::game_entities::{GamePackError, GameState, GameplayError, Player, PlayerState, DEFAULT_ICON};
 use crate::core::game_logic::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::game_pack::pack_content_entities::Question;
@@ -18,6 +18,7 @@ use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
 use log::log;
+use crate::core::game_context::GameContext;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -74,8 +75,42 @@ impl Default for AppContext {
     }
 }
 
+/// Field Access API
 impl AppContext {
-    /// Setup API
+    pub fn drop_hub(&mut self) {
+        self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
+    }
+    pub fn get_hub_ref(&self) -> &Arc<RwLock<Box<dyn HubManager>>> {
+        &self.hub
+    }
+
+    pub fn get_unlocked_hub(&self) -> RwLockReadGuard<Box<dyn HubManager>> {
+        self.hub
+            .read()
+            .map_err(|e| {
+                Report::new(GameplayError::InternalError)
+                    .attach_printable(format!("Can't get HUB for read. {:?}", e))
+            })
+            .expect("Poisoned")
+    }
+
+    pub fn get_locked_hub_mut(&self) -> RwLockWriteGuard<Box<dyn HubManager>> {
+        self.hub
+            .write()
+            .map_err(|e| {
+                Report::new(GameplayError::InternalError)
+                    .attach_printable(format!("Can't get HUB for write. {:?}", e))
+            })
+            .expect("Poisoned")
+    }
+
+    pub fn set_game_pack(&mut self, pack: GamePack) {
+        self.game_pack = pack;
+    }
+}
+
+/// Setup API
+impl AppContext {
     pub fn select_hub_type(&mut self, hub_type: HubType) {
         if self.hub_type == hub_type {
             log::info!("Hub is already set to: {:?}. Nothing to do", hub_type);
@@ -95,6 +130,7 @@ impl AppContext {
         }
         emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
     }
+
     pub fn discover_hub(&mut self, path: String) {
         log::debug!("Requested HUB change. Removing players as outdated: {:#?}", self.players);
         self.players = HashMap::new();
@@ -112,7 +148,7 @@ impl AppContext {
             log::info!("Player polling thread already started");
             return;
         }
-        
+
         log::info!("Initial setup of player polling thread");
 
         let handle = spawn(move || loop {
@@ -144,7 +180,7 @@ impl AppContext {
     fn compare_and_merge(app: &mut AppContext, detected_players: &[Player]) {
         let det_pl_cnt = detected_players.len();
         log::debug!("Detected {} players", det_pl_cnt);
-        if app.new_players_found(detected_players) {
+        if app.is_new_players_found(detected_players) {
             log::info!("New players found! Merging");
             emit_message(format!(
                 "New players detected! Total number: {}",
@@ -155,7 +191,7 @@ impl AppContext {
         }
     }
 
-    fn new_players_found(&self, detected_players: &[Player]) -> bool {
+    fn is_new_players_found(&self, detected_players: &[Player]) -> bool {
         if detected_players.len() > self.players.len() {
             return true;
         }
@@ -179,48 +215,20 @@ impl AppContext {
         self.players = detected_players
             .iter()
             .map(|p| {
-                let player = Player{
+                let player = Player {
                     name: format!("Player {}", p.term_id),
                     icon: DEFAULT_ICON.to_string(),
                     ..p.to_owned()
                 };
-                (p.term_id, player) 
+                (p.term_id, player)
             })
             .collect();
     }
+}
 
-    pub fn drop_hub(&mut self) {
-        self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
-    }
-    pub fn get_hub_ref(&self) -> &Arc<RwLock<Box<dyn HubManager>>> {
-        &self.hub
-    }
-
-    pub fn get_unlocked_hub(&self) -> RwLockReadGuard<Box<dyn HubManager>> {
-        self.hub
-            .read()
-            .map_err(|e| {
-                Report::new(GameplayError::InternalError)
-                    .attach_printable(format!("Can't get HUB for read. {:?}", e))
-            })
-            .expect("Poisoned")
-    }
-
-    pub fn get_locked_hub_mut(&self) -> RwLockWriteGuard<Box<dyn HubManager>> {
-        self.hub
-            .write()
-            .map_err(|e| {
-                Report::new(GameplayError::InternalError)
-                    .attach_printable(format!("Can't get HUB for write. {:?}", e))
-            })
-            .expect("Poisoned")
-    }
-
-    pub fn set_game_pack(&mut self, pack: GamePack) {
-        self.game_pack = pack;
-    }
-
-    /// Game API
+/// Game API
+#[deprecated]
+impl AppContext {
     pub fn finish_game(&mut self) {
         self.game = GameContext::default();
     }
@@ -267,11 +275,13 @@ impl AppContext {
         Ok(())
     }
 
+    #[deprecated]
     pub fn fetch_players(&mut self) -> &HashMap<u8, Player> {
         self.update_non_target_player_states();
         &self.players
     }
 
+    #[deprecated]
     pub fn get_pack_question(
         &mut self,
         theme: &String,
