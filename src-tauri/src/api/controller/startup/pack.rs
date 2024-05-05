@@ -1,11 +1,11 @@
+use crate::api::dto::{AppContextDto, PackErrorData};
+use crate::api::events::emit_pack_info;
+use crate::api::mapper::{get_app_context_dto, map_package_to_pack_info_dto};
+use crate::core::app_context::{app, app_mut};
+use crate::core::game_entities::GameplayError;
+use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use error_stack::Report;
 use tauri::command;
-use crate::api::dto::{AppContextDto, PackErrorData, PlayerSetupDto};
-use crate::api::events::emit_pack_info;
-use crate::api::mapper::{get_app_context_dto, map_package_to_pack_info_dto, update_players};
-use crate::core::app_context::{app, app_mut};
-use crate::core::game_entities::{GameplayError, Player, PlayerState};
-use crate::game_pack::game_pack_loader::{GamePackLoadingError, load_game_pack};
 
 /// Provide saved game configuration
 #[command]
@@ -17,7 +17,6 @@ pub fn fetch_configuration() -> AppContextDto {
 
     config
 }
-
 
 /// Load game pack into the game
 #[command]

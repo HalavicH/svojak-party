@@ -5,7 +5,7 @@ use std::default::Default;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use thiserror::Error;
 
-use crate::core::game_entities::Player;
+use crate::core::game_entities::{HubStatus, Player};
 use crate::hub_comm::common::hub_api::HubManager;
 use crate::hub_comm::hw::internal::api_types::{
     HwHubIoError, HwHubRequest, ResponseStatus, TermButtonState, TermEvent,
@@ -43,7 +43,7 @@ pub struct HwHubManager {
     port_name: String,
     hub_io_handler: Option<HwHubCommunicationHandler>,
     baudrate: u32,
-    is_initialized: bool,
+    hub_status: HubStatus,
     radio_channel: i32,
     base_timestamp: u32,
 }
@@ -55,7 +55,7 @@ impl Default for HwHubManager {
             // Default
             port_name: String::default(),
             radio_channel: 0,
-            is_initialized: false,
+            hub_status: HubStatus::default(),
             base_timestamp: 0,
             hub_io_handler: None,
         }
@@ -102,13 +102,8 @@ impl HwHubManager {
             .ok_or(HubManagerError::NotInitializedError)?;
         Ok(connection)
     }
-}
 
-impl HubManager for HwHubManager {
-    fn get_hub_address(&self) -> String {
-        self.port_name.clone()
-    }
-    fn probe(&mut self, port: &str) -> Result<(), HubManagerError> {
+    fn init_hw_hub(&mut self, port: &str) -> Result<(), HubManagerError> {
         if let Some(hub) = &self.hub_io_handler {
             log::info!("Previous HUB io handle found: {:?}. Erasing", hub);
             self.hub_io_handler = None;
@@ -119,11 +114,33 @@ impl HubManager for HwHubManager {
 
         self.init_timestamp()?;
         self.set_hub_timestamp(self.base_timestamp)?;
-        self.is_initialized = true;
         Ok(())
     }
+}
+
+impl HubManager for HwHubManager {
+    fn get_hub_address(&self) -> String {
+        self.port_name.clone()
+    }
+    fn probe(&mut self, port: &str) -> Result<(), HubManagerError> {
+        self.hub_status = match self.init_hw_hub(port) {
+            Ok(_) => HubStatus::Detected,
+            Err(err) => match err.current_context() {
+                HubManagerError::SerialPortError => HubStatus::SerialPortError,
+                HubManagerError::NoResponseFromHub => HubStatus::NoDevice,
+                _ => HubStatus::UnknownError,
+            },
+        };
+        
+        Ok(())
+    }
+
+    fn get_hub_status(&self) -> HubStatus {
+        self.hub_status.clone()
+    }
+
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
-        if !self.is_initialized {
+        if !self.hub_status.is_live() {
             bail!(HubManagerError::NotInitializedError)
         }
 

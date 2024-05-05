@@ -1,4 +1,4 @@
-use crate::api::dto::{PlayerGameDto, QuestionDataDto, QuestionType, RoundDto, RoundStatsDto};
+use crate::api::dto::{PlayerDto, QuestionDataDto, QuestionType, RoundDto, RoundStatsDto};
 use crate::api::mapper::*;
 use crate::core::app_context::{app, app_mut};
 use crate::core::game_entities::GameplayError;
@@ -6,15 +6,17 @@ use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 use tauri::command;
 
 #[command]
-pub fn fetch_players() -> Vec<PlayerGameDto> {
+#[deprecated]
+pub fn fetch_players() -> Vec<PlayerDto> {
     let mut guard = app_mut();
     let players = guard.fetch_players();
-    let vec = map_players_to_player_game_dto(players);
+    let vec = map_players_to_player_dto(players.values().collect());
     log::trace!("Players: {:#?}", vec);
     vec
 }
 
 #[command]
+#[deprecated]
 pub fn fetch_round() -> RoundDto {
     let round_dto = map_round_to_dto(app().game.get_current_round());
     log::trace!("{round_dto:#?}");
@@ -22,6 +24,7 @@ pub fn fetch_round() -> RoundDto {
 }
 
 #[command]
+#[deprecated]
 pub fn get_question_data(topic: String, price: i32) -> Result<QuestionDataDto, GameplayError> {
     let (question, q_num) = app_mut().get_pack_question(&topic, &price).map_err(|e| {
         log::error!("Can't get question data: {:#?}", e);

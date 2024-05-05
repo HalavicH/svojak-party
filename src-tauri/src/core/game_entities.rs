@@ -51,9 +51,12 @@ impl Player {
 
 #[derive(Debug, Serialize, PartialEq, Default, Copy, Clone)]
 pub enum HubStatus {
-    Detected,
     #[default]
+    NotInitialized,
+    Detected,
     NoDevice,
+    SerialPortError,
+    UnknownError
 }
 
 impl HubStatus {

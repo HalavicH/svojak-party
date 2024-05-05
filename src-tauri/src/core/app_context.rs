@@ -1,4 +1,4 @@
-use crate::api::dto::{PlayerStatsDto, RoundStatsDto};
+use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
 use crate::core::game_entities::{
@@ -488,7 +488,7 @@ impl AppContext {
             players: self
                 .players
                 .values()
-                .map(|p| PlayerStatsDto {
+                .map(|p| PlayerEndRoundStatsDto {
                     id: p.term_id as i32,
                     name: p.name.to_owned(),
                     score: p.stats.score,

@@ -6,7 +6,7 @@ use svojak_app::api::controller::gameplay::*;
 use svojak_app::api::controller::startup::context::*;
 use svojak_app::api::controller::startup::hub::*;
 use svojak_app::api::controller::startup::hw_hub::*;
-use svojak_app::api::controller::startup::*;
+use svojak_app::api::controller::startup::pack::*;
 use svojak_app::core::app_context::app;
 
 fn main() {

@@ -1,9 +1,7 @@
-use crate::api::dto::PlayerSetupDto;
+use crate::api::dto::PlayerDto;
 use crate::api::events::emit_message;
-use crate::api::mapper::{map_players_to_players_setup_dto, update_players};
 use crate::core::app_context::{app, app_mut};
 use tauri::command;
-use crate::core::game_entities::{Player, PlayerState};
 
 use crate::hub_comm::common::hub_api::HubType;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
@@ -26,7 +24,8 @@ pub fn discover_hub(path: String) -> String {
 
 /// Calls HUB to get all available players
 #[command]
-pub fn discover_players() -> Result<Vec<PlayerSetupDto>, HubManagerError> {
+#[deprecated]
+pub fn discover_players() -> Result<Vec<PlayerDto>, HubManagerError> {
     log::info!("Discovering terminals");
     let guard = app();
     let mut hub_guard = guard.get_locked_hub_mut();
@@ -35,5 +34,6 @@ pub fn discover_players() -> Result<Vec<PlayerSetupDto>, HubManagerError> {
         log::error!("{:#?}", e);
         e.current_context().clone()
     })?;
-    Ok(map_players_to_players_setup_dto(&players))
+    Ok(vec![])
+    // Ok(map_players_to_player_dto(players))
 }

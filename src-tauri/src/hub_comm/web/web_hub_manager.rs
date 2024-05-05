@@ -11,7 +11,7 @@ use reqwest::Url;
 use std::net::Ipv4Addr;
 use tokio::runtime::Runtime;
 
-use crate::core::game_entities::Player;
+use crate::core::game_entities::{HubStatus, Player};
 use crate::hub_comm::common::hub_api::HubManager;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};
@@ -57,6 +57,10 @@ impl WebHubManager {
             server::main();
         });
         self.server_handle = Some(handle);
+    }
+
+    fn build_url(&self, endpoint: &str) -> Url {
+        self.base_url.join(endpoint).expect("Bad URL join")
     }
 }
 
@@ -116,12 +120,20 @@ impl HubManager for WebHubManager {
         Err(Report::new(HubManagerError::HttpCommunicationError))
     }
 
+    fn get_hub_status(&self) -> HubStatus {
+        if self.server_handle.is_some() {
+            HubStatus::Detected
+        } else {
+            HubStatus::NotInitialized
+        }
+    }
+
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
         let players: Vec<PlayerIdentityDto> = self
             .rt
             .block_on(async {
                 self.client
-                    .get(self.base_url.join(GET_PLAYERS).expect("Bad URL join"))
+                    .get(self.build_url(GET_PLAYERS))
                     .send()
                     .await?
                     .json()
@@ -168,7 +180,7 @@ impl HubManager for WebHubManager {
             .block_on(async {
                 let dto = TimestampDto { timestamp };
                 self.client
-                    .post(self.base_url.join(SET_TIMESTAMP).expect("Bad URL join"))
+                    .post(self.build_url(SET_TIMESTAMP))
                     .json(&dto)
                     .send()
                     .await

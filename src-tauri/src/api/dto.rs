@@ -1,4 +1,4 @@
-use crate::core::game_entities::PlayerState;
+use crate::core::game_entities::{HubStatus, PlayerState, PlayerStats};
 use crate::game_pack::pack_content_entities::QuestionMediaType;
 use serde::{Deserialize, Serialize};
 
@@ -13,36 +13,22 @@ pub struct PackErrorData {
 #[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
 pub struct AppContextDto {
-    pub hub_port: String,
-    pub available_ports: Vec<String>,
-    pub radio_channel: i32,
-    pub players: Vec<PlayerSetupDto>,
+    pub hubPort: String,
+    pub availablePorts: Vec<String>,
+    pub radioChannel: i32,
+    pub hubStatus: HubStatus,
+    pub players: Vec<PlayerDto>,
 }
 
 ////////// Players ///////////
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(non_snake_case)]
-pub struct PlayerSetupDto {
-    pub termId: u8,
-    pub icon: String,
+pub struct PlayerDto {
+    pub id: i32,
+    pub iconPath: String,
     pub name: String,
     pub isUsed: bool,
-}
-
-#[derive(Debug, Serialize)]
-#[allow(non_snake_case)]
-pub struct PlayerGameDto {
-    pub id: i32,
-    pub playerIconPath: String,
-    pub playerName: String,
-    pub score: i32,
     pub state: PlayerState,
-}
-
-#[derive(Debug, Serialize)]
-#[allow(non_snake_case)]
-pub struct PlayerScoreDto {
-    pub id: i32,
     pub score: i32,
 }
 
@@ -120,12 +106,12 @@ pub struct RoundStatsDto {
     pub totalWrongAnswers: i32,
     pub totalTries: i32,
     pub roundTime: String,
-    pub players: Vec<PlayerStatsDto>,
+    pub players: Vec<PlayerEndRoundStatsDto>,
 }
 
 #[derive(Debug, Serialize)]
 #[allow(non_snake_case)]
-pub struct PlayerStatsDto {
+pub struct PlayerEndRoundStatsDto {
     pub id: i32,
     pub name: String,
     pub score: i32,

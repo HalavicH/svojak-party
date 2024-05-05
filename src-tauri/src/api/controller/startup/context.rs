@@ -1,8 +1,8 @@
+use crate::api::dto::PlayerDto;
 use crate::api::events::{emit_app_context, set_window};
 use crate::api::mapper::{get_app_context_dto, update_players};
-use tauri::{command, Window};
-use crate::api::dto::PlayerSetupDto;
 use crate::core::game_entities::{Player, PlayerState};
+use tauri::{command, Window};
 
 #[command]
 pub fn init_window_handle(window: Window) {
@@ -15,18 +15,17 @@ pub fn request_context_update() {
     emit_app_context(get_app_context_dto());
 }
 
-
 /// Saves configuration to game context
 #[command]
-pub fn save_players(players: Vec<PlayerSetupDto>) {
+pub fn save_players(players: Vec<PlayerDto>) {
     log::debug!("Updating game context with new config: {players:#?}");
 
     let player_entities: Vec<Player> = players
         .iter()
         .map(|player| Player {
-            icon: player.icon.clone(),
+            icon: player.iconPath.clone(),
             name: player.name.clone(),
-            term_id: player.termId,
+            term_id: player.id as u8,
             is_used: player.isUsed,
             state: PlayerState::Idle,
             stats: Default::default(),

@@ -1,6 +1,5 @@
 #![allow(unused)]
 
-use crate::api::dto::PlayerSetupDto;
 use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};
 use crate::hub_comm::web::web_server::server::{
     Persistence, PlayerEvent, PlayerId, PlayerIdentityDto,
