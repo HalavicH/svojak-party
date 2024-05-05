@@ -95,7 +95,7 @@ pub enum GameplayError {
     InternalError,
 }
 
-// #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug)]
 pub enum GameState {
     /// Configuring players and game pack.
     /// Next state: `ChooseQuestion` (when game started)
@@ -133,6 +133,12 @@ pub enum GameState {
     /// Start the next round by resetting game state and proceeding to question selection.
     /// Next state: `ChooseQuestion` (when host presses "Start Next Round")
     CalcStatsAndStartNextRound(GameContext<CalcStatsAndStartNextRound>),
+}
+
+impl Default for GameState {
+    fn default() -> Self {
+        GameState::SetupAndLoading(GameContext::default())
+    }
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]

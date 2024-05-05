@@ -9,22 +9,40 @@ use std::sync::{Arc, mpsc, Mutex, RwLock};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::mpsc::Receiver;
 use log::log;
+use rocket::serde::{Deserialize, Serialize};
 use crate::core::app_context::AppContext;
 use crate::core::game_logic::start_event_listener;
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SetupAndLoading {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PickFirstQuestionChooser {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ChooseQuestion {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct DisplayQuestion {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct WaitingForAnswerRequests {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AnswerAttemptReceived {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct EndQuestion {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CheckEndOfRound {}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CalcStatsAndStartNextRound {}
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct GameContext<State = SetupAndLoading> {
     state: PhantomData<State>,
     /// Entities
@@ -41,16 +59,16 @@ pub struct GameContext<State = SetupAndLoading> {
     current_question: Question,
     /// Stats
     round_stats: GameStats,
-    events: Option<Receiver<TermEvent>>,
+    events: Option<Arc<Mutex<Box<Receiver<TermEvent>>>>>,
     allow_answer_timestamp: u32,
 }
 
-impl GameContext {
-    pub fn new(pack_content: PackContent, players: HashMap<u8, Player>) -> GameContext<SetupAndLoading> {
+impl Default for GameContext {
+    fn default() -> GameContext<SetupAndLoading> {
         Self {
             state: PhantomData::<SetupAndLoading>,
-            pack_content,
-            players,
+            pack_content: PackContent::default(),
+            players: HashMap::default(),
             // Default values
             // game_state: Default::default(),
             round_index: 0,
@@ -112,14 +130,18 @@ impl<State> GameContext<State> {
 }
 
 impl GameContext<SetupAndLoading> {
-    pub fn start(self, event_rx: Receiver<TermEvent>) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError>{
+    pub fn setup(&mut self, pack_content: PackContent, players: HashMap<u8, Player>) {
+        self.pack_content = pack_content;
+        self.players = players;
+    }
+    pub fn start(self, event_rx: Receiver<TermEvent>) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
         let mut game = self.transition();
         if game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::NotEnoughPlayers);
         }
 
-        game.events = Some(event_rx);
+        game.events = Some(Arc::new(Mutex::new(Box::new(event_rx))));
         Ok(game)
     }
 }
@@ -144,7 +166,7 @@ impl GameContext<PickFirstQuestionChooser> {
         if active_players_cnt == 0 {
             return Err(GameplayError::NoActivePlayersLeft);
         } else if active_players_cnt == 1 {
-            return Ok(active_players.first().expect("Expected to have 1 user in list").term_id)
+            return Ok(active_players.first().expect("Expected to have 1 user in list").term_id);
         }
 
         // let fastest_player_id = self
@@ -176,7 +198,7 @@ impl GameContext<PickFirstQuestionChooser> {
 }
 
 impl GameContext<ChooseQuestion> {
-    pub fn choose_question(self, topic: String, price: i32) -> GameContext<DisplayQuestion>{
+    pub fn choose_question(self, topic: String, price: i32) -> GameContext<DisplayQuestion> {
         let mut context = self.transition();
         // context.set_
         log::info!("Picked question! Topic: {}, price: {}", topic, price);

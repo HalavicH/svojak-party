@@ -1,7 +1,7 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
-use crate::core::game_entities::{GamePackError, GameplayError, Player, PlayerState, DEFAULT_ICON, OldGameState};
+use crate::core::game_entities::{GamePackError, GameplayError, Player, PlayerState, DEFAULT_ICON, OldGameState, GameState};
 use crate::core::game_logic::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::game_pack::pack_content_entities::Question;
@@ -17,7 +17,7 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
-use crate::core::game_context::OldGameContext;
+use crate::core::game_context::{GameContext, OldGameContext};
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -48,6 +48,7 @@ pub struct AppContext {
     // Game entities
     pub game_pack: GamePack,
     pub __old_game: OldGameContext,
+    pub game_state: GameState,
 
     // TODO: move to game
     pub player_event_listener: Option<Arc<Mutex<Receiver<TermEvent>>>>,
@@ -63,6 +64,7 @@ impl Default for AppContext {
             hub: Arc::new(RwLock::new(Box::<HwHubManager>::default())),
             game_pack: GamePack::default(),
             __old_game: OldGameContext::default(),
+            game_state: GameState::default(),
             player_event_listener: None,
             allow_answer_timestamp: Arc::new(AtomicU32::default()),
             // window: Arc::new(RwLock::new(Box::<Option<Window>>::default())),
