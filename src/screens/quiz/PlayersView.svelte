@@ -1,8 +1,8 @@
 <script>
-    import {gamePlayers} from "../../lib/stores.js";
+    import {gameContext, gamePlayers} from "../../lib/stores.js";
     import Player from "./subcomponents/Player.svelte";
 
-    let players = $gamePlayers;
+    let players = $gameContext.players;
 </script>
 
 <div class="player-list">

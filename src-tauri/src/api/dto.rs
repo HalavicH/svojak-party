@@ -1,5 +1,5 @@
 use crate::core::game_entities::{HubStatus, PlayerState};
-use crate::game_pack::pack_content_entities::QuestionMediaType;
+use crate::game_pack::pack_content_entities::{QuestionMediaType, Round};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
@@ -45,7 +45,7 @@ pub struct PackInfoDto {
 }
 
 ////////// Round ///////////
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
 pub struct RoundDto {
     pub roundName: String,
@@ -53,14 +53,14 @@ pub struct RoundDto {
     pub roundTopics: Vec<TopicDto>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
 pub struct TopicDto {
     pub topicName: String,
     pub questions: Vec<QuestionDto>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
 pub struct QuestionDto {
     pub index: usize,

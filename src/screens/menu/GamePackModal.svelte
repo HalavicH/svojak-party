@@ -12,6 +12,7 @@
     import WarningBar from "../../components/generic/WarningBar.svelte";
     import {gameContext, gamePackInfo, navTo} from "../../lib/stores.js";
     import {Views} from "../views.js";
+    import {TauriApiCommand, callBackend} from "../../lib/commands.js";
 
     export let isOpen;
 
@@ -33,7 +34,12 @@
 
     function startTheGame() {
         console.log("Start pressed");
+        callBackend(TauriApiCommand.START_THE_GAME)
         navTo(Views.QUIZ);
+    }
+
+    async function setRoundDuration(selected) {
+        callBackend(TauriApiCommand.SAVE_ROUND_DURATION, {round_minutes: selected})
     }
 </script>
 
@@ -58,7 +64,7 @@
         <Row>
             <label for="round-duration">Select round duration:</label>
             <HSpacing size="1em"/>
-            <DropDown selectedValue="" options={gameDurationOptions} handleSelection={()=>{}}/>
+            <DropDown selectedValue={gameContext.roundDurationMin} options={gameDurationOptions} handleSelection={setRoundDuration}/>
         </Row>
     </ItemsBlock>
 

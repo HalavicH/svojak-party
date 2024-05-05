@@ -148,6 +148,12 @@ pub fn map_round_to_dto(round: &Round) -> RoundDto {
     }
 }
 
+impl From<&Round> for RoundDto {
+    fn from(value: &Round) -> Self {
+        map_round_to_dto(value)
+    }
+}
+
 pub fn map_question_to_question_dto(
     topic: String,
     question: Question,

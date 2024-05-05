@@ -18,9 +18,7 @@ pub fn init_game_pack(path: String) -> Result<(), PackErrorData> {
             app_mut().set_game_pack(pack);
 
             let package = &app().game_pack.content;
-            log::info!("Pack content: {:#?}", package);
             let pack_info_dto = map_package_to_pack_info_dto(package);
-            log::info!("Pack info: {:#?}", pack_info_dto);
             emit_pack_info(pack_info_dto);
             Ok(())
         }

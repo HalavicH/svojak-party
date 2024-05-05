@@ -1,17 +1,19 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use crate::api::dto::{AppContextDto, PackInfoDto};
+use crate::api::dto::{AppContextDto, PackInfoDto, RoundDto};
 use crate::api::mapper::get_app_context_dto;
 use crate::core::app_context::app;
 use serde::Serialize;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use tauri::Window;
+use crate::game_pack::pack_content_entities::Round;
 
 pub enum Event {
     Message,
     Error,
     GameConfig,
     PackInfo,
+    Round,
 }
 
 /// Impl enum to &str conversion
@@ -22,6 +24,7 @@ impl<'a> From<Event> for &'a str {
             Event::Error => "error",
             Event::GameConfig => "GameConfig",
             Event::PackInfo => "PackInfo",
+            Event::Round => "Round",
         }
     }
 }
@@ -35,6 +38,11 @@ pub fn emit_app_context(config: AppContextDto) {
 pub fn emit_pack_info(pack_info: PackInfoDto) {
     emit(Event::PackInfo, pack_info);
 }
+
+pub fn emit_current_round(round: RoundDto) {
+    emit(Event::Round, round);
+}
+
 
 /// Generic API
 pub fn emit_message<S: Serialize + Clone>(message: S) {

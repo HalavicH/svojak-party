@@ -236,7 +236,7 @@ impl HubMock {
 
 fn generate_random_numbers() -> Vec<u8> {
     let mut rng = thread_rng();
-    let random_count = rng.gen_range(2..=10);
+    let random_count = rng.gen_range(2..=5);
     let mut set = HashSet::new();
     let mut numbers = Vec::new();
 

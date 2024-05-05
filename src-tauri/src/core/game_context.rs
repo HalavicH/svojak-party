@@ -1,5 +1,5 @@
 use std::any::type_name;
-use crate::api::dto::QuestionType;
+use crate::api::dto::{QuestionType, RoundDto};
 use crate::core::game_entities::{GameplayError, GameState, OldGameState, Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use std::collections::HashMap;
@@ -51,7 +51,7 @@ pub struct GameContext<State = SetupAndLoading> {
     players: HashMap<u8, Player>,
     /// Game State
     // game_state: GameState,
-    round_index: usize,
+    current_round_index: usize,
     active_player_id: u8,
     // active_player: Player, // TODO
     click_for_answer_allowed: bool,
@@ -73,7 +73,7 @@ impl Default for GameContext {
             players: HashMap::default(),
             // Default values
             // game_state: Default::default(),
-            round_index: 0,
+            current_round_index: 0,
             active_player_id: 0,
             click_for_answer_allowed: false,
             answer_allowed: false,
@@ -97,7 +97,7 @@ impl<State> GameContext<State> {
             pack_content: self.pack_content,
             players: self.players,
             // game_state: self.game_state,
-            round_index: self.round_index,
+            current_round_index: self.current_round_index,
             active_player_id: self.active_player_id,
             click_for_answer_allowed: self.click_for_answer_allowed,
             answer_allowed: self.answer_allowed,
@@ -130,6 +130,11 @@ impl<State> GameContext<State> {
         let id = self.active_player_id;
         let player = self.get_player_by_id_mut(&id);
         player.state = player_state;
+    }
+    
+    pub fn get_current_round(&self) -> &Round {
+        let idx = self.current_round_index;
+        &self.pack_content.rounds[idx]
     }
 }
 

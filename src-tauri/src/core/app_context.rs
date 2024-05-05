@@ -1,10 +1,10 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
-use crate::api::events::{emit_app_context, emit_error, emit_message};
+use crate::api::events::{emit_app_context, emit_current_round, emit_error, emit_message};
 use crate::api::mapper::map_app_context;
 use crate::core::game_entities::{GamePackError, GameplayError, Player, PlayerState, DEFAULT_ICON, OldGameState, GameState};
 use crate::core::game_logic::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
-use crate::game_pack::pack_content_entities::Question;
+use crate::game_pack::pack_content_entities::{Question, Round};
 use crate::hub_comm::common::hub_api::{HubManager, HubType};
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError, HwHubManager};
 use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
@@ -259,12 +259,12 @@ impl AppContext {
 
         let game = std::mem::take(game); // Take ownership of the value inside the mutable reference
         let game = game.start(self.game_pack.content.clone(), event_rx)?;
+        emit_current_round(game.get_current_round().into());
         let game = game.pick_first_question_chooser()?;
         self.game_state = GameState::ChooseQuestion(game);
         Ok(())
     }
 }
-
 
 
 /// Old Game API
