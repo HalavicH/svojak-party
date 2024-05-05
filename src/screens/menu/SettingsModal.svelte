@@ -1,10 +1,10 @@
 <script>
-    import BaseModal from "../../components/utils/BaseModal.svelte";
-    import Button from "../../components/Button.svelte";
-    import HSpacing from "../../components/utils/HSpacing.svelte";
+    import BaseModal from "../../components/abstract/BaseModal.svelte";
+    import Button from "../../components/generic/Button.svelte";
+    import HSpacing from "../../components/generic/HSpacing.svelte";
     import {closeModal, openModal} from "svelte-modals";
-    import ItemsBlock from "../../components/ItemsBlock.svelte";
-    import Row from "../../components/Row.svelte";
+    import ItemsBlock from "../../components/generic/ItemsBlock.svelte";
+    import Row from "../../components/generic/Row.svelte";
     import WebClientsSettingsModal from "./WebClientsSettingsModal.svelte";
     import {invoke} from "@tauri-apps/api/tauri";
     import {HubType, TauriApiCommand} from "../../lib/commands"

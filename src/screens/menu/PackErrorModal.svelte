@@ -1,8 +1,8 @@
 <script>
-    import BaseModal from "../../components/utils/BaseModal.svelte";
-    import Button from "../../components/Button.svelte";
-    import ItemsBlock from "../../components/ItemsBlock.svelte";
-    import Row from "../../components/Row.svelte";
+    import BaseModal from "../../components/abstract/BaseModal.svelte";
+    import Button from "../../components/generic/Button.svelte";
+    import ItemsBlock from "../../components/generic/ItemsBlock.svelte";
+    import Row from "../../components/generic/Row.svelte";
 
     // Provided by 'modals'
     export let isOpen;

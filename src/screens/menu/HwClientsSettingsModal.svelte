@@ -1,17 +1,17 @@
 <script>
-    import BaseModal from "../../components/utils/BaseModal.svelte";
-    import Button from "../../components/Button.svelte";
+    import BaseModal from "../../components/abstract/BaseModal.svelte";
+    import Button from "../../components/generic/Button.svelte";
     import {closeModal} from "svelte-modals";
-    import ItemsBlock from "../../components/ItemsBlock.svelte";
+    import ItemsBlock from "../../components/generic/ItemsBlock.svelte";
     import HubStatus from "../../components/HubStatus.svelte";
-    import ActionsBlock from "../../components/ActionsBlock.svelte";
-    import Table from "../../components/Table.svelte";
+    import ActionsBlock from "../../components/generic/ActionsBlock.svelte";
+    import Table from "../../components/generic/Table.svelte";
     import {invoke} from "@tauri-apps/api/tauri";
     import {TauriApiCommand, HubStatusOptions, hubManagerError2Msg} from "../../lib/commands"
-    import DropDown from "../../components/DropDown.svelte";
-    import Row from "../../components/Row.svelte";
+    import DropDown from "../../components/generic/DropDown.svelte";
+    import Row from "../../components/generic/Row.svelte";
     import ConfigButton from "../../components/ConfigButton.svelte";
-    import Input from "../../components/TextInput.svelte";
+    import Input from "../../components/generic/TextInput.svelte";
     import {notify} from "../../lib/notifications"
     import {gameContext, gamePlayers} from "../../lib/stores.js";
 

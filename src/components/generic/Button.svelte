@@ -1,5 +1,5 @@
 <script>
-    import {doWithSound, getClickSound} from "../lib/sound.js";
+    import {doWithSound, getClickSound} from "../../lib/sound.js";
 
     export let id = "";
     export let text = "Button";

@@ -1,5 +1,5 @@
 <script>
-    import Button from "./Button.svelte";
+    import Button from "./generic/Button.svelte";
 
     export let id = "";
     export let text = "Button";

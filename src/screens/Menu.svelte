@@ -1,7 +1,7 @@
 <script>
     import {closeModal, openModal} from 'svelte-modals'
-    import Button from "../components/Button.svelte";
-    import ModalPlaceholder from "../components/utils/ModalPlaceholder.svelte";
+    import Button from "../components/generic/Button.svelte";
+    import ModalPlaceholder from "../components/abstract/ModalPlaceholder.svelte";
     import SettingsModal from "./menu/SettingsModal.svelte";
     import GamePackModal from "./menu/GamePackModal.svelte";
     import {open} from "@tauri-apps/api/dialog";

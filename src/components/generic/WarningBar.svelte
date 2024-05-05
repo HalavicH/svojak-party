@@ -1,6 +1,6 @@
 <script>
     import Row from "./Row.svelte";
-    import HSpacing from "./utils/HSpacing.svelte";
+    import HSpacing from "./HSpacing.svelte";
 
     export let text;
 </script>
@@ -8,7 +8,7 @@
 <div class="reset">
     <div class="warning">
         <Row>
-            <img src="../../public/warning-sign-svgrepo-com.svg" alt="">
+            <img src="../../../public/warning-sign-svgrepo-com.svg" alt="">
             <HSpacing size="0.5em"></HSpacing>
             <span>{text}</span>
         </Row>

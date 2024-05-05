@@ -1,15 +1,15 @@
 <script>
-    import BaseModal from "../../components/utils/BaseModal.svelte";
-    import Button from "../../components/Button.svelte";
-    import HSpacing from "../../components/utils/HSpacing.svelte";
-    import VSpacing from "../../components/utils/VSpacing.svelte";
-    import ItemsBlock from "../../components/ItemsBlock.svelte";
-    import Row from "../../components/Row.svelte";
-    import DropDown from "../../components/DropDown.svelte";
-    import MultiColumnList from "../../components/MultiColumnList.svelte";
+    import BaseModal from "../../components/abstract/BaseModal.svelte";
+    import Button from "../../components/generic/Button.svelte";
+    import HSpacing from "../../components/generic/HSpacing.svelte";
+    import VSpacing from "../../components/generic/VSpacing.svelte";
+    import ItemsBlock from "../../components/generic/ItemsBlock.svelte";
+    import Row from "../../components/generic/Row.svelte";
+    import DropDown from "../../components/generic/DropDown.svelte";
+    import MultiColumnList from "../../components/generic/MultiColumnList.svelte";
     import {closeModal, openModal} from 'svelte-modals'
     import SettingsModal from "./SettingsModal.svelte";
-    import WarningBar from "../../components/WarningBar.svelte";
+    import WarningBar from "../../components/generic/WarningBar.svelte";
     import {gameContext, gamePackInfo, navTo} from "../../lib/stores.js";
     import {Views} from "../views.js";
 
