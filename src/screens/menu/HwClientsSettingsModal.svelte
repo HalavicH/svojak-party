@@ -35,9 +35,11 @@
     // Watch for changes in isOpen and trigger the API call if it becomes true
     $: if (isOpen) {
         let config = $gameContext;
-        hubPortUsed = config.hub_port;
+        hubPortUsed = config.hubPort;
         players = config.players;
-        let portsFromOs = config.available_ports.map((portName) => {
+        hubStatus = config.hubStatus;
+        radioChannel = config.radioChannel;
+        let portsFromOs = config.availablePorts.map((portName) => {
             return {
                 value: portName,
                 title: portName
@@ -92,35 +94,6 @@
             radioChannel = null;
         }
     }
-
-    // // Listen for players
-    // let interval;
-    // onMount(() => {
-    //     // Start the interval on mount
-    //     interval = setInterval(async () => {
-    //         if (!(hubStatus === HubStatusOptions.Detected && isOpen === true)) {
-    //             return;
-    //         }
-    //
-    //         console.log("Setup modal is opened. Polling for players");
-    //         try {
-    //             let newPlayers = await invoke(TauriApiCommand.DISCOVER_PLAYERS, {path: hubPort});
-    //             players = newPlayers.map(player => {
-    //                 player.name = `Player ${player.termId}`;
-    //                 player.icon = DFL_PLAYER_ICON;
-    //                 return player;
-    //             });
-    //             console.log("Players: ", players);
-    //         } catch (error) {
-    //             console.error('Error fetching players:', error);
-    //         }
-    //     }, 1000);
-    // });
-    //
-    // onDestroy(() => {
-    //     // Clean up by stopping the interval on destroy
-    //     clearInterval(interval);
-    // });
 </script>
 
 <BaseModal {isOpen}>
@@ -141,7 +114,7 @@
                     <div>Select serial device:</div>
                 </td>
                 <td>
-                    <DropDown selectedValue="" options={serialPorts} handleSelection={discoverHub}/>
+                    <DropDown defaultValue={hubPortUsed} options={serialPorts} handleSelection={discoverHub}/>
                 </td>
             </tr>
             </tbody>
@@ -151,7 +124,7 @@
         <Row jc="space-between">
             <div>Provide radio channel num:</div>
             <Row>
-                <Input placeholder="1-127" style="width: 4em;"
+                <Input value={radioChannel} placeholder="1-127" style="width: 4em;"
                        onInput={captureInput}
                 />
                 <!--                       onReturnPressed={(text) => {notify.info(`Return Text${text}`)}}-->
@@ -162,16 +135,16 @@
             {#each players as player}
                 <tr>
                     <td>
-                        {player.termId}
+                        {player.id}
                     </td>
                     <td>
-                        <img class="icon" src="{player.icon}" alt="">
+                        <img class="icon" src="{player.iconPath}" alt="">
                     </td>
                     <td>
                         {player.name}
                     </td>
                     <td>
-                        <input type="checkbox" checked={player.ready}>
+                        <input type="checkbox" checked={player.isUsed}>
                     </td>
                 </tr>
             {/each}

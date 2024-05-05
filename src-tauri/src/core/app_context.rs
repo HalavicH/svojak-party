@@ -94,7 +94,7 @@ impl AppContext {
                 self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
-        emit_app_context(map_app_context(self));
+        emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
     }
     pub fn discover_hub(&mut self, path: String) -> String {
         let result = self.get_locked_hub_mut().probe(&path);
@@ -148,17 +148,17 @@ impl AppContext {
         log::debug!("");
     }
 
-    fn compare_and_merge(app_guard: &mut AppContext, detected_players: &[Player]) {
+    fn compare_and_merge(app: &mut AppContext, detected_players: &[Player]) {
         let det_pl_cnt = detected_players.len();
         log::debug!("Detected {} players", det_pl_cnt);
-        if app_guard.new_players_found(detected_players) {
+        if app.new_players_found(detected_players) {
             log::info!("New players found! Merging");
             emit_message(format!(
                 "New players detected! Total number: {}",
                 det_pl_cnt
             ));
-            app_guard.merge_players(detected_players);
-            emit_app_context(map_app_context(app_guard));
+            app.merge_players(detected_players);
+            emit_app_context(map_app_context(app, &app.get_locked_hub_mut()));
         }
     }
 

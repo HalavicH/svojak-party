@@ -13,6 +13,7 @@ use crate::hub_comm::hw::internal::api_types::{
 use crate::hub_comm::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
 use crate::hub_comm::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
 use error_stack::{bail, IntoReport, Report, Result, ResultExt};
+use log::log;
 use rgb::RGB8;
 use serde::Serialize;
 use serialport::SerialPort;
@@ -275,6 +276,7 @@ impl HubManager for HwHubManager {
     }
 
     fn radio_channel(&self) -> i32 {
+        log::debug!("Returing radio channel of {}", self.radio_channel);
         self.radio_channel
     }
 
@@ -300,7 +302,7 @@ impl HubManager for HwHubManager {
         Ok(())
     }
 
-    fn set_hub_radio_channel(&self, channel_num: u8) -> Result<(), HubManagerError> {
+    fn set_hub_radio_channel(&mut self, channel_num: u8) -> Result<(), HubManagerError> {
         log::info!("Setting hub radio channel to: {}", channel_num);
         let handle = self.get_hub_handle_or_err()?;
 
@@ -309,6 +311,7 @@ impl HubManager for HwHubManager {
             .send_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
+        self.radio_channel = channel_num as i32;
         map_status_to_result(response.status)
     }
 

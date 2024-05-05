@@ -41,7 +41,7 @@ pub trait HubManager: Debug + Send + Sync {
     fn setup_hub_connection(&mut self, _port: &str) -> Result<(), HubManagerError> {
         Err(Report::new(HubManagerError::ApiNotSupported))
     }
-    fn set_hub_radio_channel(&self, _channel_num: u8) -> Result<(), HubManagerError> {
+    fn set_hub_radio_channel(&mut self, _channel_num: u8) -> Result<(), HubManagerError> {
         Err(Report::new(HubManagerError::ApiNotSupported))
     }
     fn set_term_radio_channel(

@@ -1,7 +1,9 @@
 export const DFL_PLAYER_ICON = "/bc-logo.png";
 
+let isTauri = typeof window.__TAURI__ !== 'undefined';
+
 export function isRunningInTauri() {
-    return window.tauri !== undefined;
+    return isTauri;
 }
 
 // Check if the application is running within Tauri

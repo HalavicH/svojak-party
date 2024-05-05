@@ -4,8 +4,8 @@
 
     function toClass(hubStatusStr) {
         switch (hubStatusStr) {
-            case "Serial Port Error": return "serial-port-error";
-            case "No Device": return "unknown-device";
+            case "SerialPortError": return "serial-port-error";
+            case "NoDevice": return "unknown-device";
             case "Detected": return "detected";
             default: return "undefined";
         }

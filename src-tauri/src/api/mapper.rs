@@ -4,22 +4,23 @@ use crate::core::app_context::{app, app_mut, AppContext};
 use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use std::collections::HashMap;
+use crate::hub_comm::common::hub_api::HubManager;
 
 use crate::hub_comm::hw::hw_hub_manager::discover_serial_ports;
 
 /// Takes whole game context and maps to config which contains only required elements
 pub fn get_app_context_dto() -> AppContextDto {
     let context = app();
-    map_app_context(&context)
+    let guard = context.get_unlocked_hub();
+    map_app_context(&context, &guard)
 }
 
-pub fn map_app_context(context: &AppContext) -> AppContextDto {
-    let hub_guard = context.get_unlocked_hub();
+pub fn map_app_context(context: &AppContext, hub: &Box<dyn HubManager>) -> AppContextDto {
     AppContextDto {
         availablePorts: discover_serial_ports(),
-        hubPort: hub_guard.get_hub_address(),
-        radioChannel: hub_guard.radio_channel(),
-        hubStatus: hub_guard.get_hub_status(),
+        hubPort: hub.get_hub_address(),
+        radioChannel: hub.radio_channel(),
+        hubStatus: hub.get_hub_status(),
         players: map_players_to_player_dto(context.players.values().collect()),
     }
 }

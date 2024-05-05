@@ -24,9 +24,10 @@ export const PlayerState = {
 
 export const gamePlayers = writable([
     {
-        termId: 0,
+        id: 1,
         iconPath: DFL_PLAYER_ICON,
         name: "HalavicH",
+        isUsed: true,
         score: 500,
         state: PlayerState.Idle
     },
@@ -34,6 +35,7 @@ export const gamePlayers = writable([
         termId: 2,
         iconPath: DFL_PLAYER_ICON,
         name: "Button",
+        isUsed: true,
         score: -100,
         state: PlayerState.Dead
     },
@@ -41,6 +43,7 @@ export const gamePlayers = writable([
         termId: 3,
         iconPath: DFL_PLAYER_ICON,
         name: "Baadtrip",
+        isUsed: true,
         score: 200,
         state: PlayerState.QuestionChooser
     },
@@ -48,6 +51,7 @@ export const gamePlayers = writable([
         termId: 4,
         iconPath: DFL_PLAYER_ICON,
         name: "Valadis",
+        isUsed: true,
         score: 400,
         state: PlayerState.Inactive
     },
@@ -55,36 +59,41 @@ export const gamePlayers = writable([
 
 
 export const gameContext = writable({
-    hub_port: "",
-    available_ports: [],
-    radio_channel: -1,
+    hubPort: "",
+    availablePorts: [],
+    hubStatus: "",
+    radioChannel: -1,
     // These players are used only for setup
     players: [
         {
-            termId: 1,
-            icon: DFL_PLAYER_ICON,
+            id: 1,
+            iconPath: DFL_PLAYER_ICON,
             name: "HalavicH",
+            isUsed: true,
             score: 500,
             state: PlayerState.Idle
         },
         {
             termId: 2,
-            icon: DFL_PLAYER_ICON,
+            iconPath: DFL_PLAYER_ICON,
             name: "Button",
+            isUsed: true,
             score: -100,
             state: PlayerState.Dead
         },
         {
             termId: 3,
-            icon: DFL_PLAYER_ICON,
+            iconPath: DFL_PLAYER_ICON,
             name: "Baadtrip",
+            isUsed: true,
             score: 200,
             state: PlayerState.QuestionChooser
         },
         {
             termId: 4,
-            icon: DFL_PLAYER_ICON,
+            iconPath: DFL_PLAYER_ICON,
             name: "Valadis",
+            isUsed: true,
             score: 400,
             state: PlayerState.Inactive
         },

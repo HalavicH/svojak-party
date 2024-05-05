@@ -1,21 +1,24 @@
 <script>
+    import {onMount} from "svelte";
+
     export let options;
     export let handleSelection;
-    export let selectedValue;
+    export let defaultValue;
 
     function handleChange(event) {
         const selectedValue = event.target.value;
         handleSelection(selectedValue);
     }
 
-    $: {
-        if (selectedValue !== undefined || selectedValue !== "") {
-            const selectElement = document.getElementById('selectElement');
+    onMount(() => {
+        if (defaultValue !== undefined || defaultValue !== "") {
+            const selectElement = document.querySelector('#selectElement');
+            console.log(`Select element: ${selectElement}. Selecting value: ${defaultValue}`);
             if (selectElement) {
-                selectElement.value = selectedValue;
+                selectElement.value = defaultValue;
             }
         }
-    }
+    });
 </script>
 
 <select id="selectElement" name="size" on:change={handleChange}>
