@@ -8,7 +8,7 @@ use tauri::command;
 #[command]
 pub fn start_the_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
-    app_mut().start_the_game().map_err(|e| {
+    app_mut().start_new_game().map_err(|e| {
         log::error!("{:#?}", e);
         e.current_context().clone()
     })

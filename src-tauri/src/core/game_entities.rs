@@ -80,6 +80,8 @@ pub enum GameplayError {
     NotEnoughPlayers,
     #[error("No active players left")]
     NoActivePlayersLeft,
+    #[error("HUB operation failed")]
+    UnexpectedGameState,
 
     #[error("HUB operation failed")]
     PackElementNotPresent,
@@ -142,6 +144,10 @@ impl Default for GameState {
 }
 
 impl GameState {
+    pub fn show_state_mismatch(&mut self, expected: &str) -> String {
+        format!("Expected game state of '{}', found: {}", expected, self.get_state_name())
+    }
+
     pub fn get_state_name(&self) -> &str {
         match self {
             GameState::SetupAndLoading(_) => { "SetupAndLoading" }

@@ -10,6 +10,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::mpsc::Receiver;
 use log::log;
 use rocket::serde::{Deserialize, Serialize};
+use crate::api::events::emit_message;
 use crate::core::app_context::AppContext;
 use crate::core::game_logic::start_event_listener;
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
@@ -133,15 +134,12 @@ impl<State> GameContext<State> {
 }
 
 impl GameContext<SetupAndLoading> {
-    pub fn setup(&mut self, pack_content: PackContent, players: HashMap<u8, Player>) {
-        self.pack_content = pack_content;
-        self.players = players;
-    }
     pub fn set_round_duration(&mut self, round_duration_min: i32) {
         self.round_duration_min = round_duration_min;
     }
-    pub fn start(self, event_rx: Receiver<TermEvent>) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
+    pub fn start(self, pack_content: PackContent, event_rx: Receiver<TermEvent>) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
         let mut game = self.transition();
+        game.pack_content = pack_content;
         if game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::NotEnoughPlayers);
@@ -154,15 +152,14 @@ impl GameContext<SetupAndLoading> {
 
 impl GameContext<PickFirstQuestionChooser> {
     pub fn pick_first_question_chooser(mut self) -> Result<GameContext<ChooseQuestion>, GameplayError> {
-        let mut game = self;
-        game.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
+        self.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
 
-        let term_id = game.get_fastest_click_player_id()?;
+        let term_id = self.get_fastest_click_player_id()?;
+        emit_message(format!("Fastest player with id: {}", term_id));
+        self.set_active_player_by_id(term_id);
+        self.set_active_player_state(PlayerState::QuestionChooser);
 
-        game.set_active_player_by_id(term_id);
-        game.set_active_player_state(PlayerState::QuestionChooser);
-
-        Ok(game.transition())
+        Ok(self.transition())
     }
 
     fn get_fastest_click_player_id(&mut self) -> Result<u8, GameplayError> {

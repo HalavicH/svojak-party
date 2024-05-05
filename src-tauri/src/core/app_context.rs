@@ -17,7 +17,7 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration, Instant};
-use crate::core::game_context::{GameContext, OldGameContext};
+use crate::core::game_context::{GameContext, OldGameContext, SetupAndLoading};
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -117,10 +117,11 @@ impl AppContext {
         if let GameState::SetupAndLoading(game) = &mut self.game_state {
             game.set_round_duration(round_duration_minutes)
         } else {
-            let string = format!("Can't setup round duration. Expected game state of 'GameState::SetupAndLoading', found: {}", self.game_state.get_state_name());
-            emit_error(string);
+            let state_mismatch = self.game_state.show_state_mismatch("GameState::SetupAndLoading");
+            emit_error(format!("Can't setup round duration. {}", state_mismatch));
         }
     }
+
     pub fn select_hub_type(&mut self, hub_type: HubType) {
         if self.hub_type == hub_type {
             log::info!("Hub is already set to: {:?}. Nothing to do", hub_type);
@@ -172,6 +173,7 @@ impl AppContext {
         log::info!("Saving new thread handle");
         self.player_poling_thread_handle = Some(handle)
     }
+
     fn discover_and_save_players() {
         log::debug!("############# NEW PLAYER POLLING ITERATION ###############");
         let mut app_guard = app_mut();
@@ -240,6 +242,32 @@ impl AppContext {
 }
 
 /// Game API
+impl AppContext {
+    pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
+        let hub = self.get_hub();
+        let game = match &mut self.game_state {
+            GameState::SetupAndLoading(game) => { game }
+            _ => {
+                let state_mismatch = self.game_state.show_state_mismatch("GameState::SetupAndLoading");
+                emit_error(format!("Can't start the game: {}", state_mismatch));
+                Err(GameplayError::PlayerNotPresent)?
+            }
+        };
+
+        let (event_tx, event_rx) = mpsc::channel();
+        start_event_listener(hub, event_tx);
+
+        let game = std::mem::take(game); // Take ownership of the value inside the mutable reference
+        let game = game.start(self.game_pack.content.clone(), event_rx)?;
+        let game = game.pick_first_question_chooser()?;
+        self.game_state = GameState::ChooseQuestion(game);
+        Ok(())
+    }
+}
+
+
+
+/// Old Game API
 #[deprecated]
 impl AppContext {
     pub fn finish_game(&mut self) {
