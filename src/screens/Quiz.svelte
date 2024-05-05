@@ -1,7 +1,26 @@
 <script>
+    import PlayersView from "./quiz/PlayersView.svelte";
+    import RoundView from "./quiz/RoundView.svelte";
 </script>
 
-<div>
-    This is a quiz screen. Work in progress. Path is
+<div class="container">
+<!--    <div>-->
+<!--        This is a quiz screen. Work in progress-->
+<!--    </div>-->
+<!--    <a href="/">Home</a>-->
+    <RoundView/>
+    <PlayersView/>
 </div>
-<a href="/">Home</a>
+
+<style>
+    .container {
+        height: 99.8vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: solid 1px gray;
+        overflow: auto;
+
+        background-color: var(--modal-table-background-color);
+    }
+</style>

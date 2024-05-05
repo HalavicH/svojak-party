@@ -9,6 +9,7 @@
     import {callBackend, TauriApiCommand} from "../lib/commands.js";
     import PackErrorModal from "./menu/PackErrorModal.svelte";
     import {onMount} from "svelte";
+    import VSpacing from "../components/generic/VSpacing.svelte"
 
     onMount(async () => {
         await callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
@@ -52,6 +53,7 @@
 
 <div>
     <ModalPlaceholder/>
+    <VSpacing size="10vh"/>
     <h1>Welcome to Svojak!</h1>
     <p>Powered by BronuCon commuity</p>
     <div class="row">

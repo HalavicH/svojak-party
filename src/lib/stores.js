@@ -48,6 +48,59 @@ export const gamePackInfo = writable({
     ],
 });
 
+export const currentRound = writable({
+    roundName: 'roundName',
+    roundType: 'roundType',
+    roundTopics: [
+        {
+            topicName: 'First topic',
+            questions: [
+                {
+                    index: 0,
+                    price: 100,
+                    used: false,
+                },
+                {
+                    index: 1,
+                    price: 200,
+                    used: false,
+                },
+                {
+                    index: 2,
+                    price: 300,
+                    used: false,
+                }
+            ],
+        },
+        {
+            topicName: 'Second topic',
+            questions: [
+                {
+                    index: 0,
+                    price: 100,
+                    used: false,
+                },
+                {
+                    index: 1,
+                    price: 200,
+                    used: false,
+                },
+                {
+                    index: 2,
+                    price: 300,
+                    used: false,
+                },
+                {
+                    index: 3,
+                    price: 400,
+                    used: false,
+                }
+            ],
+        }
+    ],
+});
+
+
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");
 console.log("################################################");

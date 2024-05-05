@@ -19,12 +19,13 @@ export const TauriApiCommand = {
     DISCOVER_HUB: 'discover_hub',
     SET_HUB_RADIO_CHANNEL: 'set_hub_radio_channel',
     SAVE_PLAYERS: 'save_players',
-    /////////// LEGACY API ////////////
-    FETCH_CONFIGURATION: 'fetch_configuration',
-    DISCOVER_PLAYERS: 'discover_players',
     INIT_GAME_PACK: 'init_game_pack',
     SAVE_ROUND_DURATION: 'save_round_duration',
     START_THE_GAME: 'start_the_game',
+
+    /////////// LEGACY API ////////////
+    FETCH_CONFIGURATION: 'fetch_configuration',
+    DISCOVER_PLAYERS: 'discover_players',
     // Debug API
     SETUP_HUB_CONNECTION: 'setup_hub_connection',
     SEND_RAW_REQUEST_FRAME: 'send_raw_request_frame',
