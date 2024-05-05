@@ -1,8 +1,9 @@
 use crate::api::dto::PlayerSetupDto;
 use crate::api::events::emit_message;
-use crate::api::mapper::map_players_to_players_setup_dto;
+use crate::api::mapper::{map_players_to_players_setup_dto, update_players};
 use crate::core::app_context::{app, app_mut};
 use tauri::command;
+use crate::core::game_entities::{Player, PlayerState};
 
 use crate::hub_comm::common::hub_api::HubType;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
