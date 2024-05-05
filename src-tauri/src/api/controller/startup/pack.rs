@@ -7,17 +7,6 @@ use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use error_stack::Report;
 use tauri::command;
 
-/// Provide saved game configuration
-#[command]
-pub fn fetch_configuration() -> AppContextDto {
-    log::info!("Fetching config");
-
-    let config = get_app_context_dto();
-    log::info!("Config: {:#?}", config);
-
-    config
-}
-
 /// Load game pack into the game
 #[command]
 pub fn init_game_pack(path: String) -> Result<(), PackErrorData> {
@@ -63,18 +52,4 @@ fn handle_pack_info_error(
     };
 
     Err(data)
-}
-
-#[command]
-pub fn save_round_duration(round_minutes: i32) {
-    log::info!("Round duration is {round_minutes}");
-}
-
-#[command]
-pub fn start_the_game() -> Result<(), GameplayError> {
-    log::info!("Triggered the game start");
-    app_mut().start_the_game().map_err(|e| {
-        log::error!("{:#?}", e);
-        e.current_context().clone()
-    })
 }

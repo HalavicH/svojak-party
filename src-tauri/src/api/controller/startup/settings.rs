@@ -4,12 +4,13 @@ use crate::api::mapper::{get_app_context_dto, update_players};
 use crate::core::game_entities::{Player, PlayerState};
 use tauri::{command, Window};
 
+/// Dirty hack to capture window handle
 #[command]
 pub fn init_window_handle(window: Window) {
     set_window(window);
-    // emit_app_config();
 }
 
+/// To get initial app context
 #[command]
 pub fn request_context_update() {
     emit_app_context(get_app_context_dto());
@@ -35,4 +36,10 @@ pub fn save_players(players: Vec<PlayerDto>) {
     log::info!("Converted players: {:#?}", player_entities);
 
     update_players(&player_entities)
+}
+
+/// Store round duration
+#[command]
+pub fn save_round_duration(round_minutes: i32) {
+    log::info!("Round duration is {round_minutes}");
 }

@@ -3,7 +3,7 @@
 #[allow(unused_imports)]
 use rocket::futures::io::Window;
 use svojak_app::api::controller::gameplay::*;
-use svojak_app::api::controller::startup::context::*;
+use svojak_app::api::controller::startup::settings::*;
 use svojak_app::api::controller::startup::hub::*;
 use svojak_app::api::controller::startup::hw_hub::*;
 use svojak_app::api::controller::startup::pack::*;
@@ -22,10 +22,8 @@ fn main() {
             request_context_update,
             // Startup API
             set_hub_type,
-            fetch_configuration,
             discover_hub,
             set_hw_hub_radio_channel,
-            discover_players,
             save_players,
             init_game_pack,
             save_round_duration,
@@ -36,19 +34,10 @@ fn main() {
             dbg_send_raw_request_frame,
             dbg_send_hub_command,
             // Gameplay API
-            fetch_players,
-            fetch_round,
-            get_question_data,
+            select_question,
             allow_answer,
-            get_fastest_click,
             answer_question,
-            has_next_question,
-            finish_question_prematurely,
-            init_next_round,
             send_pip_victim,
-            get_active_player_id,
-            is_allow_answer_required,
-            fetch_round_stats
         ])
         .run(tauri::generate_context!())
         .expect("Can't start Tauri app");

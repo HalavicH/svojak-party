@@ -21,19 +21,3 @@ pub fn set_hub_type(hub_type: HubType) {
 pub fn discover_hub(path: String) {
     app_mut().discover_hub(path)
 }
-
-/// Calls HUB to get all available players
-#[command]
-#[deprecated]
-pub fn discover_players() -> Result<Vec<PlayerDto>, HubManagerError> {
-    log::info!("Discovering terminals");
-    let guard = app();
-    let mut hub_guard = guard.get_locked_hub_mut();
-
-    let players = hub_guard.discover_players().map_err(|e| {
-        log::error!("{:#?}", e);
-        e.current_context().clone()
-    })?;
-    Ok(vec![])
-    // Ok(map_players_to_player_dto(players))
-}

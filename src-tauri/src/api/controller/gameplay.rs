@@ -5,35 +5,30 @@ use crate::core::game_entities::GameplayError;
 use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 use tauri::command;
 
-#[command]
-#[deprecated]
-pub fn fetch_players() -> Vec<PlayerDto> {
-    let mut guard = app_mut();
-    let players = guard.fetch_players();
-    let vec = map_players_to_player_dto(players.values().collect());
-    log::trace!("Players: {:#?}", vec);
-    vec
-}
 
+/// Start the game with selected players and game pack
 #[command]
-#[deprecated]
-pub fn fetch_round() -> RoundDto {
-    let round_dto = map_round_to_dto(app().game.get_current_round());
-    log::trace!("{round_dto:#?}");
-    round_dto
-}
-
-#[command]
-#[deprecated]
-pub fn get_question_data(topic: String, price: i32) -> Result<QuestionDataDto, GameplayError> {
-    let (question, q_num) = app_mut().get_pack_question(&topic, &price).map_err(|e| {
-        log::error!("Can't get question data: {:#?}", e);
+pub fn start_the_game() -> Result<(), GameplayError> {
+    log::info!("Triggered the game start");
+    app_mut().start_the_game().map_err(|e| {
+        log::error!("{:#?}", e);
         e.current_context().clone()
-    })?;
-
-    Ok(map_question_to_question_dto(topic, question, q_num))
+    })
 }
 
+/// Select question to be played
+#[command]
+pub fn select_question(topic: String, price: i32) -> Result<QuestionDataDto, GameplayError> {
+    todo!("Rework needed");
+    // let (question, q_num) = app_mut().get_pack_question(&topic, &price).map_err(|e| {
+    //     log::error!("Can't get question data: {:#?}", e);
+    //     e.current_context().clone()
+    // })?;
+    // 
+    // Ok(map_question_to_question_dto(topic, question, q_num))
+}
+
+/// Allows events from players to be processed
 #[command]
 pub fn allow_answer() -> Result<(), HubManagerError> {
     app_mut().allow_answer().map_err(|e| {
@@ -42,15 +37,7 @@ pub fn allow_answer() -> Result<(), HubManagerError> {
     })
 }
 
-#[command]
-pub fn get_fastest_click() -> Result<i32, GameplayError> {
-    let id = app_mut().get_fastest_click_player_id().map_err(|e| {
-        log::error!("{:?}", e);
-        e.current_context().clone()
-    })?;
-    Ok(id as i32)
-}
-
+/// Provide answer to active question
 #[command]
 pub fn answer_question(answered_correctly: bool) -> Result<bool, GameplayError> {
     log::debug!("Answered correctly: {answered_correctly}");
@@ -61,40 +48,17 @@ pub fn answer_question(answered_correctly: bool) -> Result<bool, GameplayError> 
     })
 }
 
+/// Finished current question and set's state to 'show answer'
 #[command]
-pub fn has_next_question() -> bool {
-    app().has_next_question()
-}
-
-#[command]
-pub fn finish_question_prematurely() -> Result<(), GameplayError> {
+pub fn finish_question_prematurely_and_show_answer() {
+    todo!("Rework");
     app_mut().finish_question_prematurely().map_err(|e| {
         log::error!("Operation failed: {:?}", e);
         e.current_context().clone()
-    })
-}
-
-#[command]
-pub fn init_next_round() {
-    app_mut().game.load_next_round();
+    });
 }
 
 #[command]
 pub fn send_pip_victim(victim_id: i32) {
     log::debug!("Victim id is: {}", victim_id);
-}
-
-#[command]
-pub fn get_active_player_id() -> i32 {
-    app().get_active_player_id() as i32
-}
-
-#[command]
-pub fn is_allow_answer_required() -> bool {
-    app().game.question_type == QuestionType::Normal
-}
-
-#[command]
-pub fn fetch_round_stats() -> RoundStatsDto {
-    app().fetch_round_stats()
 }
