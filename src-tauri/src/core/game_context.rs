@@ -1,6 +1,6 @@
 use std::any::type_name;
 use crate::api::dto::QuestionType;
-use crate::core::game_entities::{GameplayError, GameState, Player, PlayerState};
+use crate::core::game_entities::{GameplayError, GameState, OldGameState, Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use std::collections::HashMap;
 use std::fmt;
@@ -31,7 +31,7 @@ pub struct GameContext<State = SetupAndLoading> {
     pack_content: PackContent,
     players: HashMap<u8, Player>,
     /// Game State
-    game_state: GameState,
+    // game_state: GameState,
     round_index: usize,
     active_player_id: u8,
     // active_player: Player, // TODO
@@ -52,7 +52,7 @@ impl GameContext {
             pack_content,
             players,
             // Default values
-            game_state: Default::default(),
+            // game_state: Default::default(),
             round_index: 0,
             active_player_id: 0,
             click_for_answer_allowed: false,
@@ -75,7 +75,7 @@ impl<State> GameContext<State> {
             state: PhantomData,
             pack_content: self.pack_content,
             players: self.players,
-            game_state: self.game_state,
+            // game_state: self.game_state,
             round_index: self.round_index,
             active_player_id: self.active_player_id,
             click_for_answer_allowed: self.click_for_answer_allowed,
@@ -199,7 +199,7 @@ pub struct OldGameContext {
     pub pack_content: PackContent,
     pub players: HashMap<u8, Player>,
     /// Game State
-    pub game_state: GameState,
+    pub game_state: OldGameState,
     pub round_index: usize,
     pub active_player_id: u8,
     pub click_for_answer_allowed: bool,
@@ -228,7 +228,7 @@ impl OldGameContext {
     }
 
     pub fn start(&mut self) {
-        self.game_state = GameState::ChooseQuestion;
+        // self.game_state = GameState::ChooseQuestion;
     }
 }
 
@@ -242,10 +242,10 @@ impl OldGameContext {
     pub fn set_active_player_id(&mut self, new_id: u8) {
         self.active_player_id = new_id
     }
-    pub fn game_state(&self) -> &GameState {
+    pub fn game_state(&self) -> &OldGameState {
         &self.game_state
     }
-    pub fn set_game_state(&mut self, game_state: GameState) {
+    pub fn set_game_state(&mut self, game_state: OldGameState) {
         self.game_state = game_state;
     }
 }

@@ -1,9 +1,7 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_app_context, emit_message};
 use crate::api::mapper::map_app_context;
-use crate::core::game_entities::{
-    GamePackError, GameState, GameplayError, Player, PlayerState, DEFAULT_ICON,
-};
+use crate::core::game_entities::{GamePackError, GameplayError, Player, PlayerState, DEFAULT_ICON, OldGameState};
 use crate::core::game_logic::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::game_pack::pack_content_entities::Question;
@@ -49,7 +47,7 @@ pub struct AppContext {
     // pub window: Arc<RwLock<Box<Option<Window>>>>,
     // Game entities
     pub game_pack: GamePack,
-    pub game: OldGameContext,
+    pub __old_game: OldGameContext,
 
     // TODO: move to game
     pub player_event_listener: Option<Arc<Mutex<Receiver<TermEvent>>>>,
@@ -64,7 +62,7 @@ impl Default for AppContext {
             hub_type: HubType::default(),
             hub: Arc::new(RwLock::new(Box::<HwHubManager>::default())),
             game_pack: GamePack::default(),
-            game: OldGameContext::default(),
+            __old_game: OldGameContext::default(),
             player_event_listener: None,
             allow_answer_timestamp: Arc::new(AtomicU32::default()),
             // window: Arc::new(RwLock::new(Box::<Option<Window>>::default())),
@@ -136,9 +134,9 @@ impl AppContext {
     pub fn discover_hub(&mut self, path: String) {
         log::debug!(
             "Requested HUB change. Removing players as outdated: {:#?}",
-            self.game.players
+            self.__old_game.players
         );
-        self.game.players = HashMap::new();
+        self.__old_game.players = HashMap::new();
         let result = self.get_locked_hub_mut().probe(&path);
         match result {
             Ok(_) => self.run_polling_for_players(),
@@ -197,11 +195,11 @@ impl AppContext {
     }
 
     fn is_new_players_found(&self, detected_players: &[Player]) -> bool {
-        if detected_players.len() > self.game.players.len() {
+        if detected_players.len() > self.__old_game.players.len() {
             return true;
         }
 
-        let current_players_ids: Vec<u8> = self.game.players.keys().cloned().collect();
+        let current_players_ids: Vec<u8> = self.__old_game.players.keys().cloned().collect();
         // emit_message(format!("Current player ids: {current_players_ids:?}"));
         // let vec: Vec<u8> = detected_players.iter().map(|p| p.term_id).collect();
         // emit_message(format!("Detected player ids: {:?}", vec));
@@ -217,7 +215,7 @@ impl AppContext {
 
     fn merge_players(&mut self, detected_players: &[Player]) {
         // TODO: make actual merge instead of simple re-assign
-        self.game.players = detected_players
+        self.__old_game.players = detected_players
             .iter()
             .map(|p| {
                 let player = Player {
@@ -235,14 +233,14 @@ impl AppContext {
 #[deprecated]
 impl AppContext {
     pub fn finish_game(&mut self) {
-        self.game = OldGameContext::default();
+        self.__old_game = OldGameContext::default();
     }
     pub fn start_the_game(&mut self) -> error_stack::Result<(), GameplayError> {
         // Prepare game context
-        self.game.pack_content = self.game_pack.content.clone();
-        self.update_game_state(GameState::ChooseQuestion);
+        self.__old_game.pack_content = self.game_pack.content.clone();
+        self.update_game_state(OldGameState::ChooseQuestion);
 
-        if self.game.players.len() < 2 {
+        if self.__old_game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::PlayerNotPresent).into_report();
         }
@@ -260,7 +258,7 @@ impl AppContext {
             Err(err) => {
                 log::error!("{:#?}", err);
 
-                self.game
+                self.__old_game
                     .players
                     .values()
                     .next()
@@ -271,11 +269,11 @@ impl AppContext {
             }
         };
 
-        self.game.set_active_player_id(q_picker_id);
+        self.__old_game.set_active_player_id(q_picker_id);
         let player = self
-            .game
+            .__old_game
             .players
-            .get_mut(&self.game.active_player_id())
+            .get_mut(&self.__old_game.active_player_id())
             .ok_or(GameplayError::PlayerNotPresent)
             .into_report()?;
         player.state = PlayerState::QuestionChooser;
@@ -285,7 +283,7 @@ impl AppContext {
     #[deprecated]
     pub fn fetch_players(&mut self) -> &HashMap<u8, Player> {
         self.update_non_target_player_states();
-        &self.game.players
+        &self.__old_game.players
     }
 
     #[deprecated]
@@ -296,7 +294,7 @@ impl AppContext {
     ) -> error_stack::Result<(Question, i32), GameplayError> {
         log::info!("Get question from category: {theme}, price: {price}");
 
-        self.game.set_active_player_id(0);
+        self.__old_game.set_active_player_id(0);
         self.update_non_target_player_states();
 
         // if *self.current.game_state() != GameState::QuestionChoosing {
@@ -308,7 +306,7 @@ impl AppContext {
             .get_question(theme, price)
             .change_context(GameplayError::PackElementNotPresent)?;
 
-        self.update_game_state(GameState::DisplayQuestion);
+        self.update_game_state(OldGameState::DisplayQuestion);
 
         Ok((question, question_number))
     }
@@ -319,7 +317,7 @@ impl AppContext {
         price: &i32,
     ) -> error_stack::Result<(), GamePackError> {
         log::info!("Try to remove question from category: {theme}, price: {price}");
-        let round = self.game.get_current_round_mut();
+        let round = self.__old_game.get_current_round_mut();
         let theme = round
             .themes
             .get_mut(theme)
@@ -341,18 +339,18 @@ impl AppContext {
     }
 
     pub fn finish_question_prematurely(&mut self) -> error_stack::Result<(), GameplayError> {
-        self.game.answer_allowed = false;
+        self.__old_game.answer_allowed = false;
         self.allow_answer_timestamp
             .swap(u32::MAX, Ordering::Relaxed);
 
-        self.game.round_stats.total_tries += 1;
-        self.game.round_stats.total_wrong_answers += 1;
+        self.__old_game.round_stats.total_tries += 1;
+        self.__old_game.round_stats.total_wrong_answers += 1;
 
-        let theme = self.game.question_theme.clone();
-        let price = self.game.question_price;
+        let theme = self.__old_game.question_theme.clone();
+        let price = self.__old_game.question_price;
         log::info!(">>> Trying to remove question from category: {theme}, price: {price}");
 
-        self.update_game_state(GameState::ChooseQuestion);
+        self.update_game_state(OldGameState::ChooseQuestion);
         self.update_non_target_player_states();
 
         self.remove_question(&theme, &price)
@@ -362,7 +360,7 @@ impl AppContext {
 
     pub fn has_next_question(&self) -> bool {
         // self.current.has_next_question
-        let has_new_question = self.game.get_current_round().questions_left > 0;
+        let has_new_question = self.__old_game.get_current_round().questions_left > 0;
         log::info!("Has new question: {}", has_new_question);
         has_new_question
     }
@@ -373,15 +371,15 @@ impl AppContext {
             .swap(timestamp, Ordering::Relaxed);
         log::info!("Current answer base timestamp: {timestamp}");
 
-        self.game.set_active_player_id(0);
+        self.__old_game.set_active_player_id(0);
         self.update_non_target_player_states();
-        self.game.click_for_answer_allowed = true;
+        self.__old_game.click_for_answer_allowed = true;
         Ok(())
     }
 
     pub fn get_fastest_click_player_id(&mut self) -> error_stack::Result<u8, GameplayError> {
         let players_allowed_to_click_num = self
-            .game
+            .__old_game
             .players
             .values()
             .filter(|&p| p.allowed_to_click())
@@ -397,11 +395,11 @@ impl AppContext {
             .change_context(GameplayError::HubOperationError)?;
 
         log::info!("Fastest click from user: {}", fastest_player_id);
-        self.game.click_for_answer_allowed = false;
-        self.game.answer_allowed = true;
-        self.game.set_active_player_id(fastest_player_id);
+        self.__old_game.click_for_answer_allowed = false;
+        self.__old_game.answer_allowed = true;
+        self.__old_game.set_active_player_id(fastest_player_id);
 
-        self.game
+        self.__old_game
             .players
             .get_mut(&fastest_player_id)
             .ok_or(Report::new(GameplayError::PlayerNotPresent))
@@ -412,18 +410,18 @@ impl AppContext {
     }
 
     pub fn get_active_player_id(&self) -> u8 {
-        self.game.active_player_id()
+        self.__old_game.active_player_id()
     }
 
     pub fn answer_question(
         &mut self,
         answered_correctly: bool,
     ) -> error_stack::Result<bool, GameplayError> {
-        if !self.game.answer_allowed {
+        if !self.__old_game.answer_allowed {
             return Err(Report::new(GameplayError::AnswerForbidden));
         }
 
-        self.game.answer_allowed = false;
+        self.__old_game.answer_allowed = false;
         self.allow_answer_timestamp
             .swap(u32::MAX, Ordering::Relaxed);
 
@@ -436,21 +434,21 @@ impl AppContext {
 
         let response_player = {
             let active_player = self
-                .game
+                .__old_game
                 .players
                 .get_mut(&active_player_id)
                 .ok_or(GameplayError::PlayerNotPresent)?;
             if answered_correctly {
                 active_player.stats.correct_num += 1;
-                self.game.round_stats.total_correct_answers += 1;
-                active_player.stats.score += self.game.question_price;
+                self.__old_game.round_stats.total_correct_answers += 1;
+                active_player.stats.score += self.__old_game.question_price;
                 active_player.state = PlayerState::AnsweredCorrectly;
             } else {
                 active_player.stats.wrong_num += 1;
-                active_player.stats.score -= self.game.question_price;
+                active_player.stats.score -= self.__old_game.question_price;
                 active_player.state = PlayerState::AnsweredWrong;
             }
-            self.game.round_stats.total_tries += 1;
+            self.__old_game.round_stats.total_tries += 1;
             active_player.stats.total_tries += 1;
             active_player.clone()
         };
@@ -459,18 +457,18 @@ impl AppContext {
 
         if self.no_players_to_answer_left() {
             log::info!("Nobody answered question correctly");
-            self.game.round_stats.total_wrong_answers += 1;
+            self.__old_game.round_stats.total_wrong_answers += 1;
         }
 
-        let theme = self.game.question_theme.clone();
-        let price = self.game.question_price;
+        let theme = self.__old_game.question_theme.clone();
+        let price = self.__old_game.question_price;
 
         let mut retry = true;
         if answered_correctly || self.no_players_to_answer_left() {
             log::info!("Removing question from the pack");
 
             retry = false;
-            self.update_game_state(GameState::ChooseQuestion);
+            self.update_game_state(OldGameState::ChooseQuestion);
             self.update_non_target_player_states();
 
             self.remove_question(&theme, &price)
@@ -482,7 +480,7 @@ impl AppContext {
 
     pub fn no_players_to_answer_left(&self) -> bool {
         let players_left = self
-            .game
+            .__old_game
             .players
             .iter()
             .filter(|(_, p)| {
@@ -496,18 +494,18 @@ impl AppContext {
     }
 
     pub fn fetch_round_stats(&self) -> RoundStatsDto {
-        let round = self.game.get_current_round();
+        let round = self.__old_game.get_current_round();
         RoundStatsDto {
             roundName: round.name.to_owned(),
             questionNumber: round.question_count,
             normalQuestionNum: round.normal_question_count,
             pigInPokeQuestionNum: round.pip_question_count,
-            totalCorrectAnswers: self.game.round_stats.total_correct_answers,
-            totalWrongAnswers: self.game.round_stats.total_wrong_answers,
-            totalTries: self.game.round_stats.total_tries,
+            totalCorrectAnswers: self.__old_game.round_stats.total_correct_answers,
+            totalWrongAnswers: self.__old_game.round_stats.total_wrong_answers,
+            totalTries: self.__old_game.round_stats.total_tries,
             roundTime: "Not tracked".to_owned(),
             players: self
-                .game
+                .__old_game
                 .players
                 .values()
                 .map(|p| PlayerEndRoundStatsDto {
@@ -523,9 +521,9 @@ impl AppContext {
         }
     }
 
-    fn update_game_state(&mut self, new_state: GameState) {
-        log::info!("Game state {:?} -> {:?}", self.game.game_state(), new_state);
-        self.game.set_game_state(new_state);
+    fn update_game_state(&mut self, new_state: OldGameState) {
+        log::info!("Game state {:?} -> {:?}", self.__old_game.game_state(), new_state);
+        self.__old_game.set_game_state(new_state);
         self.update_non_target_player_states();
     }
 
@@ -534,7 +532,7 @@ impl AppContext {
         theme: &String,
         price: &i32,
     ) -> error_stack::Result<(Question, i32), GamePackError> {
-        let round = self.game.get_current_round_mut();
+        let round = self.__old_game.get_current_round_mut();
         let question_number = round.question_count - round.questions_left;
 
         let theme = round
@@ -554,9 +552,9 @@ impl AppContext {
             ))?
             .clone();
 
-        self.game.question_theme = theme_name;
-        self.game.question_type = question.question_type.clone();
-        self.game.question_price = question.price;
+        self.__old_game.question_theme = theme_name;
+        self.__old_game.question_type = question.question_type.clone();
+        self.__old_game.question_price = question.price;
         Ok((question, question_number))
     }
 
@@ -622,7 +620,7 @@ impl AppContext {
                 continue;
             }
 
-            let Some(player) = self.game.players.get(&e.term_id) else {
+            let Some(player) = self.__old_game.players.get(&e.term_id) else {
                 log::debug!("Unknown terminal id {} event. Skipping: {:?}", e.term_id, e);
                 continue;
             };
@@ -668,14 +666,14 @@ impl AppContext {
     }
 
     fn get_player_keys(&self) -> Vec<u8> {
-        self.game.players.keys().copied().collect()
+        self.__old_game.players.keys().copied().collect()
     }
 
     fn update_non_target_player_states(&mut self) {
-        let game_state = self.game.game_state().clone();
+        let game_state = self.__old_game.game_state().clone();
         let active_id = self.get_active_player_id();
 
-        self.game.players.iter_mut().for_each(|(id, p)| {
+        self.__old_game.players.iter_mut().for_each(|(id, p)| {
             log::debug!(
                 "Game state: {:?}. Player: {}:{:?}",
                 game_state,
@@ -693,7 +691,7 @@ impl AppContext {
                 p.state = PlayerState::Inactive;
             }
 
-            if game_state == GameState::ChooseQuestion
+            if game_state == OldGameState::ChooseQuestion
                 || (p.state != PlayerState::Dead && p.state != PlayerState::Inactive)
             {
                 log::trace!("Player with id {} becomes idle", id);
@@ -704,7 +702,7 @@ impl AppContext {
 
     #[allow(dead_code)]
     fn kill_players_with_negative_balance(&mut self) {
-        self.game.players.iter_mut().for_each(|(_, player)| {
+        self.__old_game.players.iter_mut().for_each(|(_, player)| {
             if player.stats.score < 0 {
                 log::info!(
                     "Killing player {:?} because of the negative balance",
@@ -724,10 +722,10 @@ mod game_entities_test {
     #[test]
     fn test_fastest_click() {
         let mut ctx = AppContext::default();
-        ctx.game.players.insert(1, Player::default());
-        ctx.game.players.insert(2, Player::default());
-        ctx.game.players.insert(3, Player::default());
-        ctx.game.players.insert(4, Player::default());
+        ctx.__old_game.players.insert(1, Player::default());
+        ctx.__old_game.players.insert(2, Player::default());
+        ctx.__old_game.players.insert(3, Player::default());
+        ctx.__old_game.players.insert(4, Player::default());
         let i = ctx.get_fastest_click_player_id().expect("Test");
         log::info!("Fastest click from: {i}");
     }
