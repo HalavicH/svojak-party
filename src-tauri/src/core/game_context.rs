@@ -14,6 +14,7 @@ use std::sync::atomic::Ordering;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 use error_stack::{Report, ResultExt};
+use crate::core::term_event_processing::get_fastest_click_from_hub;
 use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
@@ -196,7 +197,7 @@ impl GameContext<SetupAndLoading> {
         self.game.round_duration_min = round_duration_min;
         emit_message(format!("Selected round duration of: {}", self.game.round_duration_min));
     }
-    
+
     pub fn start(
         self,
         pack_content: PackContent,
@@ -246,9 +247,15 @@ impl GameContext<PickFirstQuestionChooser> {
                 .term_id);
         }
 
-        let fastest_player_id = self
-            .get_fastest_click_from_hub()
-            .change_context(GameplayError::HubOperationError)?;
+        let receiver = self.game.events.as_ref()
+            .expect("Expected to have player event queue to be present at this point of game");
+
+        let allow_answer_timestamp = self.game.allow_answer_timestamp;
+        let fastest_player_id = get_fastest_click_from_hub(
+            receiver,
+            allow_answer_timestamp,
+            self.game.get_players_ref(),
+        ).change_context(GameplayError::HubOperationError)?;
 
         log::info!("Fastest click from user: {}", fastest_player_id);
         // self.click_for_answer_allowed = false; /// ????
@@ -257,113 +264,6 @@ impl GameContext<PickFirstQuestionChooser> {
         Ok(fastest_player_id)
     }
 
-    fn get_fastest_click_from_hub(&mut self) -> error_stack::Result<u8, HubManagerError> {
-        let Some(receiver) = &self.game.events else {
-            return Err(HubManagerError::NotInitializedError.into());
-        };
-
-        let start_time = Instant::now();
-        let timeout = Duration::from_secs(10);
-        let fastest_click: Option<u8> = None;
-
-        let receiver_guard = receiver.lock().expect("Mutex poisoned");
-        loop {
-            if start_time.elapsed() >= timeout {
-                Err(HubManagerError::NoResponseFromTerminal)?;
-            }
-
-            let events = match Self::get_events(&receiver_guard) {
-                Ok(events) => events,
-                Err(_) => {
-                    sleep(Duration::from_millis(100));
-                    continue;
-                }
-            };
-
-            let base_timestamp = self.game.allow_answer_timestamp;
-            let mut events: Vec<TermEvent> = events
-                .iter()
-                .filter(|&e| {
-                    if e.timestamp >= base_timestamp {
-                        log::info!("After answer allowed. Event {:?}", e);
-                        true
-                    } else {
-                        log::info!("Answer too early. Event {:?}", e);
-                        false
-                    }
-                })
-                .cloned()
-                .collect();
-
-            events.sort_by(|e1, e2| e1.timestamp.cmp(&e2.timestamp));
-
-            if let Some(value) = self.find_the_fastest_event(&mut events) {
-                return value;
-            }
-
-            if let Some(fastest_click_id) = fastest_click {
-                return Ok(fastest_click_id);
-            }
-
-            sleep(Duration::from_secs(1));
-        }
-    }
-
-
-    fn find_the_fastest_event(
-        &self,
-        events: &mut Vec<TermEvent>,
-    ) -> Option<error_stack::Result<u8, HubManagerError>> {
-        for e in events {
-            if e.state != Pressed {
-                log::debug!("Release event. Skipping: {:?}", e);
-                continue;
-            }
-
-            let Some(player) = self.game.players.get(&e.term_id) else {
-                log::debug!("Unknown terminal id {} event. Skipping: {:?}", e.term_id, e);
-                continue;
-            };
-
-            if !player.allowed_to_click() {
-                log::debug!(
-                    "Player {} is not allowed to click. Skipping: {:?}",
-                    e.term_id,
-                    e
-                );
-                continue;
-            }
-
-            log::info!("Found the fastest click: {:?}", e);
-            return Some(Ok(e.term_id));
-        }
-        None
-    }
-
-    fn get_events(
-        receiver: &Receiver<TermEvent>,
-    ) -> error_stack::Result<Vec<TermEvent>, HubManagerError> {
-        let mut events: Vec<TermEvent> = Vec::new();
-        loop {
-            match receiver.try_recv() {
-                Ok(received_event) => {
-                    events.push(received_event);
-                }
-                Err(mpsc::TryRecvError::Empty) => {
-                    log::debug!("Got {} events for now.", events.len());
-                    break;
-                }
-                Err(mpsc::TryRecvError::Disconnected) => {
-                    // Channel has been disconnected, so we break the loop
-                    let report = Report::new(HubManagerError::InternalError)
-                        .attach_printable("Pipe disconnected: mpsc::TryRecvError::Disconnected");
-                    return Err(report);
-                }
-            }
-        }
-
-        Ok(events)
-    }
     fn get_active_players_cnt(&mut self) -> Vec<Player> {
         self.game.players
             .values()

@@ -4,7 +4,7 @@ use crate::api::mapper::{game_to_round_stats_dto, map_app_context};
 use crate::core::game_entities::{
     GamePackError, GameState, GameplayError, OldGameState, Player, PlayerState, DEFAULT_ICON,
 };
-use crate::core::game_logic::start_event_listener;
+use crate::core::term_event_processing::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::hub_comm::common::hub_api::{HubManager, HubType};
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError, HwHubManager};

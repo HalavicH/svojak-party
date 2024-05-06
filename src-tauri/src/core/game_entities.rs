@@ -83,6 +83,8 @@ pub enum GameplayError {
     NoActivePlayersLeft,
     #[error("HUB operation failed")]
     UnexpectedGameState,
+    #[error("Answer request timeout")]
+    AnswerRequestTimeout,
 
     #[error("HUB operation failed")]
     PackElementNotPresent,
@@ -96,6 +98,8 @@ pub enum GameplayError {
     OperationForbidden,
     #[error("Internal error")]
     InternalError,
+    #[error("Broken Hub Connection")]
+    BrokenHubConnection,
 }
 
 #[derive(Debug)]
