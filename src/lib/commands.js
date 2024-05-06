@@ -43,7 +43,8 @@ export const TauriApiCommand = {
     SEND_PIP_VICTIM: 'send_pip_victim',
     GET_ACTIVE_PLAYER_ID: 'get_active_player_id',
     IS_ALLOW_ANSWER_REQUIRED: 'is_allow_answer_required',
-    FETCH_ROUND_STATS: 'fetch_round_stats'
+    FETCH_ROUND_STATS: 'fetch_round_stats',
+    END_GAME: 'END_GAME',
 };
 
 export const HubType = {

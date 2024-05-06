@@ -5,6 +5,8 @@
     import Quiz from "./screens/Quiz.svelte";
     import {currentView} from "./lib/stores"
     import {initEventListeners, setupEventListener} from "./lib/events.js";
+    import Button from "./components/generic/Button.svelte";
+    import DebugButton from "./screens/DebugButton.svelte";
 
     setupEventListener('message', (event) => {
         const message = event.payload;
@@ -27,6 +29,7 @@
     {:else if $currentView === Views.QUIZ}
         <Quiz/>
     {/if}
+    <DebugButton/>
 </main>
 
 <style>

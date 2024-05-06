@@ -4,11 +4,13 @@
     import {currentGameStateStore, GameState} from "../lib/stores.js";
     import QuestionView from "./quiz/QuestionView.svelte";
     import Row from "../components/generic/Row.svelte";
+    import ModalPlaceholder from "../components/abstract/ModalPlaceholder.svelte";
 
     $: gameState = $currentGameStateStore.gameState;
 </script>
 
 <div class="container">
+    <ModalPlaceholder/>
     {#if gameState === GameState.ChooseQuestion}
         <RoundView/>
     {:else if gameState === GameState.DisplayQuestion}

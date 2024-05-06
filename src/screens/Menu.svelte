@@ -4,13 +4,12 @@
     import ModalPlaceholder from "../components/abstract/ModalPlaceholder.svelte";
     import SettingsModal from "./menu/SettingsModal.svelte";
     import GamePackModal from "./menu/GamePackModal.svelte";
-    import {open} from "@tauri-apps/api/dialog";
     import {notify} from "../lib/notifications.js";
     import {callBackend, TauriApiCommand} from "../lib/commands.js";
     import PackErrorModal from "./menu/PackErrorModal.svelte";
     import {onMount} from "svelte";
     import VSpacing from "../components/generic/VSpacing.svelte"
-    import {isRunningInTauri} from "../lib/misc.js"
+    import {getPackFilePath} from "../lib/misc.js"
 
     onMount(async () => {
         await callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
@@ -20,31 +19,7 @@
         openModal(SettingsModal)
     }
 
-    async function getPackFilePath() {
-        if (!isRunningInTauri()) {
-            return "No tauri context";
-        }
-
-        return await open({
-            multiple: false,
-            filters: [{
-                name: 'Select game package',
-                extensions: ['siq']
-            }]
-        });
-    }
-
-    async function openGamePack() {
-        let filePath = await getPackFilePath();
-
-        if (filePath === null || filePath.length === 0) {
-            notify.info("Canceled pack selection");
-            return;
-            // closeModal();
-        } else {
-            notify.info(`Selected game package path: ${filePath}`);
-        }
-
+    function initGamePack(filePath) {
         callBackend(TauriApiCommand.INIT_GAME_PACK, {path: filePath})
             .then(() => {
                 openModal(GamePackModal)
@@ -57,6 +32,20 @@
                 openModal(PackErrorModal, {message: error});
             });
     }
+
+    async function openGamePack() {
+        let filePath = await getPackFilePath();
+
+        if (filePath === null || filePath.length === 0) {
+            notify.info("Canceled pack selection");
+            return;
+            // closeModal();
+        } else {
+            notify.info(`Selected game package path: ${filePath}`);
+        }
+        initGamePack(filePath);
+    }
+
 </script>
 
 
