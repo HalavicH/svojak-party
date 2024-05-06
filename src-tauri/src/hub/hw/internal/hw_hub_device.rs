@@ -13,7 +13,7 @@ use crate::hub::hw::internal::byte_handler::{ByteHandler, START_BYTE, STOP_BYTE}
 use error_stack::{IntoReport, Report, Result, ResultExt};
 use serialport::SerialPort;
 
-const HUB_REQUEST_PROCESSING_TIMEOUT_MS: u64 = 50;
+const HUB_REQUEST_PROCESSING_TIMEOUT_MS: u64 = 100;
 
 #[derive(Debug)]
 pub struct HwHubCommunicationHandler {
@@ -57,7 +57,7 @@ impl HwHubCommunicationHandler {
         Ok(response_frame)
     }
 
-    pub fn send_command(&self, request: HwHubRequest) -> Result<HubResponse, HwHubIoError> {
+    pub fn execute_command(&self, request: HwHubRequest) -> Result<HubResponse, HwHubIoError> {
         let frame = assemble_frame(request.cmd(), request.payload());
         let stuffed_frame = stuff_bytes(&frame);
 
@@ -98,7 +98,7 @@ impl HwHubCommunicationHandler {
             .read(&mut buffer)
             .into_report()
             .change_context(HwHubIoError::NoResponseFromHub)
-            .attach_printable("Probably timeout")?;
+            .attach_printable("Can't read raw response frame: Probably timeout")?;
 
         let response = buffer[..bytes_read].to_vec();
         Ok(response)
@@ -182,7 +182,7 @@ pub fn assemble_frame(cmd: u8, mut payload: Vec<u8>) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use crate::hub::hw::internal::api_types::ProtocolVersion::Version;
-    use crate::hub::hw::internal::hub_protocol_io_handler::{assemble_frame, stuff_bytes};
+    use crate::hub::hw::internal::hw_hub_device::{assemble_frame, stuff_bytes};
 
     #[test]
     fn test_frame_assembly() {

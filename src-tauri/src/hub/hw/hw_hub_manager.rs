@@ -5,7 +5,7 @@ use crate::hub::hub_api::{
     calc_current_epoch_ms, HubManager, HubManagerError, TermButtonState, TermEvent,
 };
 use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest, ResponseStatus};
-use crate::hub::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
+use crate::hub::hw::internal::hw_hub_device::HwHubCommunicationHandler;
 use crate::hub::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
 use error_stack::{bail, IntoReport, Report, Result, ResultExt};
 use rgb::RGB8;
@@ -158,7 +158,7 @@ impl HubManager for HwHubManager {
         let handle = self.get_hub_handle_or_err()?;
 
         let response = handle
-            .send_command(HwHubRequest::GetTimestamp)
+            .execute_command(HwHubRequest::GetTimestamp)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         if response.status != ResponseStatus::Ok {
@@ -182,7 +182,7 @@ impl HubManager for HwHubManager {
 
         let request = HwHubRequest::SetTimestamp(timestamp);
         let response = handle
-            .send_command(request)
+            .execute_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         map_status_to_result(response.status)
@@ -194,7 +194,7 @@ impl HubManager for HwHubManager {
 
         let request = HwHubRequest::SetLightColor(term_id, color);
         let response = handle
-            .send_command(request)
+            .execute_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         map_status_to_result(response.status)
@@ -214,7 +214,7 @@ impl HubManager for HwHubManager {
 
         let request = HwHubRequest::SetFeedbackLed(term_id, state.to_bool());
         let response = handle
-            .send_command(request)
+            .execute_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         map_status_to_result(response.status)
@@ -226,7 +226,7 @@ impl HubManager for HwHubManager {
 
         let request = HwHubRequest::ReadEventQueue;
         let response = handle
-            .send_command(request)
+            .execute_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         map_status_to_result(response.status)?;
@@ -296,7 +296,7 @@ impl HubManager for HwHubManager {
 
         let request = HwHubRequest::SetHubRadioChannel(channel_num);
         let response = handle
-            .send_command(request)
+            .execute_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         self.radio_channel = channel_num as i32;
@@ -313,7 +313,7 @@ impl HubManager for HwHubManager {
 
         let request = HwHubRequest::SetTermRadioChannel(term_id, channel_num);
         let response = handle
-            .send_command(request)
+            .execute_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         map_status_to_result(response.status)
@@ -325,7 +325,7 @@ impl HubManager for HwHubManager {
 
         let request = HwHubRequest::PingDevice(term_id);
         let response = handle
-            .send_command(request)
+            .execute_command(request)
             .map_err(Self::hub_io_to_hub_mgr_error)?;
 
         map_status_to_result(response.status)

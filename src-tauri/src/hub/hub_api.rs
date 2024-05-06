@@ -1,5 +1,5 @@
 use crate::core::game_entities::{HubStatus, Player};
-use crate::hub::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
+use crate::hub::hw::internal::hw_hub_device::HwHubCommunicationHandler;
 use error_stack::{IntoReport, Report, Result, ResultExt};
 use rgb::RGB8;
 use rocket::serde::Serialize;

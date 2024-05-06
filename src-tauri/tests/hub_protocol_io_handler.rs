@@ -6,7 +6,7 @@ use std::time::Duration;
 use svojak_app::hub::hw::internal::api_types::HwHubRequest::*;
 use svojak_app::hub::hw::internal::api_types::{HubResponse, ResponseStatus};
 use svojak_app::hub::hw::internal::byte_handler::ByteHandler;
-use svojak_app::hub::hw::internal::hub_protocol_io_handler::*;
+use svojak_app::hub::hw::internal::hw_hub_device::*;
 
 const MOCK_ID: u8 = 6;
 const MOCK_TID: u8 = 0;
@@ -69,7 +69,7 @@ fn test_send_request_timeout() {
     let hub_handler: HwHubCommunicationHandler =
         HwHubCommunicationHandler::new(device_handle, None);
 
-    let result = hub_handler.send_command(GetTimestamp);
+    let result = hub_handler.execute_command(GetTimestamp);
     assert!(result.is_err());
 }
 
@@ -88,7 +88,7 @@ fn test_get_timestamp_command() {
         payload: MOCK_TIMESTAMP.to_le_bytes().to_vec(),
     };
 
-    let result = hub_handler.send_command(GetTimestamp);
+    let result = hub_handler.execute_command(GetTimestamp);
     println!("Result {:#?}", result);
     assert!(result.is_ok());
     assert_eq!(result.expect("Test"), expected);
@@ -109,7 +109,7 @@ fn test_get_events() {
         payload: MOCK_EVENTS.to_vec(),
     };
 
-    let result = hub_handler.send_command(ReadEventQueue);
+    let result = hub_handler.execute_command(ReadEventQueue);
     println!("Result {:#?}", result);
     assert!(result.is_ok());
     assert_eq!(result.expect("Test"), expected);
@@ -130,7 +130,7 @@ fn test_ping_device() {
         payload: vec![],
     };
 
-    let result = hub_handler.send_command(PingDevice(MOCK_ID));
+    let result = hub_handler.execute_command(PingDevice(MOCK_ID));
     println!("Result {:#?}", result);
     assert!(result.is_ok());
     assert_eq!(result.expect("Test"), expected);

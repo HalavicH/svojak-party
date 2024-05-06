@@ -12,7 +12,7 @@ use std::thread::{sleep, JoinHandle};
 use crate::hub::hub_api::{calc_current_epoch_ms, TermButtonState, TermEvent};
 use crate::hub::hw::internal::api_types::{hub_frame_pos, ResponseStatus};
 use crate::hub::hw::internal::byte_handler::ByteHandler;
-use crate::hub::hw::internal::hub_protocol_io_handler::{format_bytes_hex, stuff_bytes};
+use crate::hub::hw::internal::hw_hub_device::{format_bytes_hex, stuff_bytes};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 

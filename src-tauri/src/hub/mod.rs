@@ -6,7 +6,7 @@ pub mod hw {
     pub mod internal {
         pub mod api_types;
         pub mod byte_handler;
-        pub mod hub_protocol_io_handler;
+        pub mod hw_hub_device;
     }
 }
 pub mod web {

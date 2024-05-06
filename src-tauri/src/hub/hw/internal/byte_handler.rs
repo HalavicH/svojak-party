@@ -1,4 +1,4 @@
-use crate::hub::hw::internal::hub_protocol_io_handler::format_bytes_hex;
+use crate::hub::hw::internal::hw_hub_device::format_bytes_hex;
 use std::fmt::Debug;
 
 pub type RawFrame = Vec<u8>;
