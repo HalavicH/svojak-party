@@ -6,6 +6,7 @@ export async function callBackend(apiCommand, params) {
         console.warn(`No Tauri context!\nSkipping Tauri API call: '${apiCommand}' with payload: '${params}'`);
         return;
     }
+    console.log(`Calling: ${apiCommand} with params: ${params}`)
     return await invoke(apiCommand, params)
 }
 
@@ -31,13 +32,9 @@ export const TauriApiCommand = {
     SEND_RAW_REQUEST_FRAME: 'send_raw_request_frame',
     SEND_HUB_COMMAND: 'send_hub_command',
     // Gameplay API
-    FETCH_PLAYERS: 'fetch_players',
-    FETCH_ROUND: 'fetch_round',
     SELECT_QUESTION: 'select_question',
     ALLOW_ANSWER: 'allow_answer',
-    GET_FASTEST_CLICK: 'get_fastest_click',
     ANSWER_QUESTION: 'answer_question',
-    HAS_NEXT_QUESTION: 'has_next_question',
     FINISH_QUESTION_PREMATURELY: 'finish_question_prematurely',
     INIT_NEXT_ROUND: 'init_next_round',
     SEND_PIP_VICTIM: 'send_pip_victim',
@@ -45,6 +42,9 @@ export const TauriApiCommand = {
     IS_ALLOW_ANSWER_REQUIRED: 'is_allow_answer_required',
     FETCH_ROUND_STATS: 'fetch_round_stats',
     END_GAME: 'END_GAME',
+    // Debug API
+    DBG_SET_GAME_STATE: 'dbg_set_game_state',
+    DBG_RESET_GAME: 'dbg_reset_game',
 };
 
 export const HubType = {

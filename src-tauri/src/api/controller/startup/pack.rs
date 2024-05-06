@@ -1,9 +1,9 @@
 use crate::api::dto::PackErrorData;
+use crate::api::events::emit_pack_info;
 use crate::core::app_context::app_mut;
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use error_stack::Report;
 use tauri::command;
-use crate::api::events::emit_pack_info;
 
 /// Load game pack into the game
 #[command]

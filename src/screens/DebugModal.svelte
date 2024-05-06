@@ -5,13 +5,16 @@
     import Row from "../components/generic/Row.svelte";
     import {TauriApiCommand, callBackend} from "../lib/commands.js";
     import {notify} from "../lib/notifications.js";
-    import {currentPlayersStore, currentPackInfoStore, navTo} from "../lib/stores.js";
+    import {currentPlayersStore, currentPackInfoStore, navTo, GameState} from "../lib/stores.js";
     import {Views} from "./views.js";
     import SecondaryButton from "../components/generic/SecondaryButton.svelte";
+    import MultiColumnList from "../components/generic/MultiColumnList.svelte";
 
     // Provided by 'modals'
     export let isOpen;
     const VIRTUAL_HUB_PORT = "Demo HUB port";
+
+    let gameStates = Object.values(GameState);
 
     async function setDemoHub() {
         await callBackend(TauriApiCommand.DISCOVER_HUB, {path: VIRTUAL_HUB_PORT});
@@ -19,16 +22,18 @@
     }
 
     async function openKefLoh() {
-        callBackend(TauriApiCommand.INIT_GAME_PACK, {path: '/Users/oleksandrkholiavko/Documents/Кеф лох.siq'})
-        notify.info(`Opened: ${VIRTUAL_HUB_PORT}`)
+        await callBackend(TauriApiCommand.INIT_GAME_PACK, {path: '/Users/oleksandrkholiavko/Documents/Кеф лох.siq'});
+        notify.info(`Opened: ${VIRTUAL_HUB_PORT}`);
     }
 
     async function resetGame() {
-        await callBackend(TauriApiCommand.END_GAME);
+        await callBackend(TauriApiCommand.DBG_RESET_GAME);
+        notify.info(`Game reset`);
     }
 
     async function startTheGame() {
         await callBackend(TauriApiCommand.START_NEW_GAME);
+        notify.info(`Game started`);
     }
 
     async function goToMenu() {
@@ -37,6 +42,11 @@
 
     async function goToQuiz() {
         navTo(Views.QUIZ);
+    }
+
+    async function setState(state) {
+        notify.info(`Set state to: ${state}`);
+        await callBackend(TauriApiCommand.DBG_SET_GAME_STATE, {name: state});
     }
 </script>
 
@@ -86,13 +96,37 @@
     </ItemsBlock>
     <ItemsBlock title="Set state:">
         <Row>
-<!--            <SecondaryButton text="Menu" onClick={goToMenu}/>-->
-<!--            <SecondaryButton text="Quiz" onClick={goToQuiz}/>-->
+            <div class="container">
+                {#each gameStates as state}
+                    <div class="item">
+                        <SecondaryButton text="{state}" onClick={()=>{setState(state)}}/>
+                    </div>
+                {/each}
+            </div>
         </Row>
     </ItemsBlock>
 </BaseModal>
 
 <style>
+    .container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        /*width: 60%;*/
+    }
+
+    .item {
+        flex: 0 0 auto;
+        /* Adjust width and height as needed */
+        /*width: 100px;*/
+        /*height: 100px;*/
+        /* Add margin or padding if desired */
+        margin: 5px;
+        /* Additional styling as needed */
+        /*background-color: #f0f0f0;*/
+        /*border: 1px solid #ccc;*/
+    }
+
     p {
         text-align: left;
     }

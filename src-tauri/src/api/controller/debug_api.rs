@@ -1,20 +1,28 @@
-use std::ops::Deref;
-use std::sync::RwLockWriteGuard;
-
 use crate::api::dto::{HubRequestDto, HubResponseDto};
-use crate::core::app_context::app;
+use crate::core::app_context::{app, app_mut};
 use crate::hub::hub_api::{HubManager, HubManagerError};
-use tauri::command;
-use crate::api::events::emit_hub_config;
-
 use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest};
+use std::sync::RwLockWriteGuard;
+use tauri::command;
 
-/// Calls HUB to set specific radio channel
+/// Game Debug API
+
+/// Tries to set game state
+/// May break the game completely
 #[command]
-pub fn set_hw_hub_radio_channel(channel_id: i32) {
-    log::info!("Got channel id: {channel_id}");
-    app().set_hub_radio_channel(channel_id as u8);
-    emit_hub_config(app().hub().deref().into());
+pub fn dbg_set_game_state(name: String) {
+    let mut app = app_mut();
+    app.set_game_state(name);
+    app.emit_game_config_locking_hub();
+    app.emit_game_context();
+}
+
+#[command]
+pub fn dbg_reset_game() {
+    let mut app = app_mut();
+    app.reset_game();
+    app.emit_game_config_locking_hub();
+    app.emit_game_context();
 }
 
 /// HUB Debug API

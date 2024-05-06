@@ -57,7 +57,11 @@ pub struct Round {
 impl Round {
     pub fn pop_question(&mut self, topic_name: &str, price: i32) -> Option<Question> {
         let Some(topic) = self.topics.get_mut(topic_name) else {
-            log::error!("Topic with name: {} not found in round with name: {}", topic_name, self.name);
+            log::error!(
+                "Topic with name: {} not found in round with name: {}",
+                topic_name,
+                self.name
+            );
             return None;
         };
 

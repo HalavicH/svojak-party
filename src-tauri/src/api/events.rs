@@ -1,11 +1,11 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use std::collections::HashMap;
 use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto};
 use crate::core::app_context::app;
 use crate::core::game_entities::{GameState, HubStatus};
 use crate::game_pack::pack_content_entities::Round;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fmt::Debug;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use tauri::Window;
@@ -106,9 +106,12 @@ pub fn emit_question(question: QuestionDto) {
 #[allow(non_snake_case)]
 #[derive(Debug, Clone, Serialize)]
 struct GameStateDto {
-    gameState: String
+    gameState: String,
 }
+
 pub fn emit_game_state(game_state: &GameState) {
-    let game_state_dto = GameStateDto { gameState: game_state.state_name().to_string() };
+    let game_state_dto = GameStateDto {
+        gameState: game_state.state_name().to_string(),
+    };
     emit(Event::GameState, game_state_dto);
 }

@@ -16,7 +16,7 @@
 <div class="round-screen">
     <div class="title-bar">
         <p class="round-label">Round: {currentRound.roundName}</p>
-        <Button text="Menu" onClick={() => {goToMainMenu}}/>
+        <Button text="Menu" onClick={goToMainMenu}/>
     </div>
     <div class="round-table-box">
         <table class="round-table">

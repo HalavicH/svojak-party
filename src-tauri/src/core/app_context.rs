@@ -1,22 +1,20 @@
 use crate::api::events::{
     emit_error, emit_game_state, emit_hub_config, emit_players, emit_question, emit_round,
 };
+use crate::core::game_context::GameContext;
 use crate::core::game_entities::{GamePackError, GameState, GameplayError, Player};
 use crate::core::player_listener::discover_and_save_players;
 use crate::core::term_event_processing::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
-use crate::hub::hub_api::{HubManager, HubManagerError, HubType, TermEvent};
+use crate::hub::hub_api::{HubManager, HubManagerError, HubType};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
+use crate::types::ArcRwBox;
 use error_stack::{FutureExt, Report, ResultExt};
-use std::collections::HashMap;
 use std::ops::Deref;
-use std::sync::atomic::AtomicU32;
-use std::sync::mpsc::Receiver;
-use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::sync::{mpsc, Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::Duration;
-use crate::types::ArcRwBox;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -172,9 +170,7 @@ impl AppContext {
     }
 
     pub fn update_players(&mut self, players: &[Player]) {
-        let players = players.iter()
-            .map(|p| { (p.term_id, p.clone()) })
-            .collect();
+        let players = players.iter().map(|p| (p.term_id, p.clone())).collect();
         self.game_state.game_mut().set_players(players);
     }
 
@@ -227,7 +223,7 @@ impl AppContext {
                     .show_state_mismatch("GameState::SetupAndLoading");
                 emit_error(format!("Can't start the game: {}", state_mismatch));
                 Err(GameplayError::OperationForbidden)?
-                    // .attach_printable_lazy(|| { "Can't start game in current state" })?
+                // .attach_printable_lazy(|| { "Can't start game in current state" })?
             }
         };
 
@@ -251,7 +247,7 @@ impl AppContext {
                     .show_state_mismatch("GameState::ChooseQuestion");
                 emit_error(format!("Can't select question: {}", state_mismatch));
                 Err(GameplayError::OperationForbidden)?
-                    // .attach_printable_lazy(|| { "Can't select question in current game state" })?
+                // .attach_printable_lazy(|| { "Can't select question in current game state" })?
             }
         };
 
@@ -454,4 +450,21 @@ impl AppContext {
     //         }
     //     });
     // }
+}
+
+/// Debug API
+impl AppContext {
+    pub fn reset_game(&mut self) {
+        let context = AppContext::default();
+        self.game_state = context.game_state;
+        self.hub_type = context.hub_type;
+        self.hub = context.hub;
+        self.player_poling_thread_handle = context.player_poling_thread_handle;
+        self.game_pack = context.game_pack;
+        self.game_state = GameState::SetupAndLoading(GameContext::default());
+    }
+
+    pub fn set_game_state(&mut self, name: String) {
+        self.game_state = GameState::from_name_and_game(&name, self.game_state.game_ref().clone());
+    }
 }

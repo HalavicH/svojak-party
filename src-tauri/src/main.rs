@@ -3,9 +3,9 @@
 
 #[allow(unused_imports)]
 use rocket::futures::io::Window;
+use svojak_app::api::controller::debug_api::*;
 use svojak_app::api::controller::gameplay::*;
 use svojak_app::api::controller::startup::hub::*;
-use svojak_app::api::controller::startup::hw_hub::*;
 use svojak_app::api::controller::startup::pack::*;
 use svojak_app::api::controller::startup::settings::*;
 use svojak_app::core::app_context::app;
@@ -40,6 +40,8 @@ fn main() {
             dbg_setup_hub_connection,
             dbg_send_raw_request_frame,
             dbg_send_hub_command,
+            dbg_set_game_state,
+            dbg_reset_game,
             // Gameplay API
             select_question,
             allow_answer,

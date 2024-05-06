@@ -165,6 +165,12 @@ impl<State> GameContext<State> {
         }
     }
 
+    pub fn new_with_game<T>(game: Game) -> GameContext<T> {
+        GameContext {
+            state: PhantomData,
+            game,
+        }
+    }
     pub fn game_mut(&mut self) -> &mut Game {
         &mut self.game
     }
@@ -273,10 +279,17 @@ impl GameContext<PickFirstQuestionChooser> {
 }
 
 impl GameContext<ChooseQuestion> {
-    pub fn choose_question(&self, topic: &str, price: i32) -> Result<GameContext<DisplayQuestion>, GameplayError> {
+    pub fn choose_question(
+        &self,
+        topic: &str,
+        price: i32,
+    ) -> Result<GameContext<DisplayQuestion>, GameplayError> {
         let mut game_ctx: GameContext<DisplayQuestion> = self.transition();
         let game = &mut game_ctx.game;
-        game.current_question = game.current_round.pop_question(topic, price).ok_or(GameplayError::PackElementNotPresent)?;
+        game.current_question = game
+            .current_round
+            .pop_question(topic, price)
+            .ok_or(GameplayError::PackElementNotPresent)?;
         log::info!("Picked question! Topic: {}, price: {}", topic, price);
         Ok(game_ctx)
     }

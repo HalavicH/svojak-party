@@ -1,5 +1,4 @@
-use crate::api::dto::QuestionDto;
-use crate::api::events::{emit_error, emit_question};
+use crate::api::events::emit_error;
 use crate::core::app_context::app_mut;
 use crate::core::game_entities::GameplayError;
 use crate::hub::hub_api::HubManagerError;

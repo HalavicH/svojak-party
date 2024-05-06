@@ -1,7 +1,7 @@
-use std::ops::Deref;
 use crate::api::events::{emit_hub_config, emit_message};
-use crate::core::app_context::app_mut;
+use crate::core::app_context::{app, app_mut};
 use crate::hub::hub_api::HubType;
+use std::ops::Deref;
 use tauri::command;
 
 /// Set hub type to web or serial
@@ -23,4 +23,12 @@ pub fn discover_hub(path: String) {
 
     emit_hub_config(app.hub().deref().into());
     // app_mut().emit_game_config_locking_hub();
+}
+
+/// Calls HUB to set specific radio channel
+#[command]
+pub fn set_hw_hub_radio_channel(channel_id: i32) {
+    log::info!("Got channel id: {channel_id}");
+    app().set_hub_radio_channel(channel_id as u8);
+    emit_hub_config(app().hub().deref().into());
 }

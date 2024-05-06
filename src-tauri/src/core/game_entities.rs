@@ -191,6 +191,22 @@ impl GameState {
             GameState::CalcStatsAndStartNextRound(_) => "CalcStatsAndStartNextRound",
         }
     }
+
+    pub fn from_name_and_game(name: &str, game: Game) -> GameState {
+        let context = GameContext::<SetupAndLoading>::new_with_game(game);
+        match name {
+            "ChooseQuestion" => GameState::ChooseQuestion(context.transition()),
+            "DisplayQuestion" => GameState::DisplayQuestion(context.transition()),
+            "WaitingForAnswerRequests" => GameState::WaitingForAnswerRequests(context.transition()),
+            "AnswerAttemptReceived" => GameState::AnswerAttemptReceived(context.transition()),
+            "EndQuestion" => GameState::EndQuestion(context.transition()),
+            "CheckEndOfRound" => GameState::CheckEndOfRound(context.transition()),
+            "CalcStatsAndStartNextRound" => {
+                GameState::CalcStatsAndStartNextRound(context.transition())
+            }
+            _ => GameState::SetupAndLoading(context),
+        }
+    }
 }
 
 impl Default for GameState {

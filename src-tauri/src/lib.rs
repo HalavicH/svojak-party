@@ -1,13 +1,4 @@
-pub mod api {
-    pub mod dto;
-    pub mod events;
-    pub mod mapper;
-
-    pub mod controller {
-        pub mod gameplay;
-        pub mod startup;
-    }
-}
+pub mod api;
 
 pub mod core {
     pub mod app_context;
