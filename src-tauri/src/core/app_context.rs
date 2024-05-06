@@ -8,7 +8,7 @@ use crate::game_pack::game_pack_entites::GamePack;
 use crate::hub::hub_api::{HubManager, HubManagerError, HubType, TermEvent};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
-use error_stack::{Report, ResultExt};
+use error_stack::{FutureExt, Report, ResultExt};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::atomic::AtomicU32;
@@ -171,6 +171,13 @@ impl AppContext {
         }
     }
 
+    pub fn update_players(&mut self, players: &[Player]) {
+        let players = players.iter()
+            .map(|p| { (p.term_id, p.clone()) })
+            .collect();
+        self.game_state.game_mut().set_players(players);
+    }
+
     /// Players polling
     fn run_polling_for_players(&mut self) {
         if self.player_poling_thread_handle.is_some() {
@@ -219,7 +226,8 @@ impl AppContext {
                     .game_state
                     .show_state_mismatch("GameState::SetupAndLoading");
                 emit_error(format!("Can't start the game: {}", state_mismatch));
-                Err(GameplayError::PlayerNotPresent)?
+                Err(GameplayError::OperationForbidden)?
+                    // .attach_printable_lazy(|| { "Can't start game in current state" })?
             }
         };
 
@@ -234,11 +242,22 @@ impl AppContext {
         Ok(())
     }
 
-    pub fn update_players(&mut self, players: &[Player]) {
-        let players = players.iter()
-            .map(|p| {(p.term_id, p.clone())})
-            .collect();
-        self.game_state.game_mut().set_players(players);
+    pub fn select_question(&mut self, topic: &str, price: i32) -> Result<(), GameplayError> {
+        let game_ctx = match &mut self.game_state {
+            GameState::ChooseQuestion(game) => game,
+            _ => {
+                let state_mismatch = self
+                    .game_state
+                    .show_state_mismatch("GameState::ChooseQuestion");
+                emit_error(format!("Can't select question: {}", state_mismatch));
+                Err(GameplayError::OperationForbidden)?
+                    // .attach_printable_lazy(|| { "Can't select question in current game state" })?
+            }
+        };
+
+        let game_ctx = game_ctx.choose_question(topic, price)?;
+        self.game_state = GameState::DisplayQuestion(game_ctx);
+        Ok(())
     }
 }
 

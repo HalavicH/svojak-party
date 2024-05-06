@@ -20,7 +20,13 @@
 
     // let config;
     $: hubConfig = $currentHubConfigStore;
-    $: players = $currentPlayersStore;
+    $: players = $currentPlayersStore.map(p => {
+        if (p.iconPath === "default") {
+            p.iconPath = DFL_PLAYER_ICON;
+        }
+        return p;
+    });
+
     $: portOptions = hubConfig.availablePorts.map((portName) => {
         return {
             value: portName,
@@ -31,17 +37,6 @@
 
     $: console.log(`Modal HwClientsSettingsModal is ${isOpen}`);
     $: console.log(`Hub port used: ${hubConfig.hubPort}`);
-
-    // Watch for changes in isOpen and trigger the API call if it becomes true
-    $: if (isOpen) {
-        players = players.map(p => {
-            if (p.iconPath === "default") {
-                p.iconPath = DFL_PLAYER_ICON;
-            }
-            return p;
-        });
-
-    }
 
     async function saveSettings() {
         console.log("Saved!");

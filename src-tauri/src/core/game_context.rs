@@ -38,7 +38,7 @@ pub struct CheckEndOfRound {}
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CalcStatsAndStartNextRound {}
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Game {
     /// Entities
     pack_content: PackContent,
@@ -138,7 +138,7 @@ impl Game {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameContext<State = SetupAndLoading> {
     state: PhantomData<State>,
     game: Game,
@@ -155,13 +155,13 @@ impl Default for GameContext {
 
 /// Common implementation for every state of the `GameContext`
 impl<State> GameContext<State> {
-    pub fn transition<T>(self) -> GameContext<T> {
+    pub fn transition<T>(&self) -> GameContext<T> {
         let prev_state = Self::full_type_to_name(&format!("{:?}", self.state));
         let next_state = Self::full_type_to_name(type_name::<T>());
         log::debug!("Game transitions '{}' -> '{}'", prev_state, next_state);
         GameContext {
             state: PhantomData,
-            game: self.game,
+            game: self.game.clone(),
         }
     }
 
@@ -273,16 +273,17 @@ impl GameContext<PickFirstQuestionChooser> {
 }
 
 impl GameContext<ChooseQuestion> {
-    pub fn choose_question(self, topic: String, price: i32) -> GameContext<DisplayQuestion> {
-        let context = self.transition();
-        // context.set_
+    pub fn choose_question(&self, topic: &str, price: i32) -> Result<GameContext<DisplayQuestion>, GameplayError> {
+        let mut game_ctx: GameContext<DisplayQuestion> = self.transition();
+        let game = &mut game_ctx.game;
+        game.current_question = game.current_round.pop_question(topic, price).ok_or(GameplayError::PackElementNotPresent)?;
         log::info!("Picked question! Topic: {}, price: {}", topic, price);
-        context
+        Ok(game_ctx)
     }
 }
 
 ///// LEGACY
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct GameStats {
     pub total_correct_answers: i32,
     pub total_wrong_answers: i32,

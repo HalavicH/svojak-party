@@ -198,7 +198,7 @@ export const currentPlayersStore = writable(mockPlayers);
 export const currentPackInfoStore = writable(mockPackInfo);
 export const currentRoundStore = writable(mockRound);
 export const currentQuestionStore = writable(mockQuestion);
-export const currentGameStateStore = writable(GameState.SetupAndLoading);
+export const currentGameStateStore = writable({gameState: GameState.SetupAndLoading});
 
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");

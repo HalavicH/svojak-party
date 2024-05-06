@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
+use std::collections::HashMap;
 use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto};
 use crate::core::app_context::app;
 use crate::core::game_entities::{GameState, HubStatus};
@@ -99,9 +100,15 @@ pub fn emit_round(round: RoundDto) {
 }
 
 pub fn emit_question(question: QuestionDto) {
-    emit(Event::Round, question);
+    emit(Event::Question, question);
 }
 
+#[allow(non_snake_case)]
+#[derive(Debug, Clone, Serialize)]
+struct GameStateDto {
+    gameState: String
+}
 pub fn emit_game_state(game_state: &GameState) {
-    emit(Event::Round, game_state.state_name());
+    let game_state_dto = GameStateDto { gameState: game_state.state_name().to_string() };
+    emit(Event::GameState, game_state_dto);
 }

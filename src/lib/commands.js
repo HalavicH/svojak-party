@@ -33,7 +33,7 @@ export const TauriApiCommand = {
     // Gameplay API
     FETCH_PLAYERS: 'fetch_players',
     FETCH_ROUND: 'fetch_round',
-    GET_QUESTION_DATA: 'get_question_data',
+    SELECT_QUESTION: 'select_question',
     ALLOW_ANSWER: 'allow_answer',
     GET_FASTEST_CLICK: 'get_fastest_click',
     ANSWER_QUESTION: 'answer_question',

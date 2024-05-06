@@ -48,19 +48,19 @@ impl From<&PackContent> for PackInfoDto {
         let num_topics = package
             .rounds
             .iter()
-            .map(|round| round.themes.len())
+            .map(|round| round.topics.len())
             .sum::<usize>() as i32;
         let num_questions = package
             .rounds
             .iter()
-            .flat_map(|round| round.themes.iter())
+            .flat_map(|round| round.topics.iter())
             .map(|(_, theme)| theme.questions.len())
             .sum::<usize>() as i32;
 
         let topic_list: Vec<String> = package
             .rounds
             .iter()
-            .flat_map(|round| round.themes.values().map(|theme| theme.name.clone()))
+            .flat_map(|round| round.topics.values().map(|theme| theme.name.clone()))
             .collect();
 
         PackInfoDto {
@@ -122,7 +122,7 @@ pub fn map_players_to_player_dto(players: Vec<&Player>) -> Vec<PlayerDto> {
 impl From<&Round> for RoundDto {
     fn from(round: &Round) -> Self {
         let round_topics: Vec<TopicDto> = round
-            .themes
+            .topics
             .values()
             .map(|theme| {
                 log::info!("{theme:#?}");

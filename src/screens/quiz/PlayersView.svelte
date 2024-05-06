@@ -1,8 +1,14 @@
 <script>
     import {currentPlayersStore} from "../../lib/stores.js";
     import Player from "./subcomponents/Player.svelte";
+    import {DFL_PLAYER_ICON} from "../../lib/misc.js";
 
-    $: players = $currentPlayersStore;
+    $: players = $currentPlayersStore.map(p => {
+        if (p.iconPath === "default") {
+            p.iconPath = DFL_PLAYER_ICON;
+        }
+        return p;
+    });
 </script>
 
 <div class="player-list">

@@ -1,9 +1,16 @@
 <script>
+    import {TauriApiCommand, callBackend} from "../../../lib/commands.js";
+
     export let topicName;
     export let question;
 
     function handleQuestionClick(topicName, index) {
         console.log(`Pressed on question ${topicName}:${index}`);
+        // question.used = true; // TODO: Use if question selection is too slow
+        callBackend(TauriApiCommand.SELECT_QUESTION, {
+            topic: topicName,
+            price: question.price
+        }).then();
     }
 </script>
 

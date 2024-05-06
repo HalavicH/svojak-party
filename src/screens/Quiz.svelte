@@ -1,14 +1,23 @@
 <script>
     import PlayersView from "./quiz/PlayersView.svelte";
     import RoundView from "./quiz/RoundView.svelte";
+    import {currentGameStateStore, GameState} from "../lib/stores.js";
+    import QuestionView from "./quiz/QuestionView.svelte";
+    import Row from "../components/generic/Row.svelte";
+
+    $: gameState = $currentGameStateStore.gameState;
 </script>
 
 <div class="container">
-<!--    <div>-->
-<!--        This is a quiz screen. Work in progress-->
-<!--    </div>-->
-<!--    <a href="/">Home</a>-->
-    <RoundView/>
+    {#if gameState === GameState.ChooseQuestion}
+        <RoundView/>
+    {:else if gameState === GameState.DisplayQuestion}
+        <QuestionView/>
+    {:else}
+        <Row>
+            <div>Unhandled state: {gameState}</div>
+        </Row>
+    {/if}
     <PlayersView/>
 </div>
 

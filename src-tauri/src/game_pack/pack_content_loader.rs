@@ -54,7 +54,7 @@ fn expand_and_validate_package_paths(
     let mut result = Ok(());
 
     pack.rounds.iter_mut().for_each(|r| {
-        r.themes.iter_mut().for_each(|(_, theme)| {
+        r.topics.iter_mut().for_each(|(_, theme)| {
             theme.questions.iter_mut().for_each(|(_, q)| {
                 q.scenario.iter_mut().for_each(|a| {
                     log::debug!("Atom {:?} before mapping: {}", a.atom_type, a.content);
@@ -214,7 +214,7 @@ fn map_round(r: &RoundDto) -> Round {
     let mut round = Round {
         name: r.name.clone(),
         round_type: r.r#type.clone(),
-        themes: {
+        topics: {
             r.themes
                 .themes_list
                 .iter()
@@ -226,7 +226,7 @@ fn map_round(r: &RoundDto) -> Round {
         normal_question_count: -1,
         pip_question_count: -1,
     };
-    let vec = Vec::from_iter(round.themes.values());
+    let vec = Vec::from_iter(round.topics.values());
     round.question_count = vec
         .iter()
         .map(|&theme| theme.questions.len() as i32)

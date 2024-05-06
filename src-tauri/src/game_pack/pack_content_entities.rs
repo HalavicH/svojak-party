@@ -47,7 +47,7 @@ impl Topic {
 pub struct Round {
     pub name: String,
     pub round_type: String,
-    pub themes: HashMap<String, Topic>,
+    pub topics: HashMap<String, Topic>,
     pub question_count: i32,
     pub normal_question_count: i32,
     pub pip_question_count: i32,
@@ -55,8 +55,13 @@ pub struct Round {
 }
 
 impl Round {
-    pub fn decrement_round(&mut self) {
-        self.questions_left -= 1;
+    pub fn pop_question(&mut self, topic_name: &str, price: i32) -> Option<Question> {
+        let Some(topic) = self.topics.get_mut(topic_name) else {
+            log::error!("Topic with name: {} not found in round with name: {}", topic_name, self.name);
+            return None;
+        };
+
+        topic.questions.remove(&price)
     }
 }
 

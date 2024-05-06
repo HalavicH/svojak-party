@@ -23,15 +23,12 @@ pub async fn start_new_game() -> Result<(), GameplayError> {
 
 /// Select question to be played
 #[command]
-pub fn select_question(topic: String, price: i32) -> Result<QuestionDto, GameplayError> {
-    todo!("Rework needed");
-    // let (question, q_num) = app_mut().get_pack_question(&topic, &price).map_err(|e| {
-    //     log::error!("Can't get question data: {:#?}", e);
-    //     e.current_context().clone()
-    // })?;
-    //
-    // app.emit_game_context();
-    // Ok(map_question_to_question_dto(topic, question, q_num))
+pub fn select_question(topic: String, price: i32) -> Result<(), GameplayError> {
+    let mut app = app_mut();
+
+    app.select_question(&topic, price)?;
+    app.emit_game_context();
+    Ok(())
 }
 
 /// Allows events from players to be processed

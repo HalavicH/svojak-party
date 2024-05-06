@@ -96,7 +96,7 @@ pub enum GameplayError {
     HubOperationError,
     #[error("Answer forbidden")]
     AnswerForbidden,
-    #[error("Operation forbidden")]
+    #[error("Operation forbidden for this game state")]
     OperationForbidden,
     #[error("Internal error")]
     InternalError,
