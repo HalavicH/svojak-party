@@ -1,7 +1,6 @@
-use std::collections::HashMap;
 use crate::api::events::{emit_message, emit_players};
 use crate::core::app_context::{app_mut, AppContext};
-use crate::core::game_entities::{DEFAULT_ICON, Player};
+use crate::core::game_entities::{Player, DEFAULT_ICON};
 
 pub fn discover_and_save_players() {
     log::debug!("||| Player polling: new iteration |||");
@@ -35,7 +34,6 @@ fn compare_and_merge(app: &mut AppContext, detected_players: &[Player]) {
         emit_players(vec.into_iter().map(|p| p.into()).collect());
     }
 }
-
 
 fn is_new_players_found(app: &AppContext, detected_players: &[Player]) -> bool {
     let players = app.game_state.get_game_ref().get_players_ref();

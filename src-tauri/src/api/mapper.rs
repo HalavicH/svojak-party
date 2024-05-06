@@ -1,12 +1,12 @@
-use std::collections::hash_map::Iter;
-use crate::api::dto::{HubConfigDto, PlayerEndRoundStatsDto, PlayersDto, QuestionDto, QuestionSceneDto, RoundDto, RoundStatsDto, TopicDto};
+use crate::api::dto::{
+    HubConfigDto, PlayerEndRoundStatsDto, QuestionDto, QuestionSceneDto, RoundDto,
+    RoundStatsDto, TopicDto,
+};
 use crate::api::dto::{PackInfoDto, PlayerDto, QuestionBriefDto};
-use crate::core::app_context::{app, app_mut, AppContext};
 use crate::core::game_context::GameStats;
 use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{Atom, PackContent, Question, Round};
 use crate::hub_comm::common::hub_api::HubManager;
-use std::collections::HashMap;
 
 use crate::hub_comm::hw::hw_hub_manager::discover_serial_ports;
 
@@ -126,21 +126,18 @@ impl From<&Round> for RoundDto {
             .values()
             .map(|theme| {
                 log::info!("{theme:#?}");
-                let mut game_questions: Vec<Question> =
-                    theme.questions.values()
-                        .cloned()
-                        .collect();
-                
+                let mut game_questions: Vec<Question> = theme.questions.values().cloned().collect();
+
                 game_questions.sort_by(|q1, q2| q1.price.cmp(&q2.price));
 
                 TopicDto {
                     topicName: theme.name.clone(),
-                    questions: game_questions.iter().enumerate().into_iter()
-                        .map(|(i, q)| {
-                            QuestionBriefDto {
-                                index: i,
-                                price: q.price,
-                            }
+                    questions: game_questions
+                        .iter()
+                        .enumerate()
+                        .map(|(i, q)| QuestionBriefDto {
+                            index: i,
+                            price: q.price,
                         })
                         .collect(),
                 }
@@ -162,11 +159,7 @@ impl From<&Question> for QuestionDto {
             category: question.topic.clone(),
             price: question.price,
             questionType: question.question_type.clone(),
-            scenario: question
-                .scenario
-                .iter()
-                .map(|a| a.into())
-                .collect(),
+            scenario: question.scenario.iter().map(|a| a.into()).collect(),
             answer: question.correct_answer.clone(),
         }
     }

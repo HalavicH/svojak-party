@@ -1,14 +1,13 @@
-use std::collections::HashMap;
+use crate::core::game_entities::{GameplayError, Player};
 use crate::hub_comm::common::hub_api::HubManager;
+use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
+use error_stack::Report;
+use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{Arc, mpsc, Mutex, RwLock, RwLockReadGuard};
+use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard};
 use std::thread;
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant};
-use error_stack::Report;
-use crate::core::game_entities::{GameplayError, Player};
-use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
-use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
 
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 
@@ -82,7 +81,11 @@ impl FastestClickRequest {
     }
 }
 
-pub fn get_fastest_click_from_hub(receiver: &Arc<Mutex<Box<Receiver<TermEvent>>>>, allow_answer_timestamp: u32, players: &HashMap<u8, Player>) -> error_stack::Result<u8, GameplayError> {
+pub fn get_fastest_click_from_hub(
+    receiver: &Arc<Mutex<Box<Receiver<TermEvent>>>>,
+    allow_answer_timestamp: u32,
+    players: &HashMap<u8, Player>,
+) -> error_stack::Result<u8, GameplayError> {
     let req = FastestClickRequest::new(Instant::now(), Duration::from_secs(10));
 
     loop {
@@ -94,7 +97,7 @@ pub fn get_fastest_click_from_hub(receiver: &Arc<Mutex<Box<Receiver<TermEvent>>>
         let receiver_guard = receiver.lock().expect("Mutex poisoned");
         let events = get_events(&receiver_guard)?;
         let filtered = filter_irrelevant_events(allow_answer_timestamp, events, players);
-        if filtered.len() == 0 {
+        if filtered.is_empty() {
             log::debug!("No events after filtering. Waiting for the next iteration");
             sleep(Duration::from_secs(1));
             continue;
@@ -113,7 +116,11 @@ fn sort_by_timestamp(filtered: Vec<TermEvent>) -> Vec<TermEvent> {
     sorted
 }
 
-fn filter_irrelevant_events(allow_answer_timestamp: u32, events: Vec<TermEvent>, players: &HashMap<u8, Player>) -> Vec<TermEvent> {
+fn filter_irrelevant_events(
+    allow_answer_timestamp: u32,
+    events: Vec<TermEvent>,
+    players: &HashMap<u8, Player>,
+) -> Vec<TermEvent> {
     events
         .iter()
         .filter(|&e| {
@@ -146,7 +153,7 @@ fn filter_irrelevant_events(allow_answer_timestamp: u32, events: Vec<TermEvent>,
                     e
                 );
                 false;
-            }         
+            }
             true
         })
         .cloned()

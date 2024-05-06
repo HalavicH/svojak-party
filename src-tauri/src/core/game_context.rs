@@ -1,23 +1,16 @@
-use crate::api::dto::{QuestionType};
-use crate::api::events::{emit_round, emit_message};
-use crate::core::game_entities::{GameplayError, OldGameState, Player, PlayerState};
+use crate::api::events::{emit_message, emit_round};
+use crate::core::game_entities::{GameplayError, Player, PlayerState};
+use crate::core::term_event_processing::get_fastest_click_from_hub;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
-use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
+use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms};
 use crate::hub_comm::hw::internal::api_types::TermEvent;
+use error_stack::{ResultExt};
 use rocket::serde::{Deserialize, Serialize};
 use std::any::type_name;
-use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::sync::mpsc::Receiver;
-use std::sync::{Arc, mpsc, Mutex};
-use std::sync::atomic::Ordering;
-use std::thread::sleep;
-use std::time::{Duration, Instant};
-use error_stack::{Report, ResultExt};
-use log::log;
-use crate::core::term_event_processing::get_fastest_click_from_hub;
-use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SetupAndLoading {}
@@ -47,6 +40,7 @@ pub struct CheckEndOfRound {}
 pub struct CalcStatsAndStartNextRound {}
 
 #[derive(Debug)]
+#[derive(Default)]
 pub struct Game {
     /// Entities
     pack_content: PackContent,
@@ -70,33 +64,17 @@ pub struct Game {
 
 impl Game {
     pub fn set_current_round_by_id(&mut self, index: usize) {
-        let round: &Round = self.pack_content.rounds.get(index).expect("Expected to have round with index");
+        let round: &Round = self
+            .pack_content
+            .rounds
+            .get(index)
+            .expect("Expected to have round with index");
         self.current_round = round.clone();
         let round_dto = round.into();
         emit_round(round_dto);
     }
 }
 
-impl Default for Game {
-    fn default() -> Game {
-        Self {
-            pack_content: PackContent::default(),
-            players: HashMap::default(),
-            // Default values
-            // game_state: Default::default(),
-            current_round_index: 0,
-            current_round: Round::default(),
-            active_player_id: 0,
-            click_for_answer_allowed: false,
-            answer_allowed: false,
-            current_question: Default::default(),
-            round_stats: Default::default(),
-            events: None,
-            allow_answer_timestamp: 0,
-            round_duration_min: 0,
-        }
-    }
-}
 
 /// External common-state API
 /// Get/Set player operations should be available in any state
@@ -149,10 +127,11 @@ impl Game {
     }
 
     fn get_player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
-        let msg = format!("Expected to have term_id: {} in players map: {:?}", term_id, self.players);
-        self.players
-            .get_mut(term_id)
-            .expect(&msg)
+        let msg = format!(
+            "Expected to have term_id: {} in players map: {:?}",
+            term_id, self.players
+        );
+        self.players.get_mut(term_id).expect(&msg)
     }
 
     fn set_active_player_state(&mut self, player_state: PlayerState) {
@@ -167,7 +146,6 @@ pub struct GameContext<State = SetupAndLoading> {
     state: PhantomData<State>,
     game: Game,
 }
-
 
 impl Default for GameContext {
     fn default() -> GameContext<SetupAndLoading> {
@@ -210,7 +188,10 @@ impl<State> GameContext<State> {
 impl GameContext<SetupAndLoading> {
     pub fn set_round_duration(&mut self, round_duration_min: i32) {
         self.game.round_duration_min = round_duration_min;
-        emit_message(format!("Selected round duration of: {}", self.game.round_duration_min));
+        emit_message(format!(
+            "Selected round duration of: {}",
+            self.game.round_duration_min
+        ));
     }
 
     pub fn start(
@@ -240,12 +221,13 @@ impl GameContext<PickFirstQuestionChooser> {
         self.game.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
 
         let term_id = match self.get_fastest_click_player_id() {
-            Ok(id) => { id }
-            Err(err) => { Err(err.current_context().clone())? }
+            Ok(id) => id,
+            Err(err) => Err(err.current_context().clone())?,
         };
         emit_message(format!("Fastest player with id: {}", term_id));
         self.game.set_active_player_by_id(term_id);
-        self.game.set_active_player_state(PlayerState::QuestionChooser);
+        self.game
+            .set_active_player_state(PlayerState::QuestionChooser);
         Ok(self.transition())
     }
 
@@ -262,7 +244,10 @@ impl GameContext<PickFirstQuestionChooser> {
                 .term_id);
         }
 
-        let receiver = self.game.events.as_ref()
+        let receiver = self
+            .game
+            .events
+            .as_ref()
             .expect("Expected to have player event queue to be present at this point of game");
 
         let allow_answer_timestamp = self.game.allow_answer_timestamp;
@@ -270,7 +255,8 @@ impl GameContext<PickFirstQuestionChooser> {
             receiver,
             allow_answer_timestamp,
             self.game.get_players_ref(),
-        ).change_context(GameplayError::HubOperationError)?;
+        )
+        .change_context(GameplayError::HubOperationError)?;
 
         log::info!("Fastest click from user: {}", fastest_player_id);
         // self.click_for_answer_allowed = false; /// ????
@@ -280,7 +266,8 @@ impl GameContext<PickFirstQuestionChooser> {
     }
 
     fn get_active_players_cnt(&mut self) -> Vec<Player> {
-        self.game.players
+        self.game
+            .players
             .values()
             .filter(|&p| p.allowed_to_click())
             .cloned()

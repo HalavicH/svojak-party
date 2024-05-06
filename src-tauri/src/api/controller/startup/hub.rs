@@ -8,7 +8,7 @@ use crate::hub_comm::common::hub_api::HubType;
 #[command]
 pub fn set_hub_type(hub_type: HubType) {
     log::debug!("Got request to set hub type: {:?}", hub_type);
-    emit_message(&format!("Set {:?}", hub_type));
+    emit_message(format!("Set {:?}", hub_type));
     let mut app = app_mut();
     // send_message(&window, &format!("Set {:?}", hub_type));
     app.select_hub_type(hub_type);

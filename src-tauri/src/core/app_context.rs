@@ -1,23 +1,25 @@
-use crate::api::dto::{RoundStatsDto};
-use crate::api::events::{emit_round, emit_error, emit_message, emit_hub_config, emit_players, emit_game_state, emit_question};
-use crate::core::game_entities::{
-    GamePackError, GameState, GameplayError, OldGameState, Player, PlayerState, DEFAULT_ICON,
+use crate::api::events::{
+    emit_error, emit_game_state, emit_hub_config, emit_players, emit_question,
+    emit_round,
 };
+use crate::core::game_entities::{
+    GamePackError, GameState, GameplayError, Player,
+};
+use crate::core::player_listener::discover_and_save_players;
 use crate::core::term_event_processing::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::hub_comm::common::hub_api::{HubManager, HubType};
-use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError, HwHubManager};
+use crate::hub_comm::hw::hw_hub_manager::{HubManagerError, HwHubManager};
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 use crate::hub_comm::web::web_hub_manager::WebHubManager;
-use error_stack::{IntoReport, Report, ResultExt};
+use error_stack::{Report, ResultExt};
 use std::collections::HashMap;
 use std::ops::Deref;
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::{AtomicU32};
 use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
-use std::time::{Duration};
-use crate::core::player_listener::discover_and_save_players;
+use std::time::Duration;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -125,8 +127,7 @@ impl AppContext {
     pub fn set_hub_radio_channel(&self, channel_id: u8) {
         let mut hub_guard = self.get_locked_hub_mut();
 
-        match hub_guard
-            .set_hw_hub_radio_channel(channel_id) {
+        match hub_guard.set_hw_hub_radio_channel(channel_id) {
             Ok(_) => {
                 drop(hub_guard); // To release lock
                 self.emit_game_config_locking_hub();
@@ -205,7 +206,14 @@ impl AppContext {
 
     pub fn emit_game_config_locking_hub(&self) {
         emit_hub_config(self.get_locked_hub_mut().deref().into());
-        emit_players(self.game_state.get_game_ref().players_as_vec().into_iter().map(|p| p.into()).collect());
+        emit_players(
+            self.game_state
+                .get_game_ref()
+                .players_as_vec()
+                .into_iter()
+                .map(|p| p.into())
+                .collect(),
+        );
     }
 
     pub fn emit_game_context(&self) {
@@ -275,7 +283,11 @@ impl AppContext {
         Ok(())
     }
 
-    fn remove_question(&mut self, theme: &String, price: &i32) -> error_stack::Result<(), GamePackError> {
+    fn remove_question(
+        &mut self,
+        theme: &String,
+        price: &i32,
+    ) -> error_stack::Result<(), GamePackError> {
         // log::info!("Try to remove question from category: {theme}, price: {price}");
         // let round = self.__old_game.get_current_round_mut();
         // let theme = round
@@ -303,29 +315,32 @@ impl AppContext {
         // self.allow_answer_timestamp
         //     .swap(timestamp, Ordering::Relaxed);
         // log::info!("Current answer base timestamp: {timestamp}");
-        // 
+        //
         // self.__old_game.set_active_player_id(0);
         // self.update_non_target_player_states();
         // self.__old_game.click_for_answer_allowed = true;
         Ok(())
     }
 
-    pub fn answer_question(&mut self, answered_correctly: bool) -> error_stack::Result<bool, GameplayError> {
+    pub fn answer_question(
+        &mut self,
+        answered_correctly: bool,
+    ) -> error_stack::Result<bool, GameplayError> {
         // if !self.__old_game.answer_allowed {
         //     return Err(Report::new(GameplayError::AnswerForbidden));
         // }
-        // 
+        //
         // self.__old_game.answer_allowed = false;
         // self.allow_answer_timestamp
         //     .swap(u32::MAX, Ordering::Relaxed);
-        // 
+        //
         // let active_player_id = self.get_active_player_id();
         // log::info!(
         //     "Active player id: {}. Player ids: {:?}",
         //     active_player_id,
         //     self.get_player_keys()
         // );
-        // 
+        //
         // let response_player = {
         //     let active_player = self
         //         .__old_game
@@ -346,25 +361,25 @@ impl AppContext {
         //     active_player.stats.total_tries += 1;
         //     active_player.clone()
         // };
-        // 
+        //
         // log::info!("Current player stats: {:?}", response_player);
-        // 
+        //
         // if self.no_players_to_answer_left() {
         //     log::info!("Nobody answered question correctly");
         //     self.__old_game.round_stats.total_wrong_answers += 1;
         // }
-        // 
+        //
         // let theme = self.__old_game.question_theme.clone();
         // let price = self.__old_game.question_price;
-        // 
+        //
         // let mut retry = true;
         // if answered_correctly || self.no_players_to_answer_left() {
         //     log::info!("Removing question from the pack");
-        // 
+        //
         //     retry = false;
         //     self.update_game_state(OldGameState::ChooseQuestion);
         //     self.update_non_target_player_states();
-        // 
+        //
         //     self.remove_question(&theme, &price)
         //         .change_context(GameplayError::PackElementNotPresent)?;
         // }
@@ -411,7 +426,7 @@ impl AppContext {
     // fn update_non_target_player_states(&mut self) {
     //     let game_state = self.__old_game.game_state().clone();
     //     let active_id = self.get_active_player_id();
-    // 
+    //
     //     self.__old_game.players.iter_mut().for_each(|(id, p)| {
     //         log::debug!(
     //             "Game state: {:?}. Player: {}:{:?}",
@@ -419,17 +434,17 @@ impl AppContext {
     //             p.term_id,
     //             p.state
     //         );
-    // 
+    //
     //         if p.term_id == active_id {
     //             log::debug!("Active player. Skipping");
     //             return;
     //         }
-    // 
+    //
     //         if p.state == PlayerState::AnsweredWrong {
     //             log::trace!("Player with id {} becomes inactive", id);
     //             p.state = PlayerState::Inactive;
     //         }
-    // 
+    //
     //         if game_state == OldGameState::ChooseQuestion
     //             || (p.state != PlayerState::Dead && p.state != PlayerState::Inactive)
     //         {

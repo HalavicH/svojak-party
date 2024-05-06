@@ -1,5 +1,7 @@
-use std::collections::HashMap;
-use crate::core::game_context::{AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion, DisplayQuestion, EndQuestion, Game, GameContext, SetupAndLoading, WaitingForAnswerRequests};
+use crate::core::game_context::{
+    AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion,
+    DisplayQuestion, EndQuestion, Game, GameContext, SetupAndLoading, WaitingForAnswerRequests,
+};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -153,30 +155,30 @@ impl GameState {
 
     pub fn get_game_mut(&mut self) -> &mut Game {
         match self {
-            GameState::SetupAndLoading(game_ctx) => { game_ctx.get_game_mut() }
-            GameState::ChooseQuestion(game_ctx) => { game_ctx.get_game_mut() }
-            GameState::DisplayQuestion(game_ctx) => { game_ctx.get_game_mut() }
-            GameState::WaitingForAnswerRequests(game_ctx) => { game_ctx.get_game_mut() }
-            GameState::AnswerAttemptReceived(game_ctx) => { game_ctx.get_game_mut() }
-            GameState::EndQuestion(game_ctx) => { game_ctx.get_game_mut() }
-            GameState::CheckEndOfRound(game_ctx) => { game_ctx.get_game_mut() }
-            GameState::CalcStatsAndStartNextRound(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::SetupAndLoading(game_ctx) => game_ctx.get_game_mut(),
+            GameState::ChooseQuestion(game_ctx) => game_ctx.get_game_mut(),
+            GameState::DisplayQuestion(game_ctx) => game_ctx.get_game_mut(),
+            GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.get_game_mut(),
+            GameState::AnswerAttemptReceived(game_ctx) => game_ctx.get_game_mut(),
+            GameState::EndQuestion(game_ctx) => game_ctx.get_game_mut(),
+            GameState::CheckEndOfRound(game_ctx) => game_ctx.get_game_mut(),
+            GameState::CalcStatsAndStartNextRound(game_ctx) => game_ctx.get_game_mut(),
         }
     }
-    
+
     pub fn get_game_ref(&self) -> &Game {
         match self {
-            GameState::SetupAndLoading(game_ctx) => { game_ctx.get_game_ref() }
-            GameState::ChooseQuestion(game_ctx) => { game_ctx.get_game_ref() }
-            GameState::DisplayQuestion(game_ctx) => { game_ctx.get_game_ref() }
-            GameState::WaitingForAnswerRequests(game_ctx) => { game_ctx.get_game_ref() }
-            GameState::AnswerAttemptReceived(game_ctx) => { game_ctx.get_game_ref() }
-            GameState::EndQuestion(game_ctx) => { game_ctx.get_game_ref() }
-            GameState::CheckEndOfRound(game_ctx) => { game_ctx.get_game_ref() }
-            GameState::CalcStatsAndStartNextRound(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::SetupAndLoading(game_ctx) => game_ctx.get_game_ref(),
+            GameState::ChooseQuestion(game_ctx) => game_ctx.get_game_ref(),
+            GameState::DisplayQuestion(game_ctx) => game_ctx.get_game_ref(),
+            GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.get_game_ref(),
+            GameState::AnswerAttemptReceived(game_ctx) => game_ctx.get_game_ref(),
+            GameState::EndQuestion(game_ctx) => game_ctx.get_game_ref(),
+            GameState::CheckEndOfRound(game_ctx) => game_ctx.get_game_ref(),
+            GameState::CalcStatsAndStartNextRound(game_ctx) => game_ctx.get_game_ref(),
         }
     }
-    
+
     pub fn get_state_name(&self) -> &str {
         match self {
             GameState::SetupAndLoading(_) => "SetupAndLoading",

@@ -1,13 +1,13 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use std::fmt::Debug;
 use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto};
 use crate::core::app_context::app;
+use crate::core::game_entities::{GameState, HubStatus};
 use crate::game_pack::pack_content_entities::Round;
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use tauri::Window;
-use crate::core::game_entities::{GameState, HubStatus};
 
 #[derive(Debug)]
 pub enum Event {
@@ -43,7 +43,11 @@ impl<'a> From<Event> for &'a str {
 
 pub fn emit<S: Serialize + Clone + Debug>(event: Event, message: S) {
     if let Some(window) = window().as_ref() {
-        log::debug!("Emitting event of type: {:?}. Payload: {:#?}", event, message);
+        log::debug!(
+            "Emitting event of type: {:?}. Payload: {:#?}",
+            event,
+            message
+        );
         window
             .emit(event.into(), message)
             .map_err(|e| format!("Failed to send message: {}", e))
