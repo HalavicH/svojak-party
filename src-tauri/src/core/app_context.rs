@@ -16,6 +16,7 @@ use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::Duration;
+use crate::types::ArcRwBox;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -39,17 +40,13 @@ pub fn app() -> RwLockReadGuard<'static, AppContext> {
 pub struct AppContext {
     // Comm entities
     pub hub_type: HubType,
-    hub: Arc<RwLock<Box<dyn HubManager>>>,
+    hub: ArcRwBox<dyn HubManager>,
     player_poling_thread_handle: Option<JoinHandle<()>>,
 
     // pub window: Arc<RwLock<Box<Option<Window>>>>,
     // Game entities
     pub game_pack: GamePack,
     pub game_state: GameState,
-
-    // TODO: move to game
-    pub player_event_listener: Option<Arc<Mutex<Receiver<TermEvent>>>>,
-    pub allow_answer_timestamp: Arc<AtomicU32>,
 }
 
 unsafe impl Send for AppContext {}
@@ -58,11 +55,9 @@ impl Default for AppContext {
     fn default() -> Self {
         Self {
             hub_type: HubType::default(),
-            hub: Arc::new(RwLock::new(Box::<HwHubManager>::default())),
+            hub: ArcRwBox::new(RwLock::new(Box::<HwHubManager>::default())),
             game_pack: GamePack::default(),
             game_state: GameState::default(),
-            player_event_listener: None,
-            allow_answer_timestamp: Arc::new(AtomicU32::default()),
             // window: Arc::new(RwLock::new(Box::<Option<Window>>::default())),
             player_poling_thread_handle: None,
         }

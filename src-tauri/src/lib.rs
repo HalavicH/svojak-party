@@ -26,3 +26,4 @@ pub mod game_pack {
 }
 
 pub mod hub;
+pub mod types;
