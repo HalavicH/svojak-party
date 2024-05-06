@@ -185,8 +185,12 @@ const mockQuestion = {
     questionType: QuestionType.Normal,
     scenario: [
         {
-            mediaType: QuestionMediaType,
-            content: String,
+            mediaType: QuestionMediaType.Text,
+            content: "Front ui should send requests via `invoke` and listen response through `listen`",
+        },
+        {
+            mediaType: QuestionMediaType.Image,
+            content: "/tauri.svg",
         }
     ],
     answer: String,

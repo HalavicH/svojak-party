@@ -1,6 +1,5 @@
 <script>
     import BaseModal from "../components/abstract/BaseModal.svelte";
-    import Button from "../components/generic/Button.svelte";
     import ItemsBlock from "../components/generic/ItemsBlock.svelte";
     import Row from "../components/generic/Row.svelte";
     import {TauriApiCommand, callBackend} from "../lib/commands.js";
@@ -8,7 +7,8 @@
     import {currentPlayersStore, currentPackInfoStore, navTo, GameState} from "../lib/stores.js";
     import {Views} from "./views.js";
     import SecondaryButton from "../components/generic/SecondaryButton.svelte";
-    import MultiColumnList from "../components/generic/MultiColumnList.svelte";
+    import {isRunningInTauri} from "../lib/misc.js";
+    import {currentGameStateStore} from "../lib/stores.js";
 
     // Provided by 'modals'
     export let isOpen;
@@ -45,8 +45,12 @@
     }
 
     async function setState(state) {
-        notify.info(`Set state to: ${state}`);
-        await callBackend(TauriApiCommand.DBG_SET_GAME_STATE, {name: state});
+        notify.info(`Set state to: '${state}'`);
+        if (isRunningInTauri()) {
+            await callBackend(TauriApiCommand.DBG_SET_GAME_STATE, {name: state});
+        } else {
+            currentGameStateStore.set({gameState: state});
+        }
     }
 </script>
 
