@@ -36,7 +36,11 @@ pub fn save_players(players: Vec<PlayerDto>) {
 
     log::info!("Converted players: {:#?}", player_entities);
 
-    app_mut().update_players(&player_entities)
+    let mut app = app_mut();
+    app.update_players(&player_entities);
+    // No emit_players required, as we just set them, but I'll do it anyway to maintain consistency
+    let vec = app.game_state.game_ref().players_ref_as_vec();
+    emit_players(vec.into_iter().map(|p| p.into()).collect());
 }
 
 /// Store round duration
@@ -44,4 +48,5 @@ pub fn save_players(players: Vec<PlayerDto>) {
 pub fn save_round_duration(round_minutes: i32) {
     log::info!("Round duration is {round_minutes}");
     app_mut().save_round_duration(round_minutes)
+    // No emit required, as it's internal fields
 }

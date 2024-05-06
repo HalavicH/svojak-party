@@ -118,7 +118,6 @@ impl AppContext {
         match hub_guard.set_hw_hub_radio_channel(channel_id) {
             Ok(_) => {
                 drop(hub_guard); // To release lock
-                self.emit_game_config_locking_hub();
             }
             Err(e) => {
                 log::error!("{:#?}", e);
@@ -144,10 +143,9 @@ impl AppContext {
                 self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
-        emit_hub_config(self.hub_mut().deref().into());
     }
 
-    pub fn discover_hub(&mut self, path: String) {
+    pub fn discover_hub_and_players(&mut self, path: String) {
         let game_ctx = match &mut self.game_state {
             GameState::SetupAndLoading(game) => game,
             _ => {
@@ -171,7 +169,6 @@ impl AppContext {
             Ok(_) => self.run_polling_for_players(),
             Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err),
         }
-        self.emit_game_config_locking_hub();
     }
 
     /// Players polling
@@ -234,16 +231,13 @@ impl AppContext {
         let game_ctx = game_ctx.start(content, event_rx)?;
         let game_ctx = game_ctx.pick_first_question_chooser()?;
         self.game_state = GameState::ChooseQuestion(game_ctx);
-        self.emit_game_config_locking_hub();
         Ok(())
     }
 
-    /// Takes whole game context and maps to config which contains only required elements
     pub fn update_players(&mut self, players: &[Player]) {
-        let players = players.iter().fold(HashMap::new(), |mut map, player| {
-            map.insert(player.term_id, player.clone());
-            map
-        });
+        let players = players.iter()
+            .map(|p| {(p.term_id, p.clone())})
+            .collect();
         self.game_state.game_mut().set_players(players);
     }
 }

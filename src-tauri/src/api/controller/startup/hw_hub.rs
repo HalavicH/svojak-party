@@ -1,9 +1,11 @@
+use std::ops::Deref;
 use std::sync::RwLockWriteGuard;
 
 use crate::api::dto::{HubRequestDto, HubResponseDto};
 use crate::core::app_context::app;
 use crate::hub::hub_api::{HubManager, HubManagerError};
 use tauri::command;
+use crate::api::events::emit_hub_config;
 
 use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest};
 
@@ -12,6 +14,7 @@ use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest};
 pub fn set_hw_hub_radio_channel(channel_id: i32) {
     log::info!("Got channel id: {channel_id}");
     app().set_hub_radio_channel(channel_id as u8);
+    emit_hub_config(app().hub().deref().into());
 }
 
 /// HUB Debug API

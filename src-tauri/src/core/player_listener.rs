@@ -11,7 +11,7 @@ pub fn discover_and_save_players() {
     };
     match result {
         Ok(detected_players) => {
-            compare_and_merge(&mut app_guard, &detected_players);
+            compare_and_merge_players(&mut app_guard, &detected_players);
         }
         Err(error) => {
             log::error!("Can't discover players: {:?}", error);
@@ -20,7 +20,7 @@ pub fn discover_and_save_players() {
     log::debug!("");
 }
 
-fn compare_and_merge(app: &mut AppContext, detected_players: &[Player]) {
+fn compare_and_merge_players(app: &mut AppContext, detected_players: &[Player]) {
     let det_pl_cnt = detected_players.len();
     log::debug!("Detected {} players", det_pl_cnt);
     if is_new_players_found(app, detected_players) {
