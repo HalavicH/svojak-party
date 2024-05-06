@@ -187,7 +187,7 @@ impl AppContext {
     }
 
     fn discover_and_save_players() {
-        log::debug!("############# NEW PLAYER POLLING ITERATION ###############");
+        log::debug!("||| Player polling: new iteration |||");
         let mut app_guard = app_mut();
         let result = {
             let mut guard = app_guard.get_locked_hub_mut();

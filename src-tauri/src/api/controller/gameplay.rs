@@ -7,7 +7,7 @@ use tauri::command;
 
 /// Start the game with selected players and game pack
 #[command]
-pub fn start_the_game() -> Result<(), GameplayError> {
+pub async fn start_new_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
     app_mut().start_new_game().map_err(|e| {
         emit_error(e.to_string());

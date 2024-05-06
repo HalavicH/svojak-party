@@ -36,7 +36,7 @@
     function startTheGame() {
         console.log("Start pressed");
         navTo(Views.QUIZ);
-        callBackend(TauriApiCommand.START_THE_GAME).then()
+        callBackend(TauriApiCommand.START_NEW_GAME).then()
     }
 
     async function setRoundDuration(selected) {

@@ -35,7 +35,7 @@ fn main() {
             init_game_pack,
             save_round_duration,
             init_game_pack,
-            start_the_game,
+            start_new_game,
             // Debug API
             dbg_setup_hub_connection,
             dbg_send_raw_request_frame,

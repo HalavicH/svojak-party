@@ -21,7 +21,7 @@ export const TauriApiCommand = {
     SAVE_PLAYERS: 'save_players',
     INIT_GAME_PACK: 'init_game_pack',
     SAVE_ROUND_DURATION: 'save_round_duration',
-    START_THE_GAME: 'start_the_game',
+    START_NEW_GAME: 'start_new_game',
 
     /////////// LEGACY API ////////////
     FETCH_CONFIGURATION: 'fetch_configuration',
