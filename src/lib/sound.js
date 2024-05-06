@@ -11,6 +11,18 @@ export function getClickSound() {
     return clickSound;
 }
 
+export function getAllowAnswerSound() {
+    return clickSound;
+}
+
+export function getCorrectAnswerSound() {
+    return clickSound;
+}
+
+export function getWrongAnswerSound() {
+    return clickSound;
+}
+
 export function getWhooshSound() {
     return swipeSound;
 }

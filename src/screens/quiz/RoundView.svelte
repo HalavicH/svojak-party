@@ -1,22 +1,16 @@
 <script>
     import {currentRoundStore, navTo} from "../../lib/stores.js";
     import Button from "../../components/generic/Button.svelte";
-    import {Views} from "../views.js";
+    import {goToMainMenu} from "../views.js";
     import QuestionTile from "./subcomponents/QuestionTile.svelte";
 
     $: currentRound = $currentRoundStore;
     console.log("|> Current round:", currentRound, "<|");
-    function goToMainMenu() {
-        console.log("Going to main menu");
-        navTo(Views.MENU);
-    }
-
 </script>
 
 <div class="round-screen">
     <div class="title-bar">
         <p class="round-label">Round: {currentRound.roundName}</p>
-        <Button text="Menu" onClick={goToMainMenu}/>
     </div>
     <div class="round-table-box">
         <table class="round-table">

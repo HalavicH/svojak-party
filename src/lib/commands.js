@@ -35,7 +35,7 @@ export const TauriApiCommand = {
     SELECT_QUESTION: 'select_question',
     ALLOW_ANSWER: 'allow_answer',
     ANSWER_QUESTION: 'answer_question',
-    FINISH_QUESTION_PREMATURELY: 'finish_question_prematurely',
+    FINISH_QUESTION_PREMATURELY_AND_SHOW_ANSWER: 'finish_question_prematurely_and_show_answer',
     INIT_NEXT_ROUND: 'init_next_round',
     SEND_PIP_VICTIM: 'send_pip_victim',
     GET_ACTIVE_PLAYER_ID: 'get_active_player_id',

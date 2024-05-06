@@ -27,6 +27,6 @@
         background-color: var(--modal-table-background-color);
 
         height: 30vh;
-        margin: 0 10px 10px;
+        margin: 0.5em;
     }
 </style>
