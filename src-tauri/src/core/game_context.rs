@@ -2,14 +2,19 @@ use crate::api::dto::{QuestionType};
 use crate::api::events::emit_message;
 use crate::core::game_entities::{GameplayError, OldGameState, Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
-use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms};
+use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 use rocket::serde::{Deserialize, Serialize};
 use std::any::type_name;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::sync::mpsc::Receiver;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, mpsc, Mutex};
+use std::sync::atomic::Ordering;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
+use error_stack::{Report, ResultExt};
+use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SetupAndLoading {}
@@ -37,6 +42,8 @@ pub struct CheckEndOfRound {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CalcStatsAndStartNextRound {}
+
+
 
 #[derive(Debug)]
 pub struct GameContext<State = SetupAndLoading> {
@@ -112,7 +119,7 @@ impl<State> GameContext<State> {
     pub fn get_players_ref(&self) -> &HashMap<u8, Player> {
         &self.players
     }
-    
+
     pub fn get_players_mut(&mut self) -> &mut HashMap<u8, Player> {
         &mut self.players
     }
@@ -130,6 +137,7 @@ impl<State> GameContext<State> {
     }
 
     fn set_active_player_by_id(&mut self, term_id: u8) {
+        log::debug!("Looking for user with id: {}", term_id);
         let player = self.get_player_by_id_mut(&term_id);
         self.active_player_id = player.term_id;
     }
@@ -179,7 +187,10 @@ impl GameContext<PickFirstQuestionChooser> {
     ) -> Result<GameContext<ChooseQuestion>, GameplayError> {
         self.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
 
-        let term_id = self.get_fastest_click_player_id()?;
+        let term_id = match self.get_fastest_click_player_id() {
+            Ok(id) => {id}
+            Err(err) => {Err(err.current_context().clone())?}
+        };
         emit_message(format!("Fastest player with id: {}", term_id));
         self.set_active_player_by_id(term_id);
         self.set_active_player_state(PlayerState::QuestionChooser);
@@ -187,12 +198,12 @@ impl GameContext<PickFirstQuestionChooser> {
         Ok(self.transition())
     }
 
-    fn get_fastest_click_player_id(&mut self) -> Result<u8, GameplayError> {
+    fn get_fastest_click_player_id(&mut self) -> error_stack::Result<u8, GameplayError> {
         let active_players = self.get_active_players_cnt();
         let active_players_cnt = active_players.len();
 
         if active_players_cnt == 0 {
-            return Err(GameplayError::NoActivePlayersLeft);
+            Err(GameplayError::NoActivePlayersLeft)?;
         } else if active_players_cnt == 1 {
             return Ok(active_players
                 .first()
@@ -200,25 +211,124 @@ impl GameContext<PickFirstQuestionChooser> {
                 .term_id);
         }
 
-        // let fastest_player_id = self
-        //     .get_fastest_click_from_hub()
-        //     .change_context(GameplayError::HubOperationError)?;
-        //
-        // log::info!("Fastest click from user: {}", fastest_player_id);
-        // self.game.click_for_answer_allowed = false;
-        // self.game.answer_allowed = true;
-        // self.game.set_active_player_id(fastest_player_id);
-        //
-        // self.game
-        //     .players
-        //     .get_mut(&fastest_player_id)
-        //     .ok_or(Report::new(GameplayError::PlayerNotPresent))
-        //     .attach_printable(format!("Can't find player with id {}", fastest_player_id))?
-        //     .state = PlayerState::FirstResponse;
+        let fastest_player_id = self
+            .get_fastest_click_from_hub()
+            .change_context(GameplayError::HubOperationError)?;
+        
+        log::info!("Fastest click from user: {}", fastest_player_id);
+        // self.click_for_answer_allowed = false; /// ????
+        // self.answer_allowed = true;
 
-        Ok(0)
+        Ok(fastest_player_id)
     }
 
+    fn get_fastest_click_from_hub(&mut self) -> error_stack::Result<u8, HubManagerError> {
+        let Some(receiver) = &self.events else {
+            return Err(HubManagerError::NotInitializedError.into());
+        };
+
+        let start_time = Instant::now();
+        let timeout = Duration::from_secs(10);
+        let fastest_click: Option<u8> = None;
+
+        let receiver_guard = receiver.lock().expect("Mutex poisoned");
+        loop {
+            if start_time.elapsed() >= timeout {
+                Err(HubManagerError::NoResponseFromTerminal)?;
+            }
+
+            let events = match Self::get_events(&receiver_guard) {
+                Ok(events) => events,
+                Err(_) => {
+                    sleep(Duration::from_millis(100));
+                    continue;
+                }
+            };
+
+            let base_timestamp = self.allow_answer_timestamp;
+            let mut events: Vec<TermEvent> = events
+                .iter()
+                .filter(|&e| {
+                    if e.timestamp >= base_timestamp {
+                        log::info!("After answer allowed. Event {:?}", e);
+                        true
+                    } else {
+                        log::info!("Answer too early. Event {:?}", e);
+                        false
+                    }
+                })
+                .cloned()
+                .collect();
+
+            events.sort_by(|e1, e2| e1.timestamp.cmp(&e2.timestamp));
+
+            if let Some(value) = self.find_the_fastest_event(&mut events) {
+                return value;
+            }
+
+            if let Some(fastest_click_id) = fastest_click {
+                return Ok(fastest_click_id);
+            }
+
+            sleep(Duration::from_secs(1));
+        }
+    }
+
+
+    fn find_the_fastest_event(
+        &self,
+        events: &mut Vec<TermEvent>,
+    ) -> Option<error_stack::Result<u8, HubManagerError>> {
+        for e in events {
+            if e.state != Pressed {
+                log::debug!("Release event. Skipping: {:?}", e);
+                continue;
+            }
+
+            let Some(player) = self.players.get(&e.term_id) else {
+                log::debug!("Unknown terminal id {} event. Skipping: {:?}", e.term_id, e);
+                continue;
+            };
+
+            if !player.allowed_to_click() {
+                log::debug!(
+                    "Player {} is not allowed to click. Skipping: {:?}",
+                    e.term_id,
+                    e
+                );
+                continue;
+            }
+
+            log::info!("Found the fastest click: {:?}", e);
+            return Some(Ok(e.term_id));
+        }
+        None
+    }
+
+    fn get_events(
+        receiver: &Receiver<TermEvent>,
+    ) -> error_stack::Result<Vec<TermEvent>, HubManagerError> {
+        let mut events: Vec<TermEvent> = Vec::new();
+        loop {
+            match receiver.try_recv() {
+                Ok(received_event) => {
+                    events.push(received_event);
+                }
+                Err(mpsc::TryRecvError::Empty) => {
+                    log::debug!("Got {} events for now.", events.len());
+                    break;
+                }
+                Err(mpsc::TryRecvError::Disconnected) => {
+                    // Channel has been disconnected, so we break the loop
+                    let report = Report::new(HubManagerError::InternalError)
+                        .attach_printable("Pipe disconnected: mpsc::TryRecvError::Disconnected");
+                    return Err(report);
+                }
+            }
+        }
+
+        Ok(events)
+    }
     fn get_active_players_cnt(&mut self) -> Vec<Player> {
         self.players
             .values()
