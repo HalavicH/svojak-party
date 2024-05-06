@@ -1,5 +1,5 @@
 import {listen} from "@tauri-apps/api/event";
-import {gameContext, gamePackInfo} from "./stores.js";
+import {currentRound, gameContext, gamePackInfo} from "./stores.js";
 import {notify} from "./notifications.js";
 import {callBackend, TauriApiCommand} from "./commands.js";
 import {isRunningInTauri} from "./misc.js";
@@ -8,6 +8,7 @@ import {onDestroy, onMount} from "svelte";
 export const TauriEvents = {
     GameConfig: 'GameConfig',
     PackInfo: 'PackInfo',
+    Round: 'Round',
 }
 
 export function setupEventListener(eventType, callback) {
@@ -50,6 +51,7 @@ function logEvent(type, event) {
 export function initEventListeners() {
     listenAndStoreEvent(TauriEvents.GameConfig, gameContext);
     listenAndStoreEvent(TauriEvents.PackInfo, gamePackInfo);
+    listenAndStoreEvent(TauriEvents.Round, currentRound);
 
     console.log("################################################");
     console.log("##### ALL EVENT LISTENERS HAS BEEN LOADED ######");

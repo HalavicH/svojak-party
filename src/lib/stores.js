@@ -1,12 +1,14 @@
 import {writable} from "svelte/store";
 import {Views} from "../screens/views.js";
 import {DFL_PLAYER_ICON} from "./misc.js";
+import {notify} from "./notifications.js";
 
 // Views
 export const currentView = writable(Views.MENU);
 
 export function navTo(view) {
     currentView.set(view);
+    notify.info(`Transitioned to: ${view}`);
 }
 
 
@@ -63,6 +65,7 @@ export const gameContext = writable({
     availablePorts: [],
     hubStatus: "",
     radioChannel: -1,
+    roundDurationMin: 10,
     // These players are used only for setup
     players: [
         {

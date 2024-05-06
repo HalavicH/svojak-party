@@ -1,6 +1,5 @@
 use crate::api::dto::PackErrorData;
 use crate::api::events::emit_pack_info;
-use crate::api::mapper::map_package_to_pack_info_dto;
 use crate::core::app_context::{app, app_mut};
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use error_stack::Report;
@@ -16,10 +15,6 @@ pub fn init_game_pack(path: String) -> Result<(), PackErrorData> {
     match result {
         Ok(pack) => {
             app_mut().set_game_pack(pack);
-
-            let package = &app().game_pack.content;
-            let pack_info_dto = map_package_to_pack_info_dto(package);
-            emit_pack_info(pack_info_dto);
             Ok(())
         }
         Err(err) => handle_pack_info_error(path, err),

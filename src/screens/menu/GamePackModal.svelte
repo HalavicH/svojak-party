@@ -13,6 +13,7 @@
     import {gameContext, gamePackInfo, navTo} from "../../lib/stores.js";
     import {Views} from "../views.js";
     import {TauriApiCommand, callBackend} from "../../lib/commands.js";
+    import {notify} from "../../lib/notifications.js";
 
     export let isOpen;
 
@@ -34,12 +35,12 @@
 
     function startTheGame() {
         console.log("Start pressed");
-        callBackend(TauriApiCommand.START_THE_GAME)
         navTo(Views.QUIZ);
+        callBackend(TauriApiCommand.START_THE_GAME).then()
     }
 
     async function setRoundDuration(selected) {
-        callBackend(TauriApiCommand.SAVE_ROUND_DURATION, {round_minutes: selected})
+        callBackend(TauriApiCommand.SAVE_ROUND_DURATION, {roundMinutes: Number.parseInt(selected)})
     }
 </script>
 

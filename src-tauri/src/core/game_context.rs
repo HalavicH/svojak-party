@@ -1,5 +1,5 @@
 use crate::api::dto::{QuestionType};
-use crate::api::events::emit_message;
+use crate::api::events::{emit_app_context, emit_round, emit_message};
 use crate::core::game_entities::{GameplayError, OldGameState, Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
@@ -51,6 +51,7 @@ pub struct Game {
     /// Game State
     // game_state: GameState,
     current_round_index: usize,
+    current_round: Round,
     active_player_id: u8,
     // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
     click_for_answer_allowed: bool,
@@ -64,6 +65,15 @@ pub struct Game {
     round_duration_min: i32,
 }
 
+impl Game {
+    pub fn set_current_round_by_id(&mut self, index: usize) {
+        let round: &Round = self.pack_content.rounds.get(index).expect("Expected to have round with index");
+        self.current_round = round.clone();
+        let round_dto = round.into();
+        emit_round(round_dto);
+    }
+}
+
 impl Default for Game {
     fn default() -> Game {
         Self {
@@ -72,6 +82,7 @@ impl Default for Game {
             // Default values
             // game_state: Default::default(),
             current_round_index: 0,
+            current_round: Round::default(),
             active_player_id: 0,
             click_for_answer_allowed: false,
             answer_allowed: false,
@@ -91,11 +102,6 @@ impl Game {
     /// Immutable
     pub fn get_players_ref(&self) -> &HashMap<u8, Player> {
         &self.players
-    }
-
-    pub fn get_current_round(&self) -> Option<&Round> {
-        let idx = self.current_round_index;
-        self.pack_content.rounds.get(idx)
     }
 
     /// Mutable player operations (used for player monitoring my hub)
@@ -119,7 +125,7 @@ impl Game {
         let player = self.get_player_by_id_mut(&term_id);
         self.active_player_id = player.term_id;
     }
-    
+
     fn get_active_player_mut(&mut self) -> &mut Player {
         let id = self.active_player_id;
         log::debug!("Looking for user with id: {}", id);
@@ -188,21 +194,26 @@ impl<State> GameContext<State> {
 impl GameContext<SetupAndLoading> {
     pub fn set_round_duration(&mut self, round_duration_min: i32) {
         self.game.round_duration_min = round_duration_min;
+        emit_message(format!("Selected round duration of: {}", self.game.round_duration_min));
     }
+    
     pub fn start(
         self,
         pack_content: PackContent,
         event_rx: Receiver<TermEvent>,
     ) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
-        let mut game = self.transition();
-        game.game.pack_content = pack_content;
-        if game.game.players.len() < 2 {
+        let mut game_ctx = self.transition();
+        game_ctx.game.pack_content = pack_content;
+        if game_ctx.game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::NotEnoughPlayers);
         }
 
-        game.game.events = Some(Arc::new(Mutex::new(Box::new(event_rx))));
-        Ok(game)
+        game_ctx.game.current_round_index = 0;
+        game_ctx.game.set_current_round_by_id(0);
+
+        game_ctx.game.events = Some(Arc::new(Mutex::new(Box::new(event_rx))));
+        Ok(game_ctx)
     }
 }
 
@@ -219,7 +230,6 @@ impl GameContext<PickFirstQuestionChooser> {
         emit_message(format!("Fastest player with id: {}", term_id));
         self.game.set_active_player_by_id(term_id);
         self.game.set_active_player_state(PlayerState::QuestionChooser);
-
         Ok(self.transition())
     }
 

@@ -43,7 +43,7 @@ impl Topic {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Round {
     pub name: String,
     pub round_type: String,

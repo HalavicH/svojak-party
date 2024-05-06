@@ -39,7 +39,7 @@ pub fn emit_pack_info(pack_info: PackInfoDto) {
     emit(Event::PackInfo, pack_info);
 }
 
-pub fn emit_current_round(round: RoundDto) {
+pub fn emit_round(round: RoundDto) {
     emit(Event::Round, round);
 }
 

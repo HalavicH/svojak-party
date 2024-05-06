@@ -1,5 +1,5 @@
 use crate::api::dto::{RoundStatsDto};
-use crate::api::events::{emit_app_context, emit_current_round, emit_error, emit_message};
+use crate::api::events::{emit_app_context, emit_round, emit_error, emit_message};
 use crate::api::mapper::{game_to_round_stats_dto, map_app_context};
 use crate::core::game_entities::{
     GamePackError, GameState, GameplayError, OldGameState, Player, PlayerState, DEFAULT_ICON,
@@ -275,8 +275,8 @@ impl AppContext {
 
         let game_ctx = std::mem::take(game_ctx); // Take ownership of the value inside the mutable reference
         let game_ctx = game_ctx.start(self.game_pack.content.clone(), event_rx)?;
-        emit_current_round(game_ctx.get_game_ref().get_current_round().into());
         let game_ctx = game_ctx.pick_first_question_chooser()?;
+        emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
         self.game_state = GameState::ChooseQuestion(game_ctx);
         Ok(())
     }

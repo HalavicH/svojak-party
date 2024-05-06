@@ -30,7 +30,12 @@ pub fn map_app_context(context: &AppContext, hub: &Box<dyn HubManager>) -> AppCo
     }
 }
 
-pub fn map_package_to_pack_info_dto(package: &PackContent) -> PackInfoDto {
+impl From<&PackContent> for PackInfoDto {
+    fn from(value: &PackContent) -> Self {
+        map_package_to_pack_info_dto(value)
+    }
+}
+fn map_package_to_pack_info_dto(package: &PackContent) -> PackInfoDto {
     let author = match package.info.authors.first() {
         Some(author) => author.name.clone(),
         None => String::new(),
