@@ -59,7 +59,7 @@ fn expand_and_validate_package_paths(
                 q.scenario.iter_mut().for_each(|a| {
                     log::debug!("Atom {:?} before mapping: {}", a.atom_type, a.content);
                     match a.atom_type {
-                        QuestionMediaType::Say => {}
+                        QuestionMediaType::Text => {}
                         QuestionMediaType::Voice => {
                             a.content = locations
                                 .audio_path
@@ -166,7 +166,7 @@ fn map_atoms(a: &AtomDto) -> Atom {
     Atom {
         atom_type: {
             match a.r#type {
-                AtomTypeDto::say => QuestionMediaType::Say,
+                AtomTypeDto::say => QuestionMediaType::Text,
                 AtomTypeDto::voice => QuestionMediaType::Voice,
                 AtomTypeDto::video => QuestionMediaType::Video,
                 AtomTypeDto::marker => QuestionMediaType::Marker,

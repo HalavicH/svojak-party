@@ -1,10 +1,11 @@
 <script>
-    import {currentRound, navTo} from "../../lib/stores.js";
+    import {currentRoundStore, navTo} from "../../lib/stores.js";
     import Button from "../../components/generic/Button.svelte";
     import {Views} from "../views.js";
     import QuestionTile from "./subcomponents/QuestionTile.svelte";
 
-    console.log(">>>> ", $currentRound);
+    $: currentRound = $currentRoundStore;
+    console.log("|> Current round:", currentRound, "<|");
     function goToMainMenu() {
         console.log("Going to main menu");
         navTo(Views.MENU);
@@ -14,13 +15,13 @@
 
 <div class="round-screen">
     <div class="title-bar">
-        <p class="round-label">Round: {$currentRound.roundName}</p>
+        <p class="round-label">Round: {currentRound.roundName}</p>
         <Button text="Menu" onClick={() => {goToMainMenu}}/>
     </div>
     <div class="round-table-box">
         <table class="round-table">
             <tbody>
-            {#each $currentRound.roundTopics as topic}
+            {#each currentRound.roundTopics as topic}
                 <tr>
                     <td class="round-topic">{topic.topicName}</td>
                     {#each topic.questions as question}

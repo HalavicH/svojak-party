@@ -1,8 +1,6 @@
 use std::sync::RwLockWriteGuard;
 
 use crate::api::dto::{HubRequestDto, HubResponseDto};
-use crate::api::events::emit_app_context;
-use crate::api::mapper::map_app_context;
 use crate::core::app_context::app;
 use tauri::command;
 
@@ -13,19 +11,9 @@ use crate::hub_comm::hw::internal::api_types::{HwHubIoError, HwHubRequest};
 
 /// Calls HUB to set specific radio channel
 #[command]
-pub fn set_hw_hub_radio_channel(channel_id: i32) -> Result<(), HubManagerError> {
+pub fn set_hw_hub_radio_channel(channel_id: i32) {
     log::info!("Got channel id: {channel_id}");
-    let app_guard = app();
-    let mut hub_guard = app_guard.get_locked_hub_mut();
-
-    let result = hub_guard
-        .set_hw_hub_radio_channel(channel_id as u8)
-        .map_err(|e| {
-            log::error!("{:#?}", e);
-            e.current_context().clone()
-        });
-    emit_app_context(map_app_context(&app_guard, &hub_guard));
-    result
+    app().set_hub_radio_channel(channel_id as u8);
 }
 
 /// HUB Debug API

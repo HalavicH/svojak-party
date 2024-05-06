@@ -2,25 +2,18 @@ use crate::core::game_entities::{HubStatus, PlayerState};
 use crate::game_pack::pack_content_entities::{QuestionMediaType};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize)]
-pub struct PackErrorData {
-    pub path: String,
-    pub cause: String,
-    pub details: String,
-}
-
-////////// Config ///////////
-#[derive(Debug, Serialize, Clone)]
+////////// Hub Config ///////////
+#[derive(Debug, Default, Serialize, Clone)]
 #[allow(non_snake_case)]
-pub struct AppContextDto {
+pub struct HubConfigDto {
     pub hubPort: String,
     pub availablePorts: Vec<String>,
     pub radioChannel: i32,
     pub hubStatus: HubStatus,
-    pub players: Vec<PlayerDto>,
 }
 
 ////////// Players ///////////
+pub type PlayersDto = Vec<PlayerDto>;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(non_snake_case)]
 pub struct PlayerDto {
@@ -44,6 +37,13 @@ pub struct PackInfoDto {
     pub packTopicList: Vec<String>,
 }
 
+#[derive(Debug, Serialize)]
+pub struct PackErrorData {
+    pub path: String,
+    pub cause: String,
+    pub details: String,
+}
+
 ////////// Round ///////////
 #[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
@@ -57,17 +57,28 @@ pub struct RoundDto {
 #[allow(non_snake_case)]
 pub struct TopicDto {
     pub topicName: String,
-    pub questions: Vec<QuestionDto>,
+    pub questions: Vec<QuestionBriefDto>,
 }
 
 #[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
-pub struct QuestionDto {
+pub struct QuestionBriefDto {
     pub index: usize,
     pub price: i32,
 }
 
-////////// Round ///////////
+////////// Question data ///////////
+#[derive(Debug, Serialize, Clone)]
+#[allow(non_snake_case)]
+pub struct QuestionDto {
+    pub number: i32,
+    pub category: String,
+    pub price: i32,
+    pub questionType: QuestionType,
+    pub scenario: Vec<QuestionSceneDto>,
+    pub answer: String,
+}
+
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize)]
 #[allow(non_snake_case)]
 pub enum QuestionType {
@@ -77,24 +88,14 @@ pub enum QuestionType {
     Auction,
 }
 
-#[derive(Debug, Serialize)]
-#[allow(non_snake_case)]
-pub struct QuestionDataDto {
-    pub number: i32,
-    pub category: String,
-    pub price: i32,
-    pub questionType: QuestionType,
-    pub scenario: Vec<QuestionSceneDto>,
-    pub answer: String,
-}
-
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[allow(non_snake_case)]
 pub struct QuestionSceneDto {
     pub mediaType: QuestionMediaType,
     pub content: String,
 }
 
+////////// Round stats ///////////
 #[derive(Debug, Serialize)]
 #[allow(non_snake_case)]
 pub struct RoundStatsDto {

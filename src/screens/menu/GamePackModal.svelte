@@ -10,14 +10,15 @@
     import {closeModal, openModal} from 'svelte-modals'
     import SettingsModal from "./SettingsModal.svelte";
     import WarningBar from "../../components/generic/WarningBar.svelte";
-    import {gameContext, gamePackInfo, navTo} from "../../lib/stores.js";
+    import {currentPlayersStore, currentPackInfoStore, navTo} from "../../lib/stores.js";
     import {Views} from "../views.js";
     import {TauriApiCommand, callBackend} from "../../lib/commands.js";
     import {notify} from "../../lib/notifications.js";
 
     export let isOpen;
 
-    export let packInfo = $gamePackInfo;
+    $: packInfo = $currentPackInfoStore;
+    $: players = $currentPlayersStore
 
     // Static
     let gameDurationOptions = [
@@ -26,7 +27,6 @@
         {value: 20, title: "20min"}
     ];
 
-    let players = $gameContext.players;
 
     function openSettings() {
         closeModal();
@@ -42,6 +42,8 @@
     async function setRoundDuration(selected) {
         callBackend(TauriApiCommand.SAVE_ROUND_DURATION, {roundMinutes: Number.parseInt(selected)})
     }
+
+    let defaultDuration = "20";
 </script>
 
 <BaseModal {isOpen}>
@@ -65,7 +67,7 @@
         <Row>
             <label for="round-duration">Select round duration:</label>
             <HSpacing size="1em"/>
-            <DropDown selectedValue={gameContext.roundDurationMin} options={gameDurationOptions} handleSelection={setRoundDuration}/>
+            <DropDown defaultValue={defaultDuration} options={gameDurationOptions} handleSelection={setRoundDuration}/>
         </Row>
     </ItemsBlock>
 

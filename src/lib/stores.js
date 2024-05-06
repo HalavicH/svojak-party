@@ -2,6 +2,7 @@ import {writable} from "svelte/store";
 import {Views} from "../screens/views.js";
 import {DFL_PLAYER_ICON} from "./misc.js";
 import {notify} from "./notifications.js";
+import {HubStatusOptions} from "./commands.js";
 
 // Views
 export const currentView = writable(Views.MENU);
@@ -10,7 +11,6 @@ export function navTo(view) {
     currentView.set(view);
     notify.info(`Transitioned to: ${view}`);
 }
-
 
 // Players involved in game
 export const PlayerState = {
@@ -24,7 +24,35 @@ export const PlayerState = {
     AnsweredWrong: 'AnsweredWrong',
 }
 
-export const gamePlayers = writable([
+// Game State
+export const GameState = {
+    SetupAndLoading: 'SetupAndLoading',
+    ChooseQuestion: 'ChooseQuestion',
+    DisplayQuestion: 'DisplayQuestion',
+    WaitingForAnswerRequests: 'WaitingForAnswerRequests',
+    AnswerAttemptReceived: 'AnswerAttemptReceived',
+    EndQuestion: 'EndQuestion',
+    CheckEndOfRound: 'CheckEndOfRound',
+    CalcStatsAndStartNextRound: 'CalcStatsAndStartNextRound',
+}
+
+
+// Mock data
+const mockHubConfig = {
+    hubPort: "",
+    availablePorts: [
+        "Test 1",
+        "Test 2",
+        "Test 3",
+        "Test 4",
+    ],
+    hubStatus: HubStatusOptions.Detected,
+    radioChannel: -1,
+    roundDurationMin: 10,
+};
+
+
+const mockPlayers = [
     {
         id: 1,
         iconPath: DFL_PLAYER_ICON,
@@ -57,53 +85,9 @@ export const gamePlayers = writable([
         score: 400,
         state: PlayerState.Inactive
     },
-]);
+];
 
-
-export const gameContext = writable({
-    hubPort: "",
-    availablePorts: [],
-    hubStatus: "",
-    radioChannel: -1,
-    roundDurationMin: 10,
-    // These players are used only for setup
-    players: [
-        {
-            id: 1,
-            iconPath: DFL_PLAYER_ICON,
-            name: "HalavicH",
-            isUsed: true,
-            score: 500,
-            state: PlayerState.Idle
-        },
-        {
-            termId: 2,
-            iconPath: DFL_PLAYER_ICON,
-            name: "Button",
-            isUsed: true,
-            score: -100,
-            state: PlayerState.Dead
-        },
-        {
-            termId: 3,
-            iconPath: DFL_PLAYER_ICON,
-            name: "Baadtrip",
-            isUsed: true,
-            score: 200,
-            state: PlayerState.QuestionChooser
-        },
-        {
-            termId: 4,
-            iconPath: DFL_PLAYER_ICON,
-            name: "Valadis",
-            isUsed: true,
-            score: 400,
-            state: PlayerState.Inactive
-        },
-    ],
-});
-
-export const gamePackInfo = writable({
+const mockPackInfo = {
     packName: 'Zlyj reper Zenyk',
     packAuthor: 'Zlyj reper Zenyk',
     packRounds: 3,
@@ -126,9 +110,9 @@ export const gamePackInfo = writable({
         'Movies',
         'Fallout',
     ],
-});
+};
 
-export const currentRound = writable({
+const mockRound = {
     roundName: 'Злий Репер Зеник',
     roundType: 'roundType',
     roundTopics: [
@@ -178,8 +162,43 @@ export const currentRound = writable({
             ],
         }
     ],
-});
+};
 
+const QuestionType = {
+    Normal: 'Normal',
+    PigInPoke: 'PigInPoke',
+    Auction: 'Auction',
+}
+
+const QuestionMediaType = {
+    Text: 'Text',
+    Voice: 'Voice',
+    Video: 'Video',
+    Marker: 'Marker',
+    Image: 'Image',
+}
+
+const mockQuestion = {
+    number: 1,
+    category: "Beer",
+    price: 100,
+    questionType: QuestionType.Normal,
+    scenario: [
+        {
+            mediaType: QuestionMediaType,
+            content: String,
+        }
+    ],
+    answer: String,
+}
+
+// Game stores
+export const currentHubConfigStore = writable(mockHubConfig);
+export const currentPlayersStore = writable(mockPlayers);
+export const currentPackInfoStore = writable(mockPackInfo);
+export const currentRoundStore = writable(mockRound);
+export const currentQuestionStore = writable(mockQuestion);
+export const currentGameStateStore = writable(GameState.SetupAndLoading);
 
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");

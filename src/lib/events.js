@@ -1,14 +1,42 @@
 import {listen} from "@tauri-apps/api/event";
-import {currentRound, gameContext, gamePackInfo} from "./stores.js";
 import {notify} from "./notifications.js";
 import {callBackend, TauriApiCommand} from "./commands.js";
 import {isRunningInTauri} from "./misc.js";
 import {onDestroy, onMount} from "svelte";
+import {
+    currentGameStateStore,
+    currentHubConfigStore,
+    currentPackInfoStore,
+    currentPlayersStore,
+    currentQuestionStore,
+    currentRoundStore
+} from "./stores.js";
 
 export const TauriEvents = {
-    GameConfig: 'GameConfig',
-    PackInfo: 'PackInfo',
-    Round: 'Round',
+    HubConFig: "HubConFig",
+    Players: "Players",
+    PackInfo: "PackInfo",
+    Round: "Round",
+    Question: "Question",
+    GameState: "GameState",
+}
+
+export function initEventListeners() {
+    listenAndStoreEvent(TauriEvents.HubConFig, currentHubConfigStore);
+    listenAndStoreEvent(TauriEvents.Players, currentPlayersStore);
+    listenAndStoreEvent(TauriEvents.PackInfo, currentPackInfoStore);
+    listenAndStoreEvent(TauriEvents.Round, currentRoundStore);
+    listenAndStoreEvent(TauriEvents.Question, currentQuestionStore);
+    listenAndStoreEvent(TauriEvents.GameState, currentGameStateStore);
+
+    console.log("################################################");
+    console.log("##### ALL EVENT LISTENERS HAS BEEN LOADED ######");
+    console.log("################################################");
+
+    // After all event listeners are initialized we can switch on event emitters
+    callBackend(TauriApiCommand.INIT_WINDOW_HANDLE).then(() => {
+        console.log("Window handle stored successfully");
+    })
 }
 
 export function setupEventListener(eventType, callback) {
@@ -46,19 +74,4 @@ function listenAndStoreEvent(eventType, storage) {
 function logEvent(type, event) {
     console.log(`|> New event: '${type}'. content: `, event, '<|');
     notify.info(`Event: ${type}`);
-}
-
-export function initEventListeners() {
-    listenAndStoreEvent(TauriEvents.GameConfig, gameContext);
-    listenAndStoreEvent(TauriEvents.PackInfo, gamePackInfo);
-    listenAndStoreEvent(TauriEvents.Round, currentRound);
-
-    console.log("################################################");
-    console.log("##### ALL EVENT LISTENERS HAS BEEN LOADED ######");
-    console.log("################################################");
-
-    // After all event listeners are initialized we can switch on event emitters
-    callBackend(TauriApiCommand.INIT_WINDOW_HANDLE).then(() => {
-        console.log("Window handle stored successfully");
-    })
 }

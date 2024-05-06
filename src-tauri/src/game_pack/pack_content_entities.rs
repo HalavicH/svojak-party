@@ -5,7 +5,7 @@ use std::collections::HashMap;
 // Game entities
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub enum QuestionMediaType {
-    Say,
+    Text,
     Voice,
     Video,
     Marker,

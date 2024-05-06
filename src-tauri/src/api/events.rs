@@ -1,59 +1,49 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use crate::api::dto::{AppContextDto, PackInfoDto, RoundDto};
-use crate::api::mapper::get_app_context_dto;
+use std::fmt::Debug;
+use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto};
 use crate::core::app_context::app;
 use crate::game_pack::pack_content_entities::Round;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use tauri::Window;
+use crate::core::game_entities::{GameState, HubStatus};
 
+#[derive(Debug)]
 pub enum Event {
+    /// Generic
     Message,
     Error,
-    GameConfig,
+    /// Game-specific
+    HubConFig,
+    Players,
     PackInfo,
     Round,
+    Question,
+    GameState,
 }
 
 /// Impl enum to &str conversion
 impl<'a> From<Event> for &'a str {
     fn from(val: Event) -> Self {
         match val {
+            // Generic
             Event::Message => "message",
             Event::Error => "error",
-            Event::GameConfig => "GameConfig",
+            // Game-specific
+            Event::HubConFig => "HubConFig",
+            Event::Players => "Players",
             Event::PackInfo => "PackInfo",
             Event::Round => "Round",
+            Event::Question => "Question",
+            Event::GameState => "GameState",
         }
     }
 }
 
-/// Game specific events
-pub fn emit_app_context(config: AppContextDto) {
-    log::debug!("Transmitting app context of: {:#?}", config);
-    emit(Event::GameConfig, config);
-}
-
-pub fn emit_pack_info(pack_info: PackInfoDto) {
-    emit(Event::PackInfo, pack_info);
-}
-
-pub fn emit_round(round: RoundDto) {
-    emit(Event::Round, round);
-}
-
-/// Generic API
-pub fn emit_message<S: Serialize + Clone>(message: S) {
-    emit(Event::Message, message);
-}
-
-pub fn emit_error<S: Serialize + Clone>(message: S) {
-    emit(Event::Error, message);
-}
-
-pub fn emit<S: Serialize + Clone>(event: Event, message: S) {
+pub fn emit<S: Serialize + Clone + Debug>(event: Event, message: S) {
     if let Some(window) = window().as_ref() {
+        log::debug!("Emitting event of type: {:?}. Payload: {:#?}", event, message);
         window
             .emit(event.into(), message)
             .map_err(|e| format!("Failed to send message: {}", e))
@@ -75,4 +65,39 @@ pub fn window() -> RwLockReadGuard<'static, Option<Window>> {
 pub fn set_window(window: Window) {
     let mut guard = WINDOW.write().expect("Mutex is poisoned");
     *guard = Some(window);
+}
+
+/// Generic API
+pub fn emit_message<S: Serialize + Clone + Debug>(message: S) {
+    emit(Event::Message, message);
+}
+
+pub fn emit_error<S: Serialize + Clone + Debug>(message: S) {
+    emit(Event::Error, message);
+}
+
+/// Game specific events
+// GameState
+pub fn emit_hub_config(hub_config: HubConfigDto) {
+    emit(Event::HubConFig, hub_config);
+}
+
+pub fn emit_players(players: PlayersDto) {
+    emit(Event::Players, players);
+}
+
+pub fn emit_pack_info(pack_info: PackInfoDto) {
+    emit(Event::PackInfo, pack_info);
+}
+
+pub fn emit_round(round: RoundDto) {
+    emit(Event::Round, round);
+}
+
+pub fn emit_question(question: QuestionDto) {
+    emit(Event::Round, question);
+}
+
+pub fn emit_game_state(game_state: &GameState) {
+    emit(Event::Round, game_state.get_state_name());
 }

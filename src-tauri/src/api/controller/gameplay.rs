@@ -1,4 +1,4 @@
-use crate::api::dto::QuestionDataDto;
+use crate::api::dto::QuestionDto;
 use crate::api::events::emit_error;
 use crate::core::app_context::app_mut;
 use crate::core::game_entities::GameplayError;
@@ -18,7 +18,7 @@ pub async fn start_new_game() -> Result<(), GameplayError> {
 
 /// Select question to be played
 #[command]
-pub fn select_question(topic: String, price: i32) -> Result<QuestionDataDto, GameplayError> {
+pub fn select_question(topic: String, price: i32) -> Result<QuestionDto, GameplayError> {
     todo!("Rework needed");
     // let (question, q_num) = app_mut().get_pack_question(&topic, &price).map_err(|e| {
     //     log::error!("Can't get question data: {:#?}", e);

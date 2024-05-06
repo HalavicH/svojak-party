@@ -1,72 +1,76 @@
-use crate::api::dto::{
-    AppContextDto, PlayerEndRoundStatsDto, QuestionDataDto, QuestionSceneDto, RoundDto,
-    RoundStatsDto, TopicDto,
-};
-use crate::api::dto::{PackInfoDto, PlayerDto, QuestionDto};
+use std::collections::hash_map::Iter;
+use crate::api::dto::{HubConfigDto, PlayerEndRoundStatsDto, PlayersDto, QuestionDto, QuestionSceneDto, RoundDto, RoundStatsDto, TopicDto};
+use crate::api::dto::{PackInfoDto, PlayerDto, QuestionBriefDto};
 use crate::core::app_context::{app, app_mut, AppContext};
 use crate::core::game_context::GameStats;
 use crate::core::game_entities::Player;
-use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
+use crate::game_pack::pack_content_entities::{Atom, PackContent, Question, Round};
 use crate::hub_comm::common::hub_api::HubManager;
 use std::collections::HashMap;
 
 use crate::hub_comm::hw::hw_hub_manager::discover_serial_ports;
 
-/// Takes whole game context and maps to config which contains only required elements
-pub fn get_app_context_dto() -> AppContextDto {
-    let context = app();
-    let guard = context.get_unlocked_hub();
-    map_app_context(&context, &guard)
-}
-
-pub fn map_app_context(context: &AppContext, hub: &Box<dyn HubManager>) -> AppContextDto {
-    let players = context.game_state.get_game_ref().get_players_ref().values().collect();
-    AppContextDto {
-        availablePorts: discover_serial_ports(),
-        hubPort: hub.get_hub_address(),
-        radioChannel: hub.radio_channel(),
-        hubStatus: hub.get_hub_status(),
-        players: map_players_to_player_dto(players),
+/// Hub manager
+impl From<&Box<dyn HubManager>> for HubConfigDto {
+    fn from(hub: &Box<dyn HubManager>) -> Self {
+        Self {
+            hubPort: hub.get_hub_address(),
+            availablePorts: discover_serial_ports(),
+            radioChannel: hub.radio_channel(),
+            hubStatus: hub.get_hub_status(),
+        }
     }
 }
 
+/// Player
+impl From<&Player> for PlayerDto {
+    fn from(player: &Player) -> Self {
+        Self {
+            id: player.term_id as i32,
+            iconPath: player.icon.clone(),
+            name: player.name.clone(),
+            isUsed: player.is_used,
+            state: player.state.clone(),
+            score: player.stats.score,
+        }
+    }
+}
+
+/// Pack content
 impl From<&PackContent> for PackInfoDto {
-    fn from(value: &PackContent) -> Self {
-        map_package_to_pack_info_dto(value)
-    }
-}
-fn map_package_to_pack_info_dto(package: &PackContent) -> PackInfoDto {
-    let author = match package.info.authors.first() {
-        Some(author) => author.name.clone(),
-        None => String::new(),
-    };
+    fn from(package: &PackContent) -> Self {
+        let author = match package.info.authors.first() {
+            Some(author) => author.name.clone(),
+            None => String::new(),
+        };
 
-    let num_rounds = package.rounds.len() as i32;
-    let num_topics = package
-        .rounds
-        .iter()
-        .map(|round| round.themes.len())
-        .sum::<usize>() as i32;
-    let num_questions = package
-        .rounds
-        .iter()
-        .flat_map(|round| round.themes.iter())
-        .map(|(_, theme)| theme.questions.len())
-        .sum::<usize>() as i32;
+        let num_rounds = package.rounds.len() as i32;
+        let num_topics = package
+            .rounds
+            .iter()
+            .map(|round| round.themes.len())
+            .sum::<usize>() as i32;
+        let num_questions = package
+            .rounds
+            .iter()
+            .flat_map(|round| round.themes.iter())
+            .map(|(_, theme)| theme.questions.len())
+            .sum::<usize>() as i32;
 
-    let topic_list: Vec<String> = package
-        .rounds
-        .iter()
-        .flat_map(|round| round.themes.values().map(|theme| theme.name.clone()))
-        .collect();
+        let topic_list: Vec<String> = package
+            .rounds
+            .iter()
+            .flat_map(|round| round.themes.values().map(|theme| theme.name.clone()))
+            .collect();
 
-    PackInfoDto {
-        packName: package.name.clone(),
-        packAuthor: author,
-        packRounds: num_rounds,
-        packTopics: num_topics,
-        packQuestions: num_questions,
-        packTopicList: topic_list,
+        PackInfoDto {
+            packName: package.name.clone(),
+            packAuthor: author,
+            packRounds: num_rounds,
+            packTopics: num_topics,
+            packQuestions: num_questions,
+            packTopicList: topic_list,
+        }
     }
 }
 
@@ -113,94 +117,66 @@ pub fn map_players_to_player_dto(players: Vec<&Player>) -> Vec<PlayerDto> {
         .collect()
 }
 
-/// Converts a `Round` struct to a `RoundDto` struct.
-///
-/// # Arguments
-///
-/// * `round` - A reference to the `Round` struct to be converted.
-///
-/// # Returns
-///
-/// A `RoundDto` struct representing the converted `Round` struct.
-///
-/// # Examples
-///
-/// ```
-/// use std::collections::HashMap;
-/// use serde::Serialize;
-/// use svojak_app::api::mapper::map_round_to_dto;
-/// use svojak_app::game_pack::pack_content_entities::{Round, Topic};
-///
-/// // Assume proper implementations for RoundType and Theme structs.
-///
-/// let round = Round {
-///     name: "1".to_string(),
-///     round_type: "normal".to_string(),
-///     themes: HashMap::new(),
-///     question_count: 30,
-///     questions_left: 27,
-///     normal_question_count: 29,
-///     pip_question_count: 1
-/// };
-///
-/// let round_dto = map_round_to_dto(&round);
-/// ```
-pub fn map_round_to_dto(round: &Round) -> RoundDto {
-    let round_topics: Vec<TopicDto> = round
-        .themes
-        .values()
-        .map(|theme| {
-            log::info!("{theme:#?}");
-            let mut game_questions: Vec<Question> =
-                theme.questions.values().cloned().collect::<Vec<Question>>();
-            game_questions.sort_by(|q1, q2| q1.price.cmp(&q2.price));
-
-            let mut questions = Vec::new();
-            game_questions.iter().enumerate().for_each(|(i, q)| {
-                questions.push(QuestionDto {
-                    index: i,
-                    price: q.price,
-                });
-            });
-
-            TopicDto {
-                topicName: theme.name.clone(),
-                questions,
-            }
-        })
-        .collect();
-
-    RoundDto {
-        roundName: round.name.clone(),
-        roundType: round.round_type.clone(),
-        roundTopics: round_topics,
-    }
-}
+// QuestionDto
 
 impl From<&Round> for RoundDto {
-    fn from(value: &Round) -> Self {
-        map_round_to_dto(value)
+    fn from(round: &Round) -> Self {
+        let round_topics: Vec<TopicDto> = round
+            .themes
+            .values()
+            .map(|theme| {
+                log::info!("{theme:#?}");
+                let mut game_questions: Vec<Question> =
+                    theme.questions.values()
+                        .cloned()
+                        .collect();
+                
+                game_questions.sort_by(|q1, q2| q1.price.cmp(&q2.price));
+
+                TopicDto {
+                    topicName: theme.name.clone(),
+                    questions: game_questions.iter().enumerate().into_iter()
+                        .map(|(i, q)| {
+                            QuestionBriefDto {
+                                index: i,
+                                price: q.price,
+                            }
+                        })
+                        .collect(),
+                }
+            })
+            .collect();
+
+        RoundDto {
+            roundName: round.name.clone(),
+            roundType: round.round_type.clone(),
+            roundTopics: round_topics,
+        }
     }
 }
 
-pub fn map_question_to_question_dto(
-    topic: String,
-    question: Question,
-    q_num: i32,
-) -> QuestionDataDto {
-    QuestionDataDto {
-        number: q_num,
-        category: topic,
-        price: question.price,
-        questionType: question.question_type,
-        scenario: question
-            .scenario
-            .iter()
-            .map(|a| QuestionSceneDto {
-                content: a.content.clone(),
-                mediaType: a.atom_type.clone(),
-            })
-            .collect(),
-        answer: question.correct_answer.clone(),
+impl From<&Question> for QuestionDto {
+    fn from(question: &Question) -> Self {
+        Self {
+            number: -1,
+            category: question.topic.clone(),
+            price: question.price,
+            questionType: question.question_type.clone(),
+            scenario: question
+                .scenario
+                .iter()
+                .map(|a| a.into())
+                .collect(),
+            answer: question.correct_answer.clone(),
+        }
+    }
+}
+
+impl From<&Atom> for QuestionSceneDto {
+    fn from(atom: &Atom) -> Self {
+        QuestionSceneDto {
+            content: atom.content.clone(),
+            mediaType: atom.atom_type.clone(),
+        }
     }
 }

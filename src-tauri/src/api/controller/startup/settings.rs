@@ -1,6 +1,7 @@
+use std::ops::Deref;
+use rocket::http::hyper::body::HttpBody;
 use crate::api::dto::PlayerDto;
-use crate::api::events::{emit_app_context, set_window};
-use crate::api::mapper::{get_app_context_dto};
+use crate::api::events::*;
 use crate::core::app_context::{app, app_mut};
 use crate::core::game_entities::{Player, PlayerState};
 use tauri::{command, Window};
@@ -14,7 +15,7 @@ pub fn init_window_handle(window: Window) {
 /// To get initial app context
 #[command]
 pub fn request_context_update() {
-    emit_app_context(get_app_context_dto());
+    app().emit_game_config_locking_hub();
 }
 
 /// Saves configuration to game context

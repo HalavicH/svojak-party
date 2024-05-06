@@ -1,6 +1,5 @@
 use crate::api::dto::{RoundStatsDto};
-use crate::api::events::{emit_app_context, emit_round, emit_error, emit_message};
-use crate::api::mapper::{game_to_round_stats_dto, map_app_context};
+use crate::api::events::{emit_round, emit_error, emit_message, emit_hub_config, emit_players, emit_game_state, emit_question};
 use crate::core::game_entities::{
     GamePackError, GameState, GameplayError, OldGameState, Player, PlayerState, DEFAULT_ICON,
 };
@@ -12,11 +11,13 @@ use crate::hub_comm::hw::internal::api_types::TermEvent;
 use crate::hub_comm::web::web_hub_manager::WebHubManager;
 use error_stack::{IntoReport, Report, ResultExt};
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::{Duration};
+use crate::core::player_listener::discover_and_save_players;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -121,6 +122,22 @@ impl AppContext {
         }
     }
 
+    pub fn set_hub_radio_channel(&self, channel_id: u8) {
+        let mut hub_guard = self.get_locked_hub_mut();
+
+        match hub_guard
+            .set_hw_hub_radio_channel(channel_id) {
+            Ok(_) => {
+                drop(hub_guard); // To release lock
+                self.emit_game_config_locking_hub();
+            }
+            Err(e) => {
+                log::error!("{:#?}", e);
+                emit_error(e.to_string())
+            }
+        };
+    }
+
     pub fn select_hub_type(&mut self, hub_type: HubType) {
         if self.hub_type == hub_type {
             log::info!("Hub is already set to: {:?}. Nothing to do", hub_type);
@@ -138,7 +155,7 @@ impl AppContext {
                 self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
-        emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
+        emit_hub_config(self.get_locked_hub_mut().deref().into());
     }
 
     pub fn discover_hub(&mut self, path: String) {
@@ -165,7 +182,7 @@ impl AppContext {
             Ok(_) => self.run_polling_for_players(),
             Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err),
         }
-        emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
+        self.emit_game_config_locking_hub();
     }
 
     /// Players polling
@@ -178,7 +195,7 @@ impl AppContext {
         log::info!("Initial setup of player polling thread");
 
         let handle = spawn(move || loop {
-            Self::discover_and_save_players();
+            discover_and_save_players();
             sleep(Duration::from_secs(2));
         });
 
@@ -186,72 +203,15 @@ impl AppContext {
         self.player_poling_thread_handle = Some(handle)
     }
 
-    fn discover_and_save_players() {
-        log::debug!("||| Player polling: new iteration |||");
-        let mut app_guard = app_mut();
-        let result = {
-            let mut guard = app_guard.get_locked_hub_mut();
-            guard.discover_players()
-        };
-        match result {
-            Ok(detected_players) => {
-                Self::compare_and_merge(&mut app_guard, &detected_players);
-            }
-            Err(error) => {
-                log::error!("Can't discover players: {:?}", error);
-            }
-        }
-        log::debug!("");
+    pub fn emit_game_config_locking_hub(&self) {
+        emit_hub_config(self.get_locked_hub_mut().deref().into());
+        emit_players(self.game_state.get_game_ref().players_as_vec().into_iter().map(|p| p.into()).collect());
     }
 
-    fn compare_and_merge(app: &mut AppContext, detected_players: &[Player]) {
-        let det_pl_cnt = detected_players.len();
-        log::debug!("Detected {} players", det_pl_cnt);
-        if app.is_new_players_found(detected_players) {
-            log::info!("New players found! Merging");
-            emit_message(format!(
-                "New players detected! Total number: {}",
-                det_pl_cnt
-            ));
-            app.merge_players(detected_players);
-            emit_app_context(map_app_context(app, &app.get_locked_hub_mut()));
-        }
-    }
-
-    fn is_new_players_found(&self, detected_players: &[Player]) -> bool {
-        let players = self.game_state.get_game_ref().get_players_ref();
-        if detected_players.len() > players.len() {
-            return true;
-        }
-
-        let current_players_ids: Vec<u8> = players.keys().cloned().collect();
-        // emit_message(format!("Current player ids: {current_players_ids:?}"));
-        // let vec: Vec<u8> = detected_players.iter().map(|p| p.term_id).collect();
-        // emit_message(format!("Detected player ids: {:?}", vec));
-
-        for detected_player in detected_players {
-            if !current_players_ids.contains(&detected_player.term_id) {
-                return true;
-            }
-        }
-
-        false
-    }
-
-    fn merge_players(&mut self, detected_players: &[Player]) {
-        // TODO: make actual merge instead of simple re-assign
-        let players = detected_players
-            .iter()
-            .map(|p| {
-                let player = Player {
-                    name: format!("Player {}", p.term_id),
-                    icon: DEFAULT_ICON.to_string(),
-                    ..p.to_owned()
-                };
-                (p.term_id, player)
-            })
-            .collect();
-        self.game_state.get_game_mut().set_players(players);
+    pub fn emit_game_context(&self) {
+        emit_game_state(&self.game_state);
+        emit_round(self.game_state.get_game_ref().current_round_ref().into());
+        emit_question(self.game_state.get_game_ref().current_question_ref().into());
     }
 }
 
@@ -274,10 +234,11 @@ impl AppContext {
         start_event_listener(hub, event_tx);
 
         let game_ctx = std::mem::take(game_ctx); // Take ownership of the value inside the mutable reference
-        let game_ctx = game_ctx.start(self.game_pack.content.clone(), event_rx)?;
+        let content = self.game_pack.content.clone();
+        let game_ctx = game_ctx.start(content, event_rx)?;
         let game_ctx = game_ctx.pick_first_question_chooser()?;
-        emit_app_context(map_app_context(self, &self.get_locked_hub_mut()));
         self.game_state = GameState::ChooseQuestion(game_ctx);
+        self.emit_game_config_locking_hub();
         Ok(())
     }
 
@@ -348,7 +309,7 @@ impl AppContext {
         // self.__old_game.click_for_answer_allowed = true;
         Ok(())
     }
-    
+
     pub fn answer_question(&mut self, answered_correctly: bool) -> error_stack::Result<bool, GameplayError> {
         // if !self.__old_game.answer_allowed {
         //     return Err(Report::new(GameplayError::AnswerForbidden));

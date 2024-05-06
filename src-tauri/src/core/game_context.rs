@@ -1,11 +1,12 @@
 use crate::api::dto::{QuestionType};
-use crate::api::events::{emit_app_context, emit_round, emit_message};
+use crate::api::events::{emit_round, emit_message};
 use crate::core::game_entities::{GameplayError, OldGameState, Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms, HubManagerError};
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 use rocket::serde::{Deserialize, Serialize};
 use std::any::type_name;
+use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::sync::mpsc::Receiver;
@@ -14,6 +15,7 @@ use std::sync::atomic::Ordering;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 use error_stack::{Report, ResultExt};
+use log::log;
 use crate::core::term_event_processing::get_fastest_click_from_hub;
 use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
 
@@ -103,6 +105,19 @@ impl Game {
     /// Immutable
     pub fn get_players_ref(&self) -> &HashMap<u8, Player> {
         &self.players
+    }
+
+    pub fn players_as_vec(&self) -> Vec<&Player> {
+        log::debug!("Players: {:#?}", self.players);
+        self.players.values().collect()
+    }
+
+    pub fn current_round_ref(&self) -> &Round {
+        &self.current_round
+    }
+
+    pub fn current_question_ref(&self) -> &Question {
+        &self.current_question
     }
 
     /// Mutable player operations (used for player monitoring my hub)

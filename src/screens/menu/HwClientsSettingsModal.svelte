@@ -6,46 +6,41 @@
     import HubStatus from "../../components/HubStatus.svelte";
     import ActionsBlock from "../../components/generic/ActionsBlock.svelte";
     import Table from "../../components/generic/Table.svelte";
-    import {TauriApiCommand, HubStatusOptions, hubManagerError2Msg, callBackend} from "../../lib/commands"
+    import {TauriApiCommand, hubManagerError2Msg, callBackend} from "../../lib/commands"
     import DropDown from "../../components/generic/DropDown.svelte";
     import Row from "../../components/generic/Row.svelte";
     import ConfigButton from "../../components/ConfigButton.svelte";
     import Input from "../../components/generic/TextInput.svelte";
     import {notify} from "../../lib/notifications"
-    import {gameContext, gamePlayers} from "../../lib/stores.js";
+    import {currentHubConfigStore, currentPlayersStore} from "../../lib/stores.js";
     import {DFL_PLAYER_ICON} from "../../lib/misc.js"
 
     // Provided by 'modals'
     export let isOpen;
 
-    let players;
     // let config;
-    let hubStatus;
-    let serialPorts = [];
-    let radioChannel = null;
+    $: hubConfig = $currentHubConfigStore;
+    $: players = $currentPlayersStore;
+    $: portOptions = hubConfig.availablePorts.map((portName) => {
+        return {
+            value: portName,
+            title: portName
+        };
+    });
+    let radioChannelSelectedNum = null;
 
-    let hubPortUsed;
     $: console.log(`Modal HwClientsSettingsModal is ${isOpen}`);
-    $: console.log(`Hub port used: ${hubPortUsed}`);
+    $: console.log(`Hub port used: ${hubConfig.hubPort}`);
 
     // Watch for changes in isOpen and trigger the API call if it becomes true
     $: if (isOpen) {
-        let config = $gameContext;
-        hubPortUsed = config.hubPort;
-        players = config.players.map(p => {
+        players = players.map(p => {
             if (p.iconPath === "default") {
                 p.iconPath = DFL_PLAYER_ICON;
             }
             return p;
         });
-        hubStatus = config.hubStatus;
-        radioChannel = config.radioChannel;
-        serialPorts = config.availablePorts.map((portName) => {
-            return {
-                value: portName,
-                title: portName
-            };
-        });
+
     }
 
     async function saveSettings() {
@@ -55,12 +50,12 @@
     }
 
     async function setRadioChannel() {
-        if (!radioChannel) {
+        if (!radioChannelSelectedNum) {
             notify.info(`Please type radio channel`);
             return;
         }
 
-        callBackend(TauriApiCommand.SET_HW_HUB_RADIO_CHANNEL, {channelId: radioChannel})
+        callBackend(TauriApiCommand.SET_HW_HUB_RADIO_CHANNEL, {channelId: radioChannelSelectedNum})
             .catch(error => {
                 notify.failure(hubManagerError2Msg(error));
             });
@@ -81,10 +76,10 @@
         let chNum = Number.parseInt(text);
         if (chNum) {
             notify.info(`RC is ${chNum}`);
-            radioChannel = chNum;
+            radioChannelSelectedNum = chNum;
         } else {
             notify.failure(`Invalid channel: '${text}'`);
-            radioChannel = null;
+            radioChannelSelectedNum = null;
         }
     }
 </script>
@@ -99,7 +94,7 @@
                     <div>Hub status:</div>
                 </td>
                 <td>
-                    <HubStatus {hubStatus}/>
+                    <HubStatus hubStatus={hubConfig.hubStatus}/>
                 </td>
             </tr>
             <tr>
@@ -107,7 +102,7 @@
                     <div>Select serial device:</div>
                 </td>
                 <td>
-                    <DropDown defaultValue={hubPortUsed} options={serialPorts} handleSelection={discoverHub}/>
+                    <DropDown defaultValue={hubConfig.hubPort} options={portOptions} handleSelection={discoverHub}/>
                 </td>
             </tr>
             </tbody>
@@ -117,7 +112,7 @@
         <Row jc="space-between">
             <div>Provide radio channel num:</div>
             <Row>
-                <Input value={radioChannel} placeholder="1-127" style="width: 4em;"
+                <Input value={hubConfig.radioChannel.toString()} placeholder="1-127" style="width: 4em;"
                        onInput={captureInput}
                 />
                 <!--                       onReturnPressed={(text) => {notify.info(`Return Text${text}`)}}-->
