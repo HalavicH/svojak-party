@@ -99,7 +99,7 @@ impl HwHubManager {
     }
 
     fn init_timestamp(&mut self) -> Result<(), HubManagerError> {
-        self.base_timestamp = get_epoch_ms()?;
+        self.base_timestamp = calc_epoch_ms()?;
         Ok(())
     }
 
@@ -128,7 +128,7 @@ impl HwHubManager {
 }
 
 impl HubManager for HwHubManager {
-    fn get_hub_address(&self) -> String {
+    fn hub_address(&self) -> String {
         self.port_name.clone()
     }
     fn probe(&mut self, port: &str) -> Result<(), HubManagerError> {
@@ -146,7 +146,7 @@ impl HubManager for HwHubManager {
         result
     }
 
-    fn get_hub_status(&self) -> HubStatus {
+    fn hub_status(&self) -> HubStatus {
         self.hub_status
     }
 
@@ -175,7 +175,7 @@ impl HubManager for HwHubManager {
     /// ### get hub timestamp
     /// #### response payload
     /// `[tid] [status] [response length] [response payload (timestamp)]`
-    fn get_hub_timestamp(&self) -> Result<u32, HubManagerError> {
+    fn calc_hub_timestamp(&self) -> Result<u32, HubManagerError> {
         log::info!("Reading current HUB base timestamp");
         let handle = self.get_hub_handle_or_err()?;
 
@@ -380,7 +380,7 @@ pub fn discover_serial_ports() -> Vec<String> {
     ports_vec
 }
 
-pub fn get_epoch_ms() -> Result<u32, HubManagerError> {
+pub fn calc_epoch_ms() -> Result<u32, HubManagerError> {
     let now = SystemTime::now();
     let since_the_epoch = now
         .duration_since(UNIX_EPOCH)
@@ -426,7 +426,7 @@ mod tests {
             .expect("Test");
 
         // Call the actual function
-        let result = get_epoch_ms();
+        let result = calc_epoch_ms();
 
         // Check the result
         assert!(result.is_ok());
@@ -442,7 +442,7 @@ mod tests {
         assert_eq!(hub.base_timestamp, 0);
 
         hub.init_timestamp().expect("Test");
-        assert_eq!(hub.base_timestamp, get_epoch_ms().expect("Test"));
+        assert_eq!(hub.base_timestamp, calc_epoch_ms().expect("Test"));
     }
 
     #[test]
@@ -450,14 +450,14 @@ mod tests {
         let execution_offset = 50;
         let mut hub = HwHubManager::default();
         hub.init_timestamp().expect("Test");
-        let terminal_timestamp = get_epoch_ms().expect("Test");
+        let terminal_timestamp = calc_epoch_ms().expect("Test");
         assert!(
             terminal_timestamp > hub.base_timestamp
                 && terminal_timestamp < (hub.base_timestamp + execution_offset)
         );
 
         sleep(Duration::from_secs(1));
-        let terminal_timestamp = get_epoch_ms().expect("Test");
+        let terminal_timestamp = calc_epoch_ms().expect("Test");
 
         assert!(
             terminal_timestamp > hub.base_timestamp

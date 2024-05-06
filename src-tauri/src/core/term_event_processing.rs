@@ -81,7 +81,7 @@ impl FastestClickRequest {
     }
 }
 
-pub fn get_fastest_click_from_hub(
+pub fn receive_fastest_click_from_hub(
     receiver: &Arc<Mutex<Box<Receiver<TermEvent>>>>,
     allow_answer_timestamp: u32,
     players: &HashMap<u8, Player>,
@@ -95,7 +95,7 @@ pub fn get_fastest_click_from_hub(
         }
 
         let receiver_guard = receiver.lock().expect("Mutex poisoned");
-        let events = get_events(&receiver_guard)?;
+        let events = receive_events(&receiver_guard)?;
         let filtered = filter_irrelevant_events(allow_answer_timestamp, events, players);
         if filtered.is_empty() {
             log::debug!("No events after filtering. Waiting for the next iteration");
@@ -160,7 +160,7 @@ fn filter_irrelevant_events(
         .collect()
 }
 
-fn get_events(
+fn receive_events(
     receiver: &Receiver<TermEvent>,
 ) -> error_stack::Result<Vec<TermEvent>, GameplayError> {
     let mut events: Vec<TermEvent> = Vec::new();

@@ -149,37 +149,37 @@ impl GameState {
         format!(
             "Expected game state of '{}', found: {}",
             expected,
-            self.get_state_name()
+            self.state_name()
         )
     }
 
-    pub fn get_game_mut(&mut self) -> &mut Game {
+    pub fn game_mut(&mut self) -> &mut Game {
         match self {
-            GameState::SetupAndLoading(game_ctx) => game_ctx.get_game_mut(),
-            GameState::ChooseQuestion(game_ctx) => game_ctx.get_game_mut(),
-            GameState::DisplayQuestion(game_ctx) => game_ctx.get_game_mut(),
-            GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.get_game_mut(),
-            GameState::AnswerAttemptReceived(game_ctx) => game_ctx.get_game_mut(),
-            GameState::EndQuestion(game_ctx) => game_ctx.get_game_mut(),
-            GameState::CheckEndOfRound(game_ctx) => game_ctx.get_game_mut(),
-            GameState::CalcStatsAndStartNextRound(game_ctx) => game_ctx.get_game_mut(),
+            GameState::SetupAndLoading(game_ctx) => game_ctx.game_mut(),
+            GameState::ChooseQuestion(game_ctx) => game_ctx.game_mut(),
+            GameState::DisplayQuestion(game_ctx) => game_ctx.game_mut(),
+            GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.game_mut(),
+            GameState::AnswerAttemptReceived(game_ctx) => game_ctx.game_mut(),
+            GameState::EndQuestion(game_ctx) => game_ctx.game_mut(),
+            GameState::CheckEndOfRound(game_ctx) => game_ctx.game_mut(),
+            GameState::CalcStatsAndStartNextRound(game_ctx) => game_ctx.game_mut(),
         }
     }
 
-    pub fn get_game_ref(&self) -> &Game {
+    pub fn game_ref(&self) -> &Game {
         match self {
-            GameState::SetupAndLoading(game_ctx) => game_ctx.get_game_ref(),
-            GameState::ChooseQuestion(game_ctx) => game_ctx.get_game_ref(),
-            GameState::DisplayQuestion(game_ctx) => game_ctx.get_game_ref(),
-            GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.get_game_ref(),
-            GameState::AnswerAttemptReceived(game_ctx) => game_ctx.get_game_ref(),
-            GameState::EndQuestion(game_ctx) => game_ctx.get_game_ref(),
-            GameState::CheckEndOfRound(game_ctx) => game_ctx.get_game_ref(),
-            GameState::CalcStatsAndStartNextRound(game_ctx) => game_ctx.get_game_ref(),
+            GameState::SetupAndLoading(game_ctx) => game_ctx.game_ref(),
+            GameState::ChooseQuestion(game_ctx) => game_ctx.game_ref(),
+            GameState::DisplayQuestion(game_ctx) => game_ctx.game_ref(),
+            GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.game_ref(),
+            GameState::AnswerAttemptReceived(game_ctx) => game_ctx.game_ref(),
+            GameState::EndQuestion(game_ctx) => game_ctx.game_ref(),
+            GameState::CheckEndOfRound(game_ctx) => game_ctx.game_ref(),
+            GameState::CalcStatsAndStartNextRound(game_ctx) => game_ctx.game_ref(),
         }
     }
 
-    pub fn get_state_name(&self) -> &str {
+    pub fn state_name(&self) -> &str {
         match self {
             GameState::SetupAndLoading(_) => "SetupAndLoading",
             GameState::ChooseQuestion(_) => "ChooseQuestion",

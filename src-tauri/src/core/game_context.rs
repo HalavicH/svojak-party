@@ -1,8 +1,8 @@
 use crate::api::events::{emit_message, emit_round};
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
-use crate::core::term_event_processing::get_fastest_click_from_hub;
+use crate::core::term_event_processing::receive_fastest_click_from_hub;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
-use crate::hub_comm::hw::hw_hub_manager::{get_epoch_ms};
+use crate::hub_comm::hw::hw_hub_manager::{calc_epoch_ms};
 use crate::hub_comm::hw::internal::api_types::TermEvent;
 use error_stack::{ResultExt};
 use rocket::serde::{Deserialize, Serialize};
@@ -81,11 +81,11 @@ impl Game {
 /// Round data should be available at any state
 impl Game {
     /// Immutable
-    pub fn get_players_ref(&self) -> &HashMap<u8, Player> {
+    pub fn players_map_ref(&self) -> &HashMap<u8, Player> {
         &self.players
     }
 
-    pub fn players_as_vec(&self) -> Vec<&Player> {
+    pub fn players_ref_as_vec(&self) -> Vec<&Player> {
         log::debug!("Players: {:#?}", self.players);
         self.players.values().collect()
     }
@@ -103,7 +103,7 @@ impl Game {
         self.players = HashMap::default();
     }
 
-    pub fn get_players_mut(&mut self) -> &mut HashMap<u8, Player> {
+    pub fn players_map_mut(&mut self) -> &mut HashMap<u8, Player> {
         &mut self.players
     }
 
@@ -116,17 +116,17 @@ impl Game {
 impl Game {
     fn set_active_player_by_id(&mut self, term_id: u8) {
         log::debug!("Looking for user with id: {}", term_id);
-        let player = self.get_player_by_id_mut(&term_id);
+        let player = self.player_by_id_mut(&term_id);
         self.active_player_id = player.term_id;
     }
 
-    fn get_active_player_mut(&mut self) -> &mut Player {
+    fn active_player_mut(&mut self) -> &mut Player {
         let id = self.active_player_id;
         log::debug!("Looking for user with id: {}", id);
-        self.get_player_by_id_mut(&id)
+        self.player_by_id_mut(&id)
     }
 
-    fn get_player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
+    fn player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
         let msg = format!(
             "Expected to have term_id: {} in players map: {:?}",
             term_id, self.players
@@ -136,7 +136,7 @@ impl Game {
 
     fn set_active_player_state(&mut self, player_state: PlayerState) {
         let id = self.active_player_id;
-        let player = self.get_player_by_id_mut(&id);
+        let player = self.player_by_id_mut(&id);
         player.state = player_state;
     }
 }
@@ -168,11 +168,11 @@ impl<State> GameContext<State> {
         }
     }
 
-    pub fn get_game_mut(&mut self) -> &mut Game {
+    pub fn game_mut(&mut self) -> &mut Game {
         &mut self.game
     }
 
-    pub fn get_game_ref(&self) -> &Game {
+    pub fn game_ref(&self) -> &Game {
         &self.game
     }
 
@@ -218,9 +218,9 @@ impl GameContext<PickFirstQuestionChooser> {
     pub fn pick_first_question_chooser(
         mut self,
     ) -> Result<GameContext<ChooseQuestion>, GameplayError> {
-        self.game.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
+        self.game.allow_answer_timestamp = calc_epoch_ms().expect("No epoch today");
 
-        let term_id = match self.get_fastest_click_player_id() {
+        let term_id = match self.receive_fastest_click_player_id() {
             Ok(id) => id,
             Err(err) => Err(err.current_context().clone())?,
         };
@@ -231,8 +231,8 @@ impl GameContext<PickFirstQuestionChooser> {
         Ok(self.transition())
     }
 
-    fn get_fastest_click_player_id(&mut self) -> error_stack::Result<u8, GameplayError> {
-        let active_players = self.get_active_players_cnt();
+    fn receive_fastest_click_player_id(&mut self) -> error_stack::Result<u8, GameplayError> {
+        let active_players = self.active_players_cnt();
         let active_players_cnt = active_players.len();
 
         if active_players_cnt == 0 {
@@ -251,10 +251,10 @@ impl GameContext<PickFirstQuestionChooser> {
             .expect("Expected to have player event queue to be present at this point of game");
 
         let allow_answer_timestamp = self.game.allow_answer_timestamp;
-        let fastest_player_id = get_fastest_click_from_hub(
+        let fastest_player_id = receive_fastest_click_from_hub(
             receiver,
             allow_answer_timestamp,
-            self.game.get_players_ref(),
+            self.game.players_map_ref(),
         )
         .change_context(GameplayError::HubOperationError)?;
 
@@ -265,7 +265,7 @@ impl GameContext<PickFirstQuestionChooser> {
         Ok(fastest_player_id)
     }
 
-    fn get_active_players_cnt(&mut self) -> Vec<Player> {
+    fn active_players_cnt(&mut self) -> Vec<Player> {
         self.game
             .players
             .values()

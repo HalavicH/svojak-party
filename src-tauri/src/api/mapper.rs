@@ -14,10 +14,10 @@ use crate::hub_comm::hw::hw_hub_manager::discover_serial_ports;
 impl From<&Box<dyn HubManager>> for HubConfigDto {
     fn from(hub: &Box<dyn HubManager>) -> Self {
         Self {
-            hubPort: hub.get_hub_address(),
+            hubPort: hub.hub_address(),
             availablePorts: discover_serial_ports(),
             radioChannel: hub.radio_channel(),
-            hubStatus: hub.get_hub_status(),
+            hubStatus: hub.hub_status(),
         }
     }
 }

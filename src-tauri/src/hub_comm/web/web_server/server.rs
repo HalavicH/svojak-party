@@ -64,7 +64,7 @@ impl ServerState {
         self.events.push(event);
     }
 
-    pub fn get_by_ip(&self, ip: &String) -> Option<PlayerIdentityDto> {
+    pub fn player_by_ip(&self, ip: &String) -> Option<PlayerIdentityDto> {
         let players: Vec<PlayerIdentityDto> = self
             .players
             .values()

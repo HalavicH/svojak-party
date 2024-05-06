@@ -94,21 +94,21 @@ impl Drop for WebHubManager {
 
 // #[allow(dead_code, unused_variables)]
 impl HubManager for WebHubManager {
-    fn get_hub_address(&self) -> String {
+    fn hub_address(&self) -> String {
         get_ipv4_interfaces_ip(&self.port).join("\n")
     }
 
     fn probe(&mut self, _port: &str) -> Result<(), HubManagerError> {
         if self.server_handle.is_some() {
             log::debug!("Web HUB already initialized. Nothing to do");
-            self.get_hub_timestamp()?;
+            self.calc_hub_timestamp()?;
             return Ok(());
         }
 
         self.start_hub_server();
         for i in 0..50 {
             sleep(Duration::from_millis(RETRY_INTERVAL_MS));
-            match self.get_hub_timestamp() {
+            match self.calc_hub_timestamp() {
                 Ok(_) => return Ok(()),
                 Err(err) => {
                     log::warn!("Can't reach web hub for {i} try. Err: {:?}", err);
@@ -120,7 +120,7 @@ impl HubManager for WebHubManager {
         Err(Report::new(HubManagerError::HttpCommunicationError))
     }
 
-    fn get_hub_status(&self) -> HubStatus {
+    fn hub_status(&self) -> HubStatus {
         if self.server_handle.is_some() {
             HubStatus::Detected
         } else {
@@ -155,7 +155,7 @@ impl HubManager for WebHubManager {
         Ok(players)
     }
 
-    fn get_hub_timestamp(&self) -> Result<u32, HubManagerError> {
+    fn calc_hub_timestamp(&self) -> Result<u32, HubManagerError> {
         let timestamp: TimestampDto = self
             .rt
             .block_on(async {

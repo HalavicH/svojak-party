@@ -9,7 +9,7 @@ use std::io::ErrorKind;
 use std::sync::{Arc, Mutex};
 use std::thread::{sleep, JoinHandle};
 
-use crate::hub_comm::hw::hw_hub_manager::get_epoch_ms;
+use crate::hub_comm::hw::hw_hub_manager::calc_epoch_ms;
 use crate::hub_comm::hw::internal::api_types::{
     hub_frame_pos, ResponseStatus, TermButtonState, TermEvent,
 };
@@ -190,7 +190,7 @@ impl HubMock {
 
                 terminals.shuffle(&mut thread_rng());
                 terminals.iter().for_each(|id| {
-                    let timestamp = get_epoch_ms().expect("Mock HUB. Not for prod");
+                    let timestamp = calc_epoch_ms().expect("Mock HUB. Not for prod");
                     let state = if timestamp % 2 == 0 {
                         TermButtonState::Pressed
                     } else {

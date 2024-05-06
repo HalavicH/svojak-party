@@ -6,7 +6,7 @@ pub fn discover_and_save_players() {
     log::debug!("||| Player polling: new iteration |||");
     let mut app_guard = app_mut();
     let result = {
-        let mut guard = app_guard.get_locked_hub_mut();
+        let mut guard = app_guard.hub_mut();
         guard.discover_players()
     };
     match result {
@@ -30,13 +30,13 @@ fn compare_and_merge(app: &mut AppContext, detected_players: &[Player]) {
             det_pl_cnt
         ));
         merge_players(app, detected_players);
-        let vec = app.game_state.get_game_ref().players_as_vec();
+        let vec = app.game_state.game_ref().players_ref_as_vec();
         emit_players(vec.into_iter().map(|p| p.into()).collect());
     }
 }
 
 fn is_new_players_found(app: &AppContext, detected_players: &[Player]) -> bool {
-    let players = app.game_state.get_game_ref().get_players_ref();
+    let players = app.game_state.game_ref().players_map_ref();
     if detected_players.len() > players.len() {
         return true;
     }
@@ -68,5 +68,5 @@ fn merge_players(app: &mut AppContext, detected_players: &[Player]) {
             (p.term_id, player)
         })
         .collect();
-    app.game_state.get_game_mut().set_players(players);
+    app.game_state.game_mut().set_players(players);
 }

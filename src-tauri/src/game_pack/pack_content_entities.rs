@@ -34,11 +34,11 @@ pub struct Topic {
 }
 
 impl Topic {
-    pub fn pop_question(&mut self, price: &i32) -> Option<Question> {
+    pub fn pop_question_by_price(&mut self, price: &i32) -> Option<Question> {
         self.questions.remove(price)
     }
 
-    pub fn get_question(&self, price: &i32) -> Option<&Question> {
+    pub fn question_by_price(&self, price: &i32) -> Option<&Question> {
         self.questions.get(price)
     }
 }

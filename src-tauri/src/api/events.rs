@@ -103,5 +103,5 @@ pub fn emit_question(question: QuestionDto) {
 }
 
 pub fn emit_game_state(game_state: &GameState) {
-    emit(Event::Round, game_state.get_state_name());
+    emit(Event::Round, game_state.state_name());
 }

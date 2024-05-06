@@ -78,15 +78,12 @@ impl AppContext {
     pub fn drop_hub(&mut self) {
         self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
     }
-    pub fn get_hub_ref(&self) -> &Arc<RwLock<Box<dyn HubManager>>> {
-        &self.hub
-    }
 
-    pub fn get_hub(&self) -> Arc<RwLock<Box<dyn HubManager>>> {
+    pub fn hub_lock(&self) -> Arc<RwLock<Box<dyn HubManager>>> {
         self.hub.clone()
     }
 
-    pub fn get_unlocked_hub(&self) -> RwLockReadGuard<Box<dyn HubManager>> {
+    pub fn hub(&self) -> RwLockReadGuard<Box<dyn HubManager>> {
         self.hub
             .read()
             .map_err(|e| {
@@ -96,7 +93,7 @@ impl AppContext {
             .expect("Poisoned")
     }
 
-    pub fn get_locked_hub_mut(&self) -> RwLockWriteGuard<Box<dyn HubManager>> {
+    pub fn hub_mut(&self) -> RwLockWriteGuard<Box<dyn HubManager>> {
         self.hub
             .write()
             .map_err(|e| {
@@ -125,7 +122,7 @@ impl AppContext {
     }
 
     pub fn set_hub_radio_channel(&self, channel_id: u8) {
-        let mut hub_guard = self.get_locked_hub_mut();
+        let mut hub_guard = self.hub_mut();
 
         match hub_guard.set_hw_hub_radio_channel(channel_id) {
             Ok(_) => {
@@ -156,7 +153,7 @@ impl AppContext {
                 self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
-        emit_hub_config(self.get_locked_hub_mut().deref().into());
+        emit_hub_config(self.hub_mut().deref().into());
     }
 
     pub fn discover_hub(&mut self, path: String) {
@@ -173,12 +170,12 @@ impl AppContext {
 
         log::debug!(
             "Requested HUB change. Removing players as outdated: {:#?}",
-            game_ctx.get_game_ref().get_players_ref()
+            game_ctx.game_ref().players_map_ref()
         );
 
-        game_ctx.get_game_mut().erase_players();
+        game_ctx.game_mut().erase_players();
 
-        let result = self.get_locked_hub_mut().probe(&path);
+        let result = self.hub_mut().probe(&path);
         match result {
             Ok(_) => self.run_polling_for_players(),
             Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err),
@@ -205,11 +202,11 @@ impl AppContext {
     }
 
     pub fn emit_game_config_locking_hub(&self) {
-        emit_hub_config(self.get_locked_hub_mut().deref().into());
+        emit_hub_config(self.hub_mut().deref().into());
         emit_players(
             self.game_state
-                .get_game_ref()
-                .players_as_vec()
+                .game_ref()
+                .players_ref_as_vec()
                 .into_iter()
                 .map(|p| p.into())
                 .collect(),
@@ -218,15 +215,15 @@ impl AppContext {
 
     pub fn emit_game_context(&self) {
         emit_game_state(&self.game_state);
-        emit_round(self.game_state.get_game_ref().current_round_ref().into());
-        emit_question(self.game_state.get_game_ref().current_question_ref().into());
+        emit_round(self.game_state.game_ref().current_round_ref().into());
+        emit_question(self.game_state.game_ref().current_question_ref().into());
     }
 }
 
 /// Game API
 impl AppContext {
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
-        let hub = self.get_hub();
+        let hub = self.hub_lock();
         let game_ctx = match &mut self.game_state {
             GameState::SetupAndLoading(game) => game,
             _ => {
@@ -256,7 +253,7 @@ impl AppContext {
             map.insert(player.term_id, player.clone());
             map
         });
-        self.game_state.get_game_mut().set_players(players);
+        self.game_state.game_mut().set_players(players);
     }
 }
 

@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use crate::hub_comm::hw::hw_hub_manager::get_epoch_ms;
+use crate::hub_comm::hw::hw_hub_manager::calc_epoch_ms;
 use crate::hub_comm::web::web_server::server::{
     Persistence, PlayerEvent, PlayerId, PlayerIdentityDto,
 };
@@ -28,7 +28,7 @@ fn register_player(
     let mut guard = state.lock().expect("Poisoned");
     let player: PlayerIdentityDto = if guard.is_known_ip(&player.ip) {
         log::info!("Ip collision. Retrieving old");
-        guard.get_by_ip(&player.ip).expect("Expected to be present")
+        guard.player_by_ip(&player.ip).expect("Expected to be present")
     } else {
         guard.add_player(player.0)
     };
@@ -58,7 +58,7 @@ fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, 
     let color = if event.state { "#00FFFF" } else { "#000000" };
 
     let mut event = event.0;
-    event.timestamp = get_epoch_ms().expect("Failed to get epoch");
+    event.timestamp = calc_epoch_ms().expect("Failed to get epoch");
     state_guard.push_event(event);
 
     Ok(json!({"color": color}))

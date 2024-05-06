@@ -17,11 +17,11 @@ pub enum HubType {
 
 pub trait HubManager: Debug + Send + Sync {
     // Common
-    fn get_hub_address(&self) -> String;
+    fn hub_address(&self) -> String;
     fn probe(&mut self, port: &str) -> Result<(), HubManagerError>;
-    fn get_hub_status(&self) -> HubStatus;
+    fn hub_status(&self) -> HubStatus;
     fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError>;
-    fn get_hub_timestamp(&self) -> Result<u32, HubManagerError>;
+    fn calc_hub_timestamp(&self) -> Result<u32, HubManagerError>;
     fn set_hub_timestamp(&self, timestamp: u32) -> Result<(), HubManagerError>;
     fn set_term_light_color(&self, term_id: u8, color: RGB8) -> Result<(), HubManagerError>;
     fn set_term_feedback_led(
