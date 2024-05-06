@@ -1,8 +1,5 @@
 use std::collections::HashMap;
-use crate::core::game_context::{
-    AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion,
-    DisplayQuestion, EndQuestion, GameContext, SetupAndLoading, WaitingForAnswerRequests,
-};
+use crate::core::game_context::{AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion, DisplayQuestion, EndQuestion, Game, GameContext, SetupAndLoading, WaitingForAnswerRequests};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -150,42 +147,29 @@ impl GameState {
         )
     }
 
-    pub fn get_players_mut(&mut self) -> &mut HashMap<u8, Player> {
+    pub fn get_game_mut(&mut self) -> &mut Game {
         match self {
-            GameState::SetupAndLoading(game) => { game.get_players_mut() }
-            GameState::ChooseQuestion(game) => { game.get_players_mut() }
-            GameState::DisplayQuestion(game) => { game.get_players_mut() }
-            GameState::WaitingForAnswerRequests(game) => { game.get_players_mut() }
-            GameState::AnswerAttemptReceived(game) => { game.get_players_mut() }
-            GameState::EndQuestion(game) => { game.get_players_mut() }
-            GameState::CheckEndOfRound(game) => { game.get_players_mut() }
-            GameState::CalcStatsAndStartNextRound(game) => { game.get_players_mut() }
+            GameState::SetupAndLoading(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::ChooseQuestion(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::DisplayQuestion(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::WaitingForAnswerRequests(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::AnswerAttemptReceived(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::EndQuestion(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::CheckEndOfRound(game_ctx) => { game_ctx.get_game_mut() }
+            GameState::CalcStatsAndStartNextRound(game_ctx) => { game_ctx.get_game_mut() }
         }
     }
     
-    pub fn get_players_ref(&self) -> &HashMap<u8, Player> {
+    pub fn get_game_ref(&self) -> &Game {
         match self {
-            GameState::SetupAndLoading(game) => { game.get_players_ref() }
-            GameState::ChooseQuestion(game) => { game.get_players_ref() }
-            GameState::DisplayQuestion(game) => { game.get_players_ref() }
-            GameState::WaitingForAnswerRequests(game) => { game.get_players_ref() }
-            GameState::AnswerAttemptReceived(game) => { game.get_players_ref() }
-            GameState::EndQuestion(game) => { game.get_players_ref() }
-            GameState::CheckEndOfRound(game) => { game.get_players_ref() }
-            GameState::CalcStatsAndStartNextRound(game) => { game.get_players_ref() }
-        }
-    }
-
-    pub fn set_players(&mut self, players: HashMap<u8, Player>) {
-        match self {
-            GameState::SetupAndLoading(game) => { game.set_players(players) }
-            GameState::ChooseQuestion(game) => { game.set_players(players) }
-            GameState::DisplayQuestion(game) => { game.set_players(players) }
-            GameState::WaitingForAnswerRequests(game) => { game.set_players(players) }
-            GameState::AnswerAttemptReceived(game) => { game.set_players(players) }
-            GameState::EndQuestion(game) => { game.set_players(players) }
-            GameState::CheckEndOfRound(game) => { game.set_players(players) }
-            GameState::CalcStatsAndStartNextRound(game) => { game.set_players(players) }
+            GameState::SetupAndLoading(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::ChooseQuestion(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::DisplayQuestion(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::WaitingForAnswerRequests(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::AnswerAttemptReceived(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::EndQuestion(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::CheckEndOfRound(game_ctx) => { game_ctx.get_game_ref() }
+            GameState::CalcStatsAndStartNextRound(game_ctx) => { game_ctx.get_game_ref() }
         }
     }
     

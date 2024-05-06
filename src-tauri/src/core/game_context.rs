@@ -43,11 +43,8 @@ pub struct CheckEndOfRound {}
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CalcStatsAndStartNextRound {}
 
-
-
 #[derive(Debug)]
-pub struct GameContext<State = SetupAndLoading> {
-    state: PhantomData<State>,
+pub struct Game {
     /// Entities
     pack_content: PackContent,
     players: HashMap<u8, Player>,
@@ -55,7 +52,7 @@ pub struct GameContext<State = SetupAndLoading> {
     // game_state: GameState,
     current_round_index: usize,
     active_player_id: u8,
-    // active_player: Player, // TODO
+    // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
     click_for_answer_allowed: bool,
     answer_allowed: bool,
     /// Current question
@@ -67,11 +64,9 @@ pub struct GameContext<State = SetupAndLoading> {
     round_duration_min: i32,
 }
 
-
-impl Default for GameContext {
-    fn default() -> GameContext<SetupAndLoading> {
+impl Default for Game {
+    fn default() -> Game {
         Self {
-            state: PhantomData::<SetupAndLoading>,
             pack_content: PackContent::default(),
             players: HashMap::default(),
             // Default values
@@ -89,35 +84,23 @@ impl Default for GameContext {
     }
 }
 
-/// Common implementation for every state of the `GameContext`
-impl<State> GameContext<State> {
-    pub fn transition<T>(self) -> GameContext<T> {
-        let prev_state = Self::full_type_to_name(&format!("{:?}", self.state));
-        let next_state = Self::full_type_to_name(type_name::<T>());
-        log::debug!("Game transitions '{}' -> '{}'", prev_state, next_state);
-        GameContext {
-            state: PhantomData,
-            pack_content: self.pack_content,
-            players: self.players,
-            // game_state: self.game_state,
-            current_round_index: self.current_round_index,
-            active_player_id: self.active_player_id,
-            click_for_answer_allowed: self.click_for_answer_allowed,
-            answer_allowed: self.answer_allowed,
-            current_question: self.current_question,
-            round_stats: self.round_stats,
-            events: self.events,
-            allow_answer_timestamp: self.allow_answer_timestamp,
-            round_duration_min: self.round_duration_min,
-        }
-    }
-
-    pub fn erase_players(&mut self) {
-        self.players = HashMap::default();
-    }
-
+/// External common-state API
+/// Get/Set player operations should be available in any state
+/// Round data should be available at any state
+impl Game {
+    /// Immutable
     pub fn get_players_ref(&self) -> &HashMap<u8, Player> {
         &self.players
+    }
+
+    pub fn get_current_round(&self) -> Option<&Round> {
+        let idx = self.current_round_index;
+        self.pack_content.rounds.get(idx)
+    }
+
+    /// Mutable player operations (used for player monitoring my hub)
+    pub fn erase_players(&mut self) {
+        self.players = HashMap::default();
     }
 
     pub fn get_players_mut(&mut self) -> &mut HashMap<u8, Player> {
@@ -127,6 +110,71 @@ impl<State> GameContext<State> {
     pub fn set_players(&mut self, players: HashMap<u8, Player>) {
         self.players = players;
     }
+}
+
+/// Internal API
+impl Game {
+    fn set_active_player_by_id(&mut self, term_id: u8) {
+        log::debug!("Looking for user with id: {}", term_id);
+        let player = self.get_player_by_id_mut(&term_id);
+        self.active_player_id = player.term_id;
+    }
+    
+    fn get_active_player_mut(&mut self) -> &mut Player {
+        let id = self.active_player_id;
+        log::debug!("Looking for user with id: {}", id);
+        self.get_player_by_id_mut(&id)
+    }
+
+    fn get_player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
+        let msg = format!("Expected to have term_id: {} in players map: {:?}", term_id, self.players);
+        self.players
+            .get_mut(term_id)
+            .expect(&msg)
+    }
+
+    fn set_active_player_state(&mut self, player_state: PlayerState) {
+        let id = self.active_player_id;
+        let player = self.get_player_by_id_mut(&id);
+        player.state = player_state;
+    }
+}
+
+#[derive(Debug)]
+pub struct GameContext<State = SetupAndLoading> {
+    state: PhantomData<State>,
+    game: Game,
+}
+
+
+impl Default for GameContext {
+    fn default() -> GameContext<SetupAndLoading> {
+        Self {
+            state: PhantomData::<SetupAndLoading>,
+            game: Game::default(),
+        }
+    }
+}
+
+/// Common implementation for every state of the `GameContext`
+impl<State> GameContext<State> {
+    pub fn transition<T>(self) -> GameContext<T> {
+        let prev_state = Self::full_type_to_name(&format!("{:?}", self.state));
+        let next_state = Self::full_type_to_name(type_name::<T>());
+        log::debug!("Game transitions '{}' -> '{}'", prev_state, next_state);
+        GameContext {
+            state: PhantomData,
+            game: self.game,
+        }
+    }
+
+    pub fn get_game_mut(&mut self) -> &mut Game {
+        &mut self.game
+    }
+
+    pub fn get_game_ref(&self) -> &Game {
+        &self.game
+    }
 
     fn full_type_to_name(next_state: &str) -> String {
         next_state
@@ -135,34 +183,11 @@ impl<State> GameContext<State> {
             .expect("Expected to have type with :: in path")
             .replace(['"', '>'], "")
     }
-
-    fn set_active_player_by_id(&mut self, term_id: u8) {
-        log::debug!("Looking for user with id: {}", term_id);
-        let player = self.get_player_by_id_mut(&term_id);
-        self.active_player_id = player.term_id;
-    }
-
-    fn get_player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
-        self.players
-            .get_mut(term_id)
-            .expect("For set_active_player_by_id() it's expected to have valid 'term_id' passed")
-    }
-
-    fn set_active_player_state(&mut self, player_state: PlayerState) {
-        let id = self.active_player_id;
-        let player = self.get_player_by_id_mut(&id);
-        player.state = player_state;
-    }
-
-    pub fn get_current_round(&self) -> &Round {
-        let idx = self.current_round_index;
-        &self.pack_content.rounds[idx]
-    }
 }
 
 impl GameContext<SetupAndLoading> {
     pub fn set_round_duration(&mut self, round_duration_min: i32) {
-        self.round_duration_min = round_duration_min;
+        self.game.round_duration_min = round_duration_min;
     }
     pub fn start(
         self,
@@ -170,13 +195,13 @@ impl GameContext<SetupAndLoading> {
         event_rx: Receiver<TermEvent>,
     ) -> Result<GameContext<PickFirstQuestionChooser>, GameplayError> {
         let mut game = self.transition();
-        game.pack_content = pack_content;
-        if game.players.len() < 2 {
+        game.game.pack_content = pack_content;
+        if game.game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::NotEnoughPlayers);
         }
 
-        game.events = Some(Arc::new(Mutex::new(Box::new(event_rx))));
+        game.game.events = Some(Arc::new(Mutex::new(Box::new(event_rx))));
         Ok(game)
     }
 }
@@ -185,15 +210,15 @@ impl GameContext<PickFirstQuestionChooser> {
     pub fn pick_first_question_chooser(
         mut self,
     ) -> Result<GameContext<ChooseQuestion>, GameplayError> {
-        self.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
+        self.game.allow_answer_timestamp = get_epoch_ms().expect("No epoch today");
 
         let term_id = match self.get_fastest_click_player_id() {
-            Ok(id) => {id}
-            Err(err) => {Err(err.current_context().clone())?}
+            Ok(id) => { id }
+            Err(err) => { Err(err.current_context().clone())? }
         };
         emit_message(format!("Fastest player with id: {}", term_id));
-        self.set_active_player_by_id(term_id);
-        self.set_active_player_state(PlayerState::QuestionChooser);
+        self.game.set_active_player_by_id(term_id);
+        self.game.set_active_player_state(PlayerState::QuestionChooser);
 
         Ok(self.transition())
     }
@@ -214,7 +239,7 @@ impl GameContext<PickFirstQuestionChooser> {
         let fastest_player_id = self
             .get_fastest_click_from_hub()
             .change_context(GameplayError::HubOperationError)?;
-        
+
         log::info!("Fastest click from user: {}", fastest_player_id);
         // self.click_for_answer_allowed = false; /// ????
         // self.answer_allowed = true;
@@ -223,7 +248,7 @@ impl GameContext<PickFirstQuestionChooser> {
     }
 
     fn get_fastest_click_from_hub(&mut self) -> error_stack::Result<u8, HubManagerError> {
-        let Some(receiver) = &self.events else {
+        let Some(receiver) = &self.game.events else {
             return Err(HubManagerError::NotInitializedError.into());
         };
 
@@ -245,7 +270,7 @@ impl GameContext<PickFirstQuestionChooser> {
                 }
             };
 
-            let base_timestamp = self.allow_answer_timestamp;
+            let base_timestamp = self.game.allow_answer_timestamp;
             let mut events: Vec<TermEvent> = events
                 .iter()
                 .filter(|&e| {
@@ -285,7 +310,7 @@ impl GameContext<PickFirstQuestionChooser> {
                 continue;
             }
 
-            let Some(player) = self.players.get(&e.term_id) else {
+            let Some(player) = self.game.players.get(&e.term_id) else {
                 log::debug!("Unknown terminal id {} event. Skipping: {:?}", e.term_id, e);
                 continue;
             };
@@ -330,7 +355,7 @@ impl GameContext<PickFirstQuestionChooser> {
         Ok(events)
     }
     fn get_active_players_cnt(&mut self) -> Vec<Player> {
-        self.players
+        self.game.players
             .values()
             .filter(|&p| p.allowed_to_click())
             .cloned()

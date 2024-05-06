@@ -20,12 +20,13 @@ pub fn get_app_context_dto() -> AppContextDto {
 }
 
 pub fn map_app_context(context: &AppContext, hub: &Box<dyn HubManager>) -> AppContextDto {
+    let players = context.game_state.get_game_ref().get_players_ref().values().collect();
     AppContextDto {
         availablePorts: discover_serial_ports(),
         hubPort: hub.get_hub_address(),
         radioChannel: hub.radio_channel(),
         hubStatus: hub.get_hub_status(),
-        players: map_players_to_player_dto(context.game_state.get_players_ref().values().collect()),
+        players: map_players_to_player_dto(players),
     }
 }
 

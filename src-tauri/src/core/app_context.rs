@@ -142,7 +142,7 @@ impl AppContext {
     }
 
     pub fn discover_hub(&mut self, path: String) {
-        let game = match &mut self.game_state {
+        let game_ctx = match &mut self.game_state {
             GameState::SetupAndLoading(game) => game,
             _ => {
                 let state_mismatch = self
@@ -155,10 +155,10 @@ impl AppContext {
 
         log::debug!(
             "Requested HUB change. Removing players as outdated: {:#?}",
-            game.get_players_ref()
+            game_ctx.get_game_ref().get_players_ref()
         );
 
-        game.erase_players();
+        game_ctx.get_game_mut().erase_players();
 
         let result = self.get_locked_hub_mut().probe(&path);
         match result {
@@ -219,7 +219,7 @@ impl AppContext {
     }
 
     fn is_new_players_found(&self, detected_players: &[Player]) -> bool {
-        let players = self.game_state.get_players_ref();
+        let players = self.game_state.get_game_ref().get_players_ref();
         if detected_players.len() > players.len() {
             return true;
         }
@@ -251,7 +251,7 @@ impl AppContext {
                 (p.term_id, player)
             })
             .collect();
-        self.game_state.set_players(players);
+        self.game_state.get_game_mut().set_players(players);
     }
 }
 
@@ -259,7 +259,7 @@ impl AppContext {
 impl AppContext {
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
         let hub = self.get_hub();
-        let game = match &mut self.game_state {
+        let game_ctx = match &mut self.game_state {
             GameState::SetupAndLoading(game) => game,
             _ => {
                 let state_mismatch = self
@@ -273,11 +273,11 @@ impl AppContext {
         let (event_tx, event_rx) = mpsc::channel();
         start_event_listener(hub, event_tx);
 
-        let game = std::mem::take(game); // Take ownership of the value inside the mutable reference
-        let game = game.start(self.game_pack.content.clone(), event_rx)?;
-        emit_current_round(game.get_current_round().into());
-        let game = game.pick_first_question_chooser()?;
-        self.game_state = GameState::ChooseQuestion(game);
+        let game_ctx = std::mem::take(game_ctx); // Take ownership of the value inside the mutable reference
+        let game_ctx = game_ctx.start(self.game_pack.content.clone(), event_rx)?;
+        emit_current_round(game_ctx.get_game_ref().get_current_round().into());
+        let game_ctx = game_ctx.pick_first_question_chooser()?;
+        self.game_state = GameState::ChooseQuestion(game_ctx);
         Ok(())
     }
 
@@ -287,7 +287,7 @@ impl AppContext {
             map.insert(player.term_id, player.clone());
             map
         });
-        self.game_state.set_players(players);
+        self.game_state.get_game_mut().set_players(players);
     }
 }
 
