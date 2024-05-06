@@ -1,21 +1,17 @@
 use crate::api::events::{
-    emit_error, emit_game_state, emit_hub_config, emit_players, emit_question,
-    emit_round,
+    emit_error, emit_game_state, emit_hub_config, emit_players, emit_question, emit_round,
 };
-use crate::core::game_entities::{
-    GamePackError, GameState, GameplayError, Player,
-};
+use crate::core::game_entities::{GamePackError, GameState, GameplayError, Player};
 use crate::core::player_listener::discover_and_save_players;
 use crate::core::term_event_processing::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
-use crate::hub_comm::common::hub_api::{HubManager, HubType};
-use crate::hub_comm::hw::hw_hub_manager::{HubManagerError, HwHubManager};
-use crate::hub_comm::hw::internal::api_types::TermEvent;
-use crate::hub_comm::web::web_hub_manager::WebHubManager;
+use crate::hub::hub_api::{HubManager, HubManagerError, HubType, TermEvent};
+use crate::hub::hw::hw_hub_manager::HwHubManager;
+use crate::hub::web::web_hub_manager::WebHubManager;
 use error_stack::{Report, ResultExt};
 use std::collections::HashMap;
 use std::ops::Deref;
-use std::sync::atomic::{AtomicU32};
+use std::sync::atomic::AtomicU32;
 use std::sync::mpsc::Receiver;
 use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::{sleep, spawn, JoinHandle};

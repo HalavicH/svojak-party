@@ -9,12 +9,10 @@ use std::io::ErrorKind;
 use std::sync::{Arc, Mutex};
 use std::thread::{sleep, JoinHandle};
 
-use crate::hub_comm::hw::hw_hub_manager::calc_epoch_ms;
-use crate::hub_comm::hw::internal::api_types::{
-    hub_frame_pos, ResponseStatus, TermButtonState, TermEvent,
-};
-use crate::hub_comm::hw::internal::byte_handler::ByteHandler;
-use crate::hub_comm::hw::internal::hub_protocol_io_handler::{format_bytes_hex, stuff_bytes};
+use crate::hub::hub_api::{calc_current_epoch_ms, TermButtonState, TermEvent};
+use crate::hub::hw::internal::api_types::{hub_frame_pos, ResponseStatus};
+use crate::hub::hw::internal::byte_handler::ByteHandler;
+use crate::hub::hw::internal::hub_protocol_io_handler::{format_bytes_hex, stuff_bytes};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
@@ -190,7 +188,7 @@ impl HubMock {
 
                 terminals.shuffle(&mut thread_rng());
                 terminals.iter().for_each(|id| {
-                    let timestamp = calc_epoch_ms().expect("Mock HUB. Not for prod");
+                    let timestamp = calc_current_epoch_ms().expect("Mock HUB. Not for prod");
                     let state = if timestamp % 2 == 0 {
                         TermButtonState::Pressed
                     } else {

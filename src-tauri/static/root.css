@@ -19,7 +19,7 @@
 
     --accent-color: rgba(40, 114, 124, 0.281);
 
-    /* Other common settings */
+    /* Other api settings */
     color: var(--text-color);
     background-color: var(--background-color);
     font-family: Inter, Avenir, Helvetica, Arial, sans-serif;

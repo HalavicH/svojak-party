@@ -2,12 +2,10 @@ use std::sync::RwLockWriteGuard;
 
 use crate::api::dto::{HubRequestDto, HubResponseDto};
 use crate::core::app_context::app;
+use crate::hub::hub_api::{HubManager, HubManagerError};
 use tauri::command;
 
-use crate::hub_comm::common::hub_api::HubManager;
-
-use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
-use crate::hub_comm::hw::internal::api_types::{HwHubIoError, HwHubRequest};
+use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest};
 
 /// Calls HUB to set specific radio channel
 #[command]

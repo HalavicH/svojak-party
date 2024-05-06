@@ -3,10 +3,10 @@ use std::io::{ErrorKind, Read, Write};
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
-use svojak_app::hub_comm::hw::internal::api_types::HwHubRequest::*;
-use svojak_app::hub_comm::hw::internal::api_types::{HubResponse, ResponseStatus};
-use svojak_app::hub_comm::hw::internal::byte_handler::ByteHandler;
-use svojak_app::hub_comm::hw::internal::hub_protocol_io_handler::*;
+use svojak_app::hub::hw::internal::api_types::HwHubRequest::*;
+use svojak_app::hub::hw::internal::api_types::{HubResponse, ResponseStatus};
+use svojak_app::hub::hw::internal::byte_handler::ByteHandler;
+use svojak_app::hub::hw::internal::hub_protocol_io_handler::*;
 
 const MOCK_ID: u8 = 6;
 const MOCK_TID: u8 = 0;

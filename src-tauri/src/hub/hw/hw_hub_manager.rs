@@ -1,42 +1,20 @@
 #![allow(dead_code)]
 
-use std::default::Default;
-
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use thiserror::Error;
-
 use crate::core::game_entities::{HubStatus, Player};
-use crate::hub_comm::common::hub_api::HubManager;
-use crate::hub_comm::hw::internal::api_types::{
-    HwHubIoError, HwHubRequest, ResponseStatus, TermButtonState, TermEvent,
+use crate::hub::hub_api::{
+    calc_current_epoch_ms, HubManager, HubManagerError, TermButtonState, TermEvent,
 };
-use crate::hub_comm::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
-use crate::hub_comm::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
+use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest, ResponseStatus};
+use crate::hub::hw::internal::hub_protocol_io_handler::HwHubCommunicationHandler;
+use crate::hub::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
 use error_stack::{bail, IntoReport, Report, Result, ResultExt};
 use rgb::RGB8;
-use serde::Serialize;
 use serialport::SerialPort;
+use std::default::Default;
+use std::time::Duration;
 
 const HUB_CMD_TIMEOUT: Duration = Duration::from_millis(100);
 const MAX_TERMINAL_CNT: u8 = 10;
-
-#[derive(Debug, Clone, Serialize, Error)]
-pub enum HubManagerError {
-    #[error("Api not supported for this type of HUB")]
-    ApiNotSupported,
-    #[error("Hub is not initialized")]
-    NotInitializedError,
-    #[error("Serial port error")]
-    SerialPortError,
-    #[error("HTTP communication error")]
-    HttpCommunicationError,
-    #[error("No response from hub")]
-    NoResponseFromHub,
-    #[error("No response from terminal")]
-    NoResponseFromTerminal,
-    #[error("Internal error")]
-    InternalError,
-}
 
 #[derive(Debug)]
 pub struct HwHubManager {
@@ -99,7 +77,7 @@ impl HwHubManager {
     }
 
     fn init_timestamp(&mut self) -> Result<(), HubManagerError> {
-        self.base_timestamp = calc_epoch_ms()?;
+        self.base_timestamp = calc_current_epoch_ms()?;
         Ok(())
     }
 
@@ -380,61 +358,12 @@ pub fn discover_serial_ports() -> Vec<String> {
     ports_vec
 }
 
-pub fn calc_epoch_ms() -> Result<u32, HubManagerError> {
-    let now = SystemTime::now();
-    let since_the_epoch = now
-        .duration_since(UNIX_EPOCH)
-        .into_report()
-        .attach_printable("Can't get unix time")
-        .change_context(HubManagerError::InternalError)?;
-
-    let milliseconds_since_base: u32 = since_the_epoch
-        .as_secs()
-        .checked_mul(1000)
-        .and_then(|ms| {
-            let stripped_ms = ms & 0xFFFFFFFF;
-            stripped_ms.checked_add(u64::from(since_the_epoch.subsec_nanos()) / 1_000_000)
-        })
-        .and_then(|ms| ms.try_into().ok())
-        .ok_or(HubManagerError::InternalError)
-        .into_report()
-        .attach_printable("Can't process UNIX time to timestamp")?;
-
-    Ok(milliseconds_since_base)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::hub::hub_api::calc_current_epoch_ms;
     use std::thread::sleep;
     use std::time::Duration;
-
-    #[test]
-    fn test_get_epoch_ms() {
-        // Get the expected result manually
-        let now = SystemTime::now();
-        let since_the_epoch = now.duration_since(UNIX_EPOCH).expect("Test");
-
-        let _expected_milliseconds_since_base: u32 = since_the_epoch
-            .as_secs()
-            .checked_mul(1000)
-            .and_then(|ms| {
-                let stripped_ms = ms & 0xFFFFFFFF;
-                stripped_ms.checked_add(u64::from(since_the_epoch.subsec_nanos()) / 1_000_000)
-            })
-            .and_then(|ms| ms.try_into().ok())
-            .expect("Test");
-
-        // Call the actual function
-        let result = calc_epoch_ms();
-
-        // Check the result
-        assert!(result.is_ok());
-        let _execution_offset = 100;
-        let _timestamp = result.expect("Test");
-        // assert!(timestamp > expected_milliseconds_since_base &&
-        //     timestamp < (expected_milliseconds_since_base + execution_offset));
-    }
 
     #[test]
     fn test_hub_timestamp_init() {
@@ -442,7 +371,7 @@ mod tests {
         assert_eq!(hub.base_timestamp, 0);
 
         hub.init_timestamp().expect("Test");
-        assert_eq!(hub.base_timestamp, calc_epoch_ms().expect("Test"));
+        assert_eq!(hub.base_timestamp, calc_current_epoch_ms().expect("Test"));
     }
 
     #[test]
@@ -450,14 +379,14 @@ mod tests {
         let execution_offset = 50;
         let mut hub = HwHubManager::default();
         hub.init_timestamp().expect("Test");
-        let terminal_timestamp = calc_epoch_ms().expect("Test");
+        let terminal_timestamp = calc_current_epoch_ms().expect("Test");
         assert!(
             terminal_timestamp > hub.base_timestamp
                 && terminal_timestamp < (hub.base_timestamp + execution_offset)
         );
 
         sleep(Duration::from_secs(1));
-        let terminal_timestamp = calc_epoch_ms().expect("Test");
+        let terminal_timestamp = calc_current_epoch_ms().expect("Test");
 
         assert!(
             terminal_timestamp > hub.base_timestamp

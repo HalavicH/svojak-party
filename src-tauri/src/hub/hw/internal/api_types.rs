@@ -1,6 +1,7 @@
 use crate::api::dto::HubRequestDto;
+use crate::hub::hub_api::TermButtonState;
 use rgb::RGB8;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::error::Error;
 use std::fmt;
 use thiserror::Error;
@@ -146,38 +147,6 @@ pub mod hub_frame_pos {
     pub const COMMAND_OR_STATUS: usize = 2;
     pub const PAYLOAD_LEN: usize = 3;
     pub const PAYLOAD: usize = 4;
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct TermEvent {
-    pub term_id: u8,
-    pub timestamp: u32,
-    pub state: TermButtonState,
-}
-
-/// Terminal button state enum
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub enum TermButtonState {
-    Pressed,
-    Released,
-}
-
-impl From<bool> for TermButtonState {
-    fn from(state: bool) -> Self {
-        match state {
-            true => TermButtonState::Pressed,
-            false => TermButtonState::Released,
-        }
-    }
-}
-
-impl TermButtonState {
-    pub fn to_bool(&self) -> bool {
-        match self {
-            TermButtonState::Pressed => true,
-            TermButtonState::Released => false,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize)]

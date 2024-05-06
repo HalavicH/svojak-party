@@ -2,7 +2,7 @@ use crate::api::dto::QuestionDto;
 use crate::api::events::emit_error;
 use crate::core::app_context::app_mut;
 use crate::core::game_entities::GameplayError;
-use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
+use crate::hub::hub_api::HubManagerError;
 use tauri::command;
 
 /// Start the game with selected players and game pack

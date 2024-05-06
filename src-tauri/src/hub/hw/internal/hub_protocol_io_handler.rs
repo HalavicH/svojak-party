@@ -5,11 +5,11 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
 
-use crate::hub_comm::hw::internal::api_types::ProtocolVersion::Version;
-use crate::hub_comm::hw::internal::api_types::{
+use crate::hub::hw::internal::api_types::ProtocolVersion::Version;
+use crate::hub::hw::internal::api_types::{
     hub_frame_pos, HubResponse, HwHubIoError, HwHubRequest, ResponseStatus,
 };
-use crate::hub_comm::hw::internal::byte_handler::{ByteHandler, START_BYTE, STOP_BYTE};
+use crate::hub::hw::internal::byte_handler::{ByteHandler, START_BYTE, STOP_BYTE};
 use error_stack::{IntoReport, Report, Result, ResultExt};
 use serialport::SerialPort;
 
@@ -181,8 +181,8 @@ pub fn assemble_frame(cmd: u8, mut payload: Vec<u8>) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use crate::hub_comm::hw::internal::api_types::ProtocolVersion::Version;
-    use crate::hub_comm::hw::internal::hub_protocol_io_handler::{assemble_frame, stuff_bytes};
+    use crate::hub::hw::internal::api_types::ProtocolVersion::Version;
+    use crate::hub::hw::internal::hub_protocol_io_handler::{assemble_frame, stuff_bytes};
 
     #[test]
     fn test_frame_assembly() {

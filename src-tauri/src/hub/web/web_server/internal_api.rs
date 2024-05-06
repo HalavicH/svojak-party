@@ -1,9 +1,7 @@
 #![allow(unused)]
 
-use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};
-use crate::hub_comm::web::web_server::server::{
-    Persistence, PlayerEvent, PlayerId, PlayerIdentityDto,
-};
+use crate::hub::hub_api::{TermButtonState, TermEvent};
+use crate::hub::web::web_server::server::{Persistence, PlayerEvent, PlayerId, PlayerIdentityDto};
 use rgb::{RGB, RGB8};
 use rocket::serde::json::serde_json::json;
 use rocket::serde::json::{Json, Value};

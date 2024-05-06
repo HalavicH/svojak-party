@@ -2,9 +2,8 @@ use crate::api::events::{emit_message, emit_round};
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
 use crate::core::term_event_processing::receive_fastest_click_from_hub;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
-use crate::hub_comm::hw::hw_hub_manager::{calc_epoch_ms};
-use crate::hub_comm::hw::internal::api_types::TermEvent;
-use error_stack::{ResultExt};
+use crate::hub::hub_api::{calc_current_epoch_ms, TermEvent};
+use error_stack::ResultExt;
 use rocket::serde::{Deserialize, Serialize};
 use std::any::type_name;
 use std::collections::HashMap;
@@ -39,8 +38,7 @@ pub struct CheckEndOfRound {}
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CalcStatsAndStartNextRound {}
 
-#[derive(Debug)]
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Game {
     /// Entities
     pack_content: PackContent,
@@ -75,8 +73,7 @@ impl Game {
     }
 }
 
-
-/// External common-state API
+/// External api-state API
 /// Get/Set player operations should be available in any state
 /// Round data should be available at any state
 impl Game {
@@ -218,7 +215,7 @@ impl GameContext<PickFirstQuestionChooser> {
     pub fn pick_first_question_chooser(
         mut self,
     ) -> Result<GameContext<ChooseQuestion>, GameplayError> {
-        self.game.allow_answer_timestamp = calc_epoch_ms().expect("No epoch today");
+        self.game.allow_answer_timestamp = calc_current_epoch_ms().expect("No epoch today");
 
         let term_id = match self.receive_fastest_click_player_id() {
             Ok(id) => id,

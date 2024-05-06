@@ -12,15 +12,15 @@ use std::net::Ipv4Addr;
 use tokio::runtime::Runtime;
 
 use crate::core::game_entities::{HubStatus, Player};
-use crate::hub_comm::common::hub_api::HubManager;
-use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
-use crate::hub_comm::hw::internal::api_types::{TermButtonState, TermEvent};
-use crate::hub_comm::web::web_server::internal_api::INTERNAL_API::*;
-use crate::hub_comm::web::web_server::internal_api::{
+use crate::hub::hub_api::HubManager;
+use crate::hub::hub_api::{HubManagerError, TermButtonState, TermEvent};
+use crate::hub::web::web_server::internal_api::INTERNAL_API::TAKE_EVENT_QUEUE;
+use crate::hub::web::web_server::internal_api::INTERNAL_API::*;
+use crate::hub::web::web_server::internal_api::{
     TermFeedbackState, TermLightColorDto, TimestampDto,
 };
-use crate::hub_comm::web::web_server::server;
-use crate::hub_comm::web::web_server::server::PlayerIdentityDto;
+use crate::hub::web::web_server::server;
+use crate::hub::web::web_server::server::PlayerIdentityDto;
 
 const RETRY_INTERVAL_MS: u64 = 100;
 

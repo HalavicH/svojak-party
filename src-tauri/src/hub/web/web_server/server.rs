@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use crate::hub_comm::web::web_server::{internal_api, player_api};
+use crate::hub::web::web_server::{internal_api, player_api};
 use rocket::form::FromForm;
 use rocket::fs::{relative, FileServer};
 use rocket::serde::{Deserialize, Serialize};

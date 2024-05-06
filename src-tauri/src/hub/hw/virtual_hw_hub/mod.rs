@@ -1,10 +1,10 @@
+use crate::hub::hub_api::HubManagerError;
 use error_stack::{Report, Result};
 use serialport::SerialPort;
 use std::thread::JoinHandle;
 
-use crate::hub_comm::hw::hw_hub_manager::HubManagerError;
 #[cfg(unix)]
-use crate::hub_comm::hw::virtual_hw_hub::hub_mock::run_hub_mock;
+use crate::hub::hw::virtual_hw_hub::hub_mock::run_hub_mock;
 
 #[cfg(unix)]
 mod hub_mock;

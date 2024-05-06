@@ -1,5 +1,5 @@
 use crate::api::dto::PackErrorData;
-use crate::core::app_context::{app_mut};
+use crate::core::app_context::app_mut;
 use crate::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use error_stack::Report;
 use tauri::command;

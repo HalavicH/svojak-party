@@ -1,14 +1,14 @@
 use crate::api::dto::{
-    HubConfigDto, PlayerEndRoundStatsDto, QuestionDto, QuestionSceneDto, RoundDto,
-    RoundStatsDto, TopicDto,
+    HubConfigDto, PlayerEndRoundStatsDto, QuestionDto, QuestionSceneDto, RoundDto, RoundStatsDto,
+    TopicDto,
 };
 use crate::api::dto::{PackInfoDto, PlayerDto, QuestionBriefDto};
 use crate::core::game_context::GameStats;
 use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{Atom, PackContent, Question, Round};
-use crate::hub_comm::common::hub_api::HubManager;
+use crate::hub::hub_api::HubManager;
 
-use crate::hub_comm::hw::hw_hub_manager::discover_serial_ports;
+use crate::hub::hw::hw_hub_manager::discover_serial_ports;
 
 /// Hub manager
 impl From<&Box<dyn HubManager>> for HubConfigDto {

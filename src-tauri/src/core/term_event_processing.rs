@@ -1,6 +1,5 @@
 use crate::core::game_entities::{GameplayError, Player};
-use crate::hub_comm::common::hub_api::HubManager;
-use crate::hub_comm::hw::internal::api_types::TermButtonState::Pressed;
+use crate::hub::hub_api::{HubManager, TermButtonState, TermEvent};
 use error_stack::Report;
 use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender};
@@ -8,8 +7,6 @@ use std::sync::{mpsc, Arc, Mutex, RwLock, RwLockReadGuard};
 use std::thread;
 use std::thread::{sleep, JoinHandle};
 use std::time::{Duration, Instant};
-
-use crate::hub_comm::hw::internal::api_types::TermEvent;
 
 const EVT_POLLING_INTERVAL_MS: u64 = 1000;
 
@@ -132,7 +129,7 @@ fn filter_irrelevant_events(
             true
         })
         .filter(|&e| {
-            if e.state != Pressed {
+            if e.state != TermButtonState::Pressed {
                 log::debug!("Release event. Skipping: {:?}", e);
                 return false;
             }
