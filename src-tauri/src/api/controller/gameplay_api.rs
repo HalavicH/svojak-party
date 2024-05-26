@@ -9,11 +9,12 @@ use tauri::command;
 pub async fn start_new_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
     let mut app = app_mut();
-    app.start_new_game().map_err(|e| {
-        emit_error(e.to_string());
-        log::error!("{:#?}", e);
-        e.current_context().clone()
-    })?;
+    app.start_new_game()
+        .map_err(|e| {
+            emit_error(e.to_string());
+            log::error!("{:#?}", e);
+            e.current_context().clone()
+        })?;
 
     app.emit_game_config_locking_hub();
     app.emit_game_context();
@@ -32,7 +33,7 @@ pub fn select_question(topic: String, price: i32) -> Result<(), GameplayError> {
 
 /// Allows events from players to be processed
 #[command]
-pub fn allow_answer() -> Result<(), HubManagerError> {
+pub fn allow_answer() -> Result<(), GameplayError> {
     app_mut().allow_answer().map_err(|e| {
         log::error!("{:?}", e);
         e.current_context().clone()

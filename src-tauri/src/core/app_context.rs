@@ -1,7 +1,5 @@
-use crate::api::events::{
-    emit_error, emit_game_state, emit_hub_config, emit_players, emit_question, emit_round,
-};
-use crate::core::game_context::GameContext;
+use crate::api::events::{emit_error, emit_game_state, emit_game_state_by_name, emit_hub_config, emit_players, emit_question, emit_round};
+use crate::core::game_context::{DisplayQuestion, GameContext};
 use crate::core::game_entities::{GamePackError, GameState, GameplayError, Player};
 use crate::core::player_listener::discover_and_save_players;
 use crate::core::term_event_processing::start_event_listener;
@@ -217,14 +215,7 @@ impl AppContext {
         let hub = self.hub_lock();
         let game_ctx = match &mut self.game_state {
             GameState::SetupAndLoading(game) => game,
-            _ => {
-                let state_mismatch = self
-                    .game_state
-                    .show_state_mismatch("GameState::SetupAndLoading");
-                emit_error(format!("Can't start the game: {}", state_mismatch));
-                Err(GameplayError::OperationForbidden)?
-                // .attach_printable_lazy(|| { "Can't start game in current state" })?
-            }
+            _ => Err(self.handle_state_mismatch_error("GameState::SetupAndLoading"))?
         };
 
         let (event_tx, event_rx) = mpsc::channel();
@@ -233,6 +224,8 @@ impl AppContext {
         let game_ctx = std::mem::take(game_ctx); // Take ownership of the value inside the mutable reference
         let content = self.game_pack.content.clone();
         let game_ctx = game_ctx.start(content, event_rx)?;
+        // TODO: consider extracting this as another step in the game
+        emit_game_state_by_name("PickFirstQuestionChooser"); // Nasty workaround to avoid use after free
         let game_ctx = game_ctx.pick_first_question_chooser()?;
         self.game_state = GameState::ChooseQuestion(game_ctx);
         Ok(())
@@ -241,19 +234,30 @@ impl AppContext {
     pub fn select_question(&mut self, topic: &str, price: i32) -> Result<(), GameplayError> {
         let game_ctx = match &mut self.game_state {
             GameState::ChooseQuestion(game) => game,
-            _ => {
-                let state_mismatch = self
-                    .game_state
-                    .show_state_mismatch("GameState::ChooseQuestion");
-                emit_error(format!("Can't select question: {}", state_mismatch));
-                Err(GameplayError::OperationForbidden)?
-                // .attach_printable_lazy(|| { "Can't select question in current game state" })?
-            }
+            _ => Err(self.handle_state_mismatch_error("GameState::ChooseQuestion"))?
         };
 
         let game_ctx = game_ctx.choose_question(topic, price)?;
         self.game_state = GameState::DisplayQuestion(game_ctx);
         Ok(())
+    }
+
+    pub fn allow_answer(&mut self) -> error_stack::Result<(), GameplayError> {
+        let game_ctx = match &mut self.game_state {
+            GameState::DisplayQuestion(game) => game,
+            _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
+        };
+
+        let game_ctx = game_ctx.allow_answer()?;
+        Ok(())
+    }
+
+    fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
+        let state_mismatch = self
+            .game_state
+            .show_state_mismatch(expected_state);
+        emit_error(format!("Can't allow answer: {}", state_mismatch));
+        GameplayError::OperationForbidden
     }
 }
 
@@ -304,18 +308,6 @@ impl AppContext {
         //
         // round.questions_left -= 1;
         // log::info!("Question left: {}", round.questions_left);
-        Ok(())
-    }
-
-    pub fn allow_answer(&mut self) -> error_stack::Result<(), HubManagerError> {
-        // let timestamp = get_epoch_ms()?;
-        // self.allow_answer_timestamp
-        //     .swap(timestamp, Ordering::Relaxed);
-        // log::info!("Current answer base timestamp: {timestamp}");
-        //
-        // self.__old_game.set_active_player_id(0);
-        // self.update_non_target_player_states();
-        // self.__old_game.click_for_answer_allowed = true;
         Ok(())
     }
 
@@ -418,37 +410,6 @@ impl AppContext {
 
     // fn get_player_keys(&self) -> Vec<u8> {
     //     self.__old_game.players.keys().copied().collect()
-    // }
-
-    // fn update_non_target_player_states(&mut self) {
-    //     let game_state = self.__old_game.game_state().clone();
-    //     let active_id = self.get_active_player_id();
-    //
-    //     self.__old_game.players.iter_mut().for_each(|(id, p)| {
-    //         log::debug!(
-    //             "Game state: {:?}. Player: {}:{:?}",
-    //             game_state,
-    //             p.term_id,
-    //             p.state
-    //         );
-    //
-    //         if p.term_id == active_id {
-    //             log::debug!("Active player. Skipping");
-    //             return;
-    //         }
-    //
-    //         if p.state == PlayerState::AnsweredWrong {
-    //             log::trace!("Player with id {} becomes inactive", id);
-    //             p.state = PlayerState::Inactive;
-    //         }
-    //
-    //         if game_state == OldGameState::ChooseQuestion
-    //             || (p.state != PlayerState::Dead && p.state != PlayerState::Inactive)
-    //         {
-    //             log::trace!("Player with id {} becomes idle", id);
-    //             p.state = PlayerState::Idle;
-    //         }
-    //     });
     // }
 }
 

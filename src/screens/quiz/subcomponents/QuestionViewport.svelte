@@ -5,12 +5,12 @@
 </script>
 
 <div class="viewport">
-    {question.scenario[0].content}
-<!--    <div class="slider"></div>-->
-<!--    <div class="navigation">-->
-<!--        <button id="prev-button" class="prev-button">&lt;</button>-->
-<!--        <button id="next-button" class="next-button">&gt;</button>-->
-<!--    </div>-->
+    {JSON.stringify(question)}
+    <!--    <div class="slider"></div>-->
+    <!--    <div class="navigation">-->
+    <!--        <button id="prev-button" class="prev-button">&lt;</button>-->
+    <!--        <button id="next-button" class="next-button">&gt;</button>-->
+    <!--    </div>-->
 </div>
 
 <style>
@@ -22,7 +22,7 @@
         flex: 1;
 
         margin: 0.2em;
-        height: 68vh;
+        height: 100%;
         background-color: rgba(181, 229, 172, 0.16);
         border: solid 3px var(--items-block-border-color);
         border-radius: inherit;

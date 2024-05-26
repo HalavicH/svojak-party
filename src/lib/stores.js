@@ -27,6 +27,7 @@ export const PlayerState = {
 // Game State
 export const GameState = {
     SetupAndLoading: 'SetupAndLoading',
+    PickFirstQuestionChooser: 'PickFirstQuestionChooser',
     ChooseQuestion: 'ChooseQuestion',
     DisplayQuestion: 'DisplayQuestion',
     WaitingForAnswerRequests: 'WaitingForAnswerRequests',

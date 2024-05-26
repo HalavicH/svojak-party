@@ -1,4 +1,4 @@
-use crate::api::events::{emit_message, emit_round};
+use crate::api::events::{emit_game_state_by_name, emit_message, emit_players, emit_round};
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
 use crate::core::term_event_processing::receive_fastest_click_from_hub;
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
@@ -38,6 +38,8 @@ pub struct CheckEndOfRound {}
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CalcStatsAndStartNextRound {}
 
+const INVALID_PLAYER_ID: u8 = 0;
+
 #[derive(Debug, Default, Clone)]
 pub struct Game {
     /// Entities
@@ -49,7 +51,6 @@ pub struct Game {
     current_round: Round,
     active_player_id: u8,
     // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
-    click_for_answer_allowed: bool,
     answer_allowed: bool,
     /// Current question
     current_question: Question,
@@ -58,6 +59,12 @@ pub struct Game {
     events: Option<Arc<Mutex<Box<Receiver<TermEvent>>>>>,
     allow_answer_timestamp: u32,
     round_duration_min: i32,
+}
+
+impl Game {
+    pub(crate) fn is_active_player(&self, other: &Player) -> bool {
+        other.term_id == self.active_player_id
+    }
 }
 
 impl Game {
@@ -95,7 +102,7 @@ impl Game {
         &self.current_question
     }
 
-    /// Mutable player operations (used for player monitoring my hub)
+    /// Mutable player operations (used for player monitoring by hub)
     pub fn erase_players(&mut self) {
         self.players = HashMap::default();
     }
@@ -188,6 +195,7 @@ impl<State> GameContext<State> {
     }
 }
 
+///
 impl GameContext<SetupAndLoading> {
     pub fn set_round_duration(&mut self, round_duration_min: i32) {
         self.game.round_duration_min = round_duration_min;
@@ -259,11 +267,9 @@ impl GameContext<PickFirstQuestionChooser> {
             allow_answer_timestamp,
             self.game.players_map_ref(),
         )
-        .change_context(GameplayError::HubOperationError)?;
+            .change_context(GameplayError::HubOperationError)?;
 
         log::info!("Fastest click from user: {}", fastest_player_id);
-        // self.click_for_answer_allowed = false; /// ????
-        // self.answer_allowed = true;
 
         Ok(fastest_player_id)
     }
@@ -292,6 +298,62 @@ impl GameContext<ChooseQuestion> {
             .ok_or(GameplayError::PackElementNotPresent)?;
         log::info!("Picked question! Topic: {}, price: {}", topic, price);
         Ok(game_ctx)
+    }
+}
+
+impl GameContext<DisplayQuestion> {
+    pub fn allow_answer(&mut self) -> Result<GameContext<WaitingForAnswerRequests>, GameplayError> {
+        let game_ctx = self;
+
+        let timestamp = calc_current_epoch_ms().expect("Expected to calc epoch successfully");
+        game_ctx.game.allow_answer_timestamp = timestamp;
+        log::info!("Current answer base timestamp: {}", timestamp);
+
+        game_ctx.game.active_player_id = INVALID_PLAYER_ID; // TODO: Consider using Option<u8>
+        game_ctx.update_non_active_player_states();
+        emit_players(game_ctx
+            .game
+            .players_ref_as_vec()
+            .into_iter()
+            .map(|p| p.into())
+            .collect()
+        );
+        game_ctx.game.answer_allowed = true;
+
+        emit_game_state_by_name("WaitingForAnswerRequests");
+        // game_ctx.game.set_active_player_state(PlayerState::Answering);
+        let game_ctx: GameContext<WaitingForAnswerRequests> = game_ctx.transition();
+        Ok(game_ctx)
+    }
+
+    /// For DisplayQuestion state
+    fn update_non_active_player_states(&mut self) {
+        let game_state = "DisplayQuestion";
+        let game = &mut self.game;
+        let active_id = game.active_player_id;
+
+        game.players.iter_mut()
+            .filter(|(&id, _)| { id != active_id })
+            .for_each(|(id, p)| {
+                // Logging for debugging purposes
+                log::debug!(
+                    "Game state: {:?}. Player: {}:{:?}",
+                    game_state,
+                    p.term_id,
+                    p.state
+                );
+
+                if p.state == PlayerState::AnsweredWrong {
+                    log::trace!("Player with id {} becomes inactive", id);
+                    p.state = PlayerState::Inactive;
+                }
+
+                if p.state != PlayerState::Dead && p.state != PlayerState::Inactive
+                {
+                    log::trace!("Player with id {} becomes idle", id);
+                    p.state = PlayerState::Idle;
+                }
+            });
     }
 }
 

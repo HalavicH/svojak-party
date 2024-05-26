@@ -6,6 +6,8 @@
     import Row from "../components/generic/Row.svelte";
     import ModalPlaceholder from "../components/abstract/ModalPlaceholder.svelte";
     import MenuButton from "./quiz/subcomponents/MenuButton.svelte";
+    import PickFirstQuestionChooser from "./quiz/PickFirstQuestionChooser.svelte";
+    import Centered from "../components/generic/Centered.svelte";
 
     $: gameState = $currentGameStateStore.gameState;
 </script>
@@ -13,19 +15,38 @@
 <div class="container">
     <ModalPlaceholder/>
     <MenuButton/>
-    {#if gameState === GameState.ChooseQuestion}
-        <RoundView/>
-    {:else if gameState === GameState.DisplayQuestion}
-        <QuestionView/>
-    {:else}
-        <Row>
-            <div>Unhandled state: {gameState}</div>
-        </Row>
-    {/if}
+    <div class="main-view">
+        {#if gameState === GameState.SetupAndLoading}
+            <Centered greedy={true}>
+                <div>Loading...</div>
+            </Centered>
+        {:else if gameState === GameState.PickFirstQuestionChooser}
+            <PickFirstQuestionChooser/>
+        {:else if gameState === GameState.ChooseQuestion}
+            <RoundView/>
+        {:else if gameState === GameState.DisplayQuestion
+                || gameState === GameState.WaitingForAnswerRequests
+                || gameState === GameState.AnswerAttemptReceived
+        }
+            <QuestionView/>
+        {:else}
+            <Row>
+                <div>Unhandled state: {gameState}</div>
+            </Row>
+        {/if}
+    </div>
     <PlayersView/>
 </div>
 
 <style>
+    .main-view {
+        padding-top: 0.3em; /* Fixes weird shift to top */
+        display: flex;
+        flex-direction: column;
+        /*flex: 1;*/
+        height: 66vh;
+    }
+
     .container {
         height: 98vh;
         display: flex;

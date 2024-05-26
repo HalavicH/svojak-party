@@ -115,3 +115,10 @@ pub fn emit_game_state(game_state: &GameState) {
     };
     emit(Event::GameState, game_state_dto);
 }
+
+pub fn emit_game_state_by_name(game_state_name: &str) {
+    let game_state_dto = GameStateDto {
+        gameState: game_state_name.to_string(),
+    };
+    emit(Event::GameState, game_state_dto);
+}

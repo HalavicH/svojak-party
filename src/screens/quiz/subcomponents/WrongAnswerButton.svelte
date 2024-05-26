@@ -1,13 +1,14 @@
 <script>
     import {doWithSound, getWrongAnswerSound} from "../../../lib/sound.js";
     export let onClick = () => {};
+    export let active;
 
     function handleClick() {
         doWithSound(onClick, getWrongAnswerSound());
     }
 </script>
 
-<button type="button" on:click={handleClick}>Wrong answer</button>
+<button type="button" on:click={handleClick} class:inactive={!active}>Wrong answer</button>
 
 <style>
     button {
@@ -33,4 +34,10 @@
         border-color: #2b0000;
         background-color: rgb(88, 0, 0);
     }
+
+    .inactive {
+        filter: grayscale(100%);
+        pointer-events: none;
+    }
+
 </style>

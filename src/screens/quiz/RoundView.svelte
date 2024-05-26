@@ -8,7 +8,7 @@
     console.log("|> Current round:", currentRound, "<|");
 </script>
 
-<div class="round-screen">
+<div>
     <div class="title-bar">
         <p class="round-label">Round: {currentRound.roundName}</p>
     </div>
@@ -29,13 +29,6 @@
 </div>
 
 <style>
-    .round-screen {
-        display: flex;
-        flex-direction: column;
-        /*flex: 1;*/
-        height: 66vh;
-    }
-
     .title-bar {
         margin: 15px 15px 0;
         padding: 3px 10px;

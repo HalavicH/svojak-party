@@ -5,18 +5,17 @@
     import Row from "../../components/generic/Row.svelte";
 </script>
 
-<Row>
+<div class="row">
     <QuestionViewport/>
     <QuestionSidebar/>
-</Row>
+</div>
 
 <style>
-    /* Question screen */
-    .question-screen {
-
+    .row {
+        display: flex;
         flex-direction: row;
-        height: 66vh;
-
-        margin: 10px;
+        /*justify-content: center;*/
+        flex: 1;
+        align-items: center;
     }
 </style>

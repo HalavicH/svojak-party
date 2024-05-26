@@ -1,7 +1,4 @@
-use crate::core::game_context::{
-    AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion,
-    DisplayQuestion, EndQuestion, Game, GameContext, SetupAndLoading, WaitingForAnswerRequests,
-};
+use crate::core::game_context::{AnswerAttemptReceived, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion, DisplayQuestion, EndQuestion, Game, GameContext, PickFirstQuestionChooser, SetupAndLoading, WaitingForAnswerRequests};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -112,6 +109,10 @@ pub enum GameState {
 
     /// When game instantiated & started this is the first state
     /// Next state: `DisplayQuestion` (when question selected)
+    PickFirstQuestionChooser(GameContext<SetupAndLoading>),
+
+    /// When game instantiated & started this is the first state
+    /// Next state: `DisplayQuestion` (when question selected)
     ChooseQuestion(GameContext<ChooseQuestion>),
 
     /// When question selected everyone reads it, but can't answer until host allows
@@ -156,6 +157,7 @@ impl GameState {
     pub fn game_mut(&mut self) -> &mut Game {
         match self {
             GameState::SetupAndLoading(game_ctx) => game_ctx.game_mut(),
+            GameState::PickFirstQuestionChooser(game_ctx) => {game_ctx.game_mut()},
             GameState::ChooseQuestion(game_ctx) => game_ctx.game_mut(),
             GameState::DisplayQuestion(game_ctx) => game_ctx.game_mut(),
             GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.game_mut(),
@@ -169,6 +171,7 @@ impl GameState {
     pub fn game_ref(&self) -> &Game {
         match self {
             GameState::SetupAndLoading(game_ctx) => game_ctx.game_ref(),
+            GameState::PickFirstQuestionChooser(game_ctx) => {game_ctx.game_ref()},
             GameState::ChooseQuestion(game_ctx) => game_ctx.game_ref(),
             GameState::DisplayQuestion(game_ctx) => game_ctx.game_ref(),
             GameState::WaitingForAnswerRequests(game_ctx) => game_ctx.game_ref(),
@@ -182,6 +185,7 @@ impl GameState {
     pub fn state_name(&self) -> &str {
         match self {
             GameState::SetupAndLoading(_) => "SetupAndLoading",
+            GameState::PickFirstQuestionChooser(_) => {"PickFirstQuestionChooser"}
             GameState::ChooseQuestion(_) => "ChooseQuestion",
             GameState::DisplayQuestion(_) => "DisplayQuestion",
             GameState::WaitingForAnswerRequests(_) => "WaitingForAnswerRequests",

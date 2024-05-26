@@ -12,6 +12,11 @@
 
     $: currentRound = $currentRoundStore;
 
+    // $: clickAllowed = currentQuestionStore.questionState === "ANSWERING";
+    // $: noPlayersToAnswerLeft = currentQuestionStore.playersToAnswer.length === 0;
+    $: clickAllowed = false;
+    $: noPlayersToAnswerLeft = false;
+
     async function allowAnswer() {
         await callBackend(TauriApiCommand.ALLOW_ANSWER);
     }
@@ -40,11 +45,11 @@
     <div class="controls">
         <AllowAnswerButton onClick={allowAnswer}/>
         <VSpacing size="0.5em"/>
-        <CorrectAnswerButton onClick={correctAnswer}/>
+        <CorrectAnswerButton onClick={correctAnswer} active={clickAllowed}/>
         <VSpacing size="0.5em"/>
-        <WrongAnswerButton onClick={wrongAnswer}/>
+        <WrongAnswerButton onClick={wrongAnswer} active={clickAllowed}/>
         <VSpacing size="0.5em"/>
-        <Button text="Show answer and end question" onClick={showAnswerAndEndQuestion}/>
+        <Button text="Show answer and end question" onClick={showAnswerAndEndQuestion} active={clickAllowed && noPlayersToAnswerLeft}/>
     </div>
 </div>
 

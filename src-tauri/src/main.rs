@@ -4,7 +4,7 @@
 #[allow(unused_imports)]
 use rocket::futures::io::Window;
 use svojak_app::api::controller::debug_api::*;
-use svojak_app::api::controller::gameplay::*;
+use svojak_app::api::controller::gameplay_api::*;
 use svojak_app::api::controller::startup::hub::*;
 use svojak_app::api::controller::startup::pack::*;
 use svojak_app::api::controller::startup::settings::*;
