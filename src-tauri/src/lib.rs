@@ -2,7 +2,7 @@ pub mod api;
 
 pub mod core {
     pub mod app_context;
-    pub mod game_context;
+    pub mod game_ctx;
     pub mod game_entities;
     pub mod player_listener;
     pub mod term_event_processing;

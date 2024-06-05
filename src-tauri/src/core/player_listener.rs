@@ -1,4 +1,4 @@
-use crate::api::events::{emit_message, emit_players};
+use crate::api::events::{emit_message, emit_players_by_game_ctx};
 use crate::core::app_context::{app_mut, AppContext};
 use crate::core::game_entities::{Player, DEFAULT_ICON};
 
@@ -30,13 +30,12 @@ fn compare_and_merge_players(app: &mut AppContext, detected_players: &[Player]) 
             det_pl_cnt
         ));
         merge_players(app, detected_players);
-        let vec = app.game_state.game_ref().players_ref_as_vec();
-        emit_players(vec.into_iter().map(|p| p.into()).collect());
+        emit_players_by_game_ctx(app.game_state.game_ctx_ref());
     }
 }
 
 fn is_new_players_found(app: &AppContext, detected_players: &[Player]) -> bool {
-    let players = app.game_state.game_ref().players_map_ref();
+    let players = app.game_state.game_ctx_ref().players_map_ref();
     if detected_players.len() > players.len() {
         return true;
     }

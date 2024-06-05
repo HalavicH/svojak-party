@@ -39,7 +39,7 @@ pub fn save_players(players: Vec<PlayerDto>) {
     let mut app = app_mut();
     app.update_players(&player_entities);
     // No emit_players required, as we just set them, but I'll do it anyway to maintain consistency
-    let vec = app.game_state.game_ref().players_ref_as_vec();
+    let vec = app.game_state.game_ctx_ref().players_ref_as_vec();
     emit_players(vec.into_iter().map(|p| p.into()).collect());
 }
 

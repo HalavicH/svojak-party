@@ -1,10 +1,14 @@
-use crate::api::events::{emit_error, emit_game_state, emit_game_state_by_name, emit_hub_config, emit_players, emit_question, emit_round};
-use crate::core::game_context::{DisplayQuestion, GameContext};
-use crate::core::game_entities::{GamePackError, GameState, GameplayError, Player};
+use crate::api::events::{
+    emit_error, emit_game_state, emit_game_state_by_name, emit_hub_config,
+    emit_players_by_game_ctx, emit_question, emit_round,
+};
+use crate::core::game_ctx::game::Game;
+use crate::core::game_ctx::game_state::GameState;
+use crate::core::game_entities::{GamePackError, GameplayError, Player};
 use crate::core::player_listener::discover_and_save_players;
 use crate::core::term_event_processing::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
-use crate::hub::hub_api::{HubManager, HubManagerError, HubType};
+use crate::hub::hub_api::{HubManager, HubType};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
 use crate::types::ArcRwBox;
@@ -192,20 +196,14 @@ impl AppContext {
 
     pub fn emit_game_config_locking_hub(&self) {
         emit_hub_config(self.hub_mut().deref().into());
-        emit_players(
-            self.game_state
-                .game_ref()
-                .players_ref_as_vec()
-                .into_iter()
-                .map(|p| p.into())
-                .collect(),
-        );
+        let game_ctx = self.game_state.game_ctx_ref();
+        emit_players_by_game_ctx(game_ctx);
     }
 
     pub fn emit_game_context(&self) {
         emit_game_state(&self.game_state);
-        emit_round(self.game_state.game_ref().current_round_ref().into());
-        emit_question(self.game_state.game_ref().current_question_ref().into());
+        emit_round(self.game_state.game_ctx_ref().current_round_ref().into());
+        emit_question(self.game_state.game_ctx_ref().current_question_ref().into());
     }
 }
 
@@ -213,49 +211,48 @@ impl AppContext {
 impl AppContext {
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
         let hub = self.hub_lock();
-        let game_ctx = match &mut self.game_state {
+        let game = match &mut self.game_state {
             GameState::SetupAndLoading(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::SetupAndLoading"))?
+            _ => Err(self.handle_state_mismatch_error("GameState::SetupAndLoading"))?,
         };
 
         let (event_tx, event_rx) = mpsc::channel();
         start_event_listener(hub, event_tx);
 
-        let game_ctx = std::mem::take(game_ctx); // Take ownership of the value inside the mutable reference
+        let game = std::mem::take(game); // Take ownership of the value inside the mutable reference
         let content = self.game_pack.content.clone();
-        let game_ctx = game_ctx.start(content, event_rx)?;
+        let game = game.start(content, event_rx)?;
         // TODO: consider extracting this as another step in the game
         emit_game_state_by_name("PickFirstQuestionChooser"); // Nasty workaround to avoid use after free
-        let game_ctx = game_ctx.pick_first_question_chooser()?;
-        self.game_state = GameState::ChooseQuestion(game_ctx);
+        let game = game.pick_first_question_chooser()?;
+        self.game_state = GameState::ChooseQuestion(game);
         Ok(())
     }
 
     pub fn select_question(&mut self, topic: &str, price: i32) -> Result<(), GameplayError> {
-        let game_ctx = match &mut self.game_state {
+        let game = match &mut self.game_state {
             GameState::ChooseQuestion(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::ChooseQuestion"))?
+            _ => Err(self.handle_state_mismatch_error("GameState::ChooseQuestion"))?,
         };
 
-        let game_ctx = game_ctx.choose_question(topic, price)?;
-        self.game_state = GameState::DisplayQuestion(game_ctx);
+        let game = game.choose_question(topic, price)?;
+        self.game_state = GameState::DisplayQuestion(game);
         Ok(())
     }
 
     pub fn allow_answer(&mut self) -> error_stack::Result<(), GameplayError> {
-        let game_ctx = match &mut self.game_state {
+        let game = match &mut self.game_state {
             GameState::DisplayQuestion(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
         };
 
-        let game_ctx = game_ctx.allow_answer()?;
+        let game = game.allow_answer()?;
+        self.game_state = GameState::WaitingForAnswerRequests(game);
         Ok(())
     }
 
     fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
-        let state_mismatch = self
-            .game_state
-            .show_state_mismatch(expected_state);
+        let state_mismatch = self.game_state.show_state_mismatch(expected_state);
         emit_error(format!("Can't allow answer: {}", state_mismatch));
         GameplayError::OperationForbidden
     }
@@ -422,10 +419,11 @@ impl AppContext {
         self.hub = context.hub;
         self.player_poling_thread_handle = context.player_poling_thread_handle;
         self.game_pack = context.game_pack;
-        self.game_state = GameState::SetupAndLoading(GameContext::default());
+        self.game_state = GameState::SetupAndLoading(Game::default());
     }
 
     pub fn set_game_state(&mut self, name: String) {
-        self.game_state = GameState::from_name_and_game(&name, self.game_state.game_ref().clone());
+        self.game_state =
+            GameState::from_name_and_game(&name, self.game_state.game_ctx_ref().clone());
     }
 }

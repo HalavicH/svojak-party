@@ -1,7 +1,6 @@
 use crate::api::events::emit_error;
 use crate::core::app_context::app_mut;
 use crate::core::game_entities::GameplayError;
-use crate::hub::hub_api::HubManagerError;
 use tauri::command;
 
 /// Start the game with selected players and game pack
@@ -9,12 +8,11 @@ use tauri::command;
 pub async fn start_new_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
     let mut app = app_mut();
-    app.start_new_game()
-        .map_err(|e| {
-            emit_error(e.to_string());
-            log::error!("{:#?}", e);
-            e.current_context().clone()
-        })?;
+    app.start_new_game().map_err(|e| {
+        emit_error(e.to_string());
+        log::error!("{:#?}", e);
+        e.current_context().clone()
+    })?;
 
     app.emit_game_config_locking_hub();
     app.emit_game_context();
