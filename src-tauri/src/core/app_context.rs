@@ -4,6 +4,7 @@ use crate::api::events::{
 };
 use crate::core::game_ctx::game::Game;
 use crate::core::game_ctx::game_state::GameState;
+use crate::core::game_ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
 use crate::core::game_entities::{GamePackError, GameplayError, Player};
 use crate::core::player_listener::discover_and_save_players;
 use crate::core::term_event_processing::start_event_listener;
@@ -48,8 +49,6 @@ pub struct AppContext {
     pub game_pack: GamePack,
     pub game_state: GameState,
 }
-
-unsafe impl Send for AppContext {}
 
 impl Default for AppContext {
     fn default() -> Self {
@@ -96,6 +95,12 @@ impl AppContext {
 
     pub fn set_game_pack(&mut self, pack: GamePack) {
         self.game_pack = pack;
+    }
+
+    /// This method should be used for every state change to ensure event emission
+    pub fn set_game_state(&mut self, state: GameState) {
+        self.game_state = state;
+        emit_game_state(&self.game_state);
     }
 }
 
@@ -219,13 +224,12 @@ impl AppContext {
         let (event_tx, event_rx) = mpsc::channel();
         start_event_listener(hub, event_tx);
 
-        let game = std::mem::take(game); // Take ownership of the value inside the mutable reference
         let content = self.game_pack.content.clone();
         let game = game.start(content, event_rx)?;
         // TODO: consider extracting this as another step in the game
         emit_game_state_by_name("PickFirstQuestionChooser"); // Nasty workaround to avoid use after free
         let game = game.pick_first_question_chooser()?;
-        self.game_state = GameState::ChooseQuestion(game);
+        self.set_game_state(GameState::ChooseQuestion(game));
         Ok(())
     }
 
@@ -236,7 +240,7 @@ impl AppContext {
         };
 
         let game = game.choose_question(topic, price)?;
-        self.game_state = GameState::DisplayQuestion(game);
+        self.set_game_state(GameState::DisplayQuestion(game));
         Ok(())
     }
 
@@ -247,7 +251,24 @@ impl AppContext {
         };
 
         let game = game.allow_answer()?;
-        self.game_state = GameState::WaitingForAnswerRequests(game);
+        self.set_game_state(GameState::WaitingForAnswerRequests(game));
+        Ok(())
+    }
+
+    pub fn answer_question(
+        &mut self,
+        answered_correctly: bool,
+    ) -> error_stack::Result<(), GameplayError> {
+        let game = match &mut self.game_state {
+            GameState::AnswerAttemptReceived(game) => game,
+            _ => Err(self.handle_state_mismatch_error("GameState::AnswerAttemptReceived"))?,
+        };
+
+        let path = game.answer_question(answered_correctly)?;
+        self.set_game_state(match path {
+            Aqr::EndQuestion(game) => GameState::EndQuestion(game),
+            Aqr::DisplayQuestion(game) => GameState::DisplayQuestion(game),
+        });
         Ok(())
     }
 
@@ -308,71 +329,6 @@ impl AppContext {
         Ok(())
     }
 
-    pub fn answer_question(
-        &mut self,
-        answered_correctly: bool,
-    ) -> error_stack::Result<bool, GameplayError> {
-        // if !self.__old_game.answer_allowed {
-        //     return Err(Report::new(GameplayError::AnswerForbidden));
-        // }
-        //
-        // self.__old_game.answer_allowed = false;
-        // self.allow_answer_timestamp
-        //     .swap(u32::MAX, Ordering::Relaxed);
-        //
-        // let active_player_id = self.get_active_player_id();
-        // log::info!(
-        //     "Active player id: {}. Player ids: {:?}",
-        //     active_player_id,
-        //     self.get_player_keys()
-        // );
-        //
-        // let response_player = {
-        //     let active_player = self
-        //         .__old_game
-        //         .players
-        //         .get_mut(&active_player_id)
-        //         .ok_or(GameplayError::PlayerNotPresent)?;
-        //     if answered_correctly {
-        //         active_player.stats.correct_num += 1;
-        //         self.__old_game.round_stats.total_correct_answers += 1;
-        //         active_player.stats.score += self.__old_game.question_price;
-        //         active_player.state = PlayerState::AnsweredCorrectly;
-        //     } else {
-        //         active_player.stats.wrong_num += 1;
-        //         active_player.stats.score -= self.__old_game.question_price;
-        //         active_player.state = PlayerState::AnsweredWrong;
-        //     }
-        //     self.__old_game.round_stats.total_tries += 1;
-        //     active_player.stats.total_tries += 1;
-        //     active_player.clone()
-        // };
-        //
-        // log::info!("Current player stats: {:?}", response_player);
-        //
-        // if self.no_players_to_answer_left() {
-        //     log::info!("Nobody answered question correctly");
-        //     self.__old_game.round_stats.total_wrong_answers += 1;
-        // }
-        //
-        // let theme = self.__old_game.question_theme.clone();
-        // let price = self.__old_game.question_price;
-        //
-        // let mut retry = true;
-        // if answered_correctly || self.no_players_to_answer_left() {
-        //     log::info!("Removing question from the pack");
-        //
-        //     retry = false;
-        //     self.update_game_state(OldGameState::ChooseQuestion);
-        //     self.update_non_target_player_states();
-        //
-        //     self.remove_question(&theme, &price)
-        //         .change_context(GameplayError::PackElementNotPresent)?;
-        // }
-
-        Ok(true)
-    }
-
     pub fn no_players_to_answer_left(&self) -> bool {
         // let players_left = self
         //     .__old_game
@@ -412,18 +368,19 @@ impl AppContext {
 
 /// Debug API
 impl AppContext {
-    pub fn reset_game(&mut self) {
+    pub fn _dbg_reset_game(&mut self) {
         let context = AppContext::default();
-        self.game_state = context.game_state;
         self.hub_type = context.hub_type;
         self.hub = context.hub;
         self.player_poling_thread_handle = context.player_poling_thread_handle;
         self.game_pack = context.game_pack;
-        self.game_state = GameState::SetupAndLoading(Game::default());
+        self.set_game_state(GameState::SetupAndLoading(Game::default()));
     }
 
-    pub fn set_game_state(&mut self, name: String) {
-        self.game_state =
-            GameState::from_name_and_game(&name, self.game_state.game_ctx_ref().clone());
+    pub fn _dbg_set_game_state(&mut self, name: String) {
+        self.set_game_state(GameState::from_name_and_game(
+            &name,
+            self.game_state.game_ctx_ref().clone(),
+        ));
     }
 }

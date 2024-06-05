@@ -40,7 +40,7 @@ pub fn allow_answer() -> Result<(), GameplayError> {
 
 /// Provide answer to active question
 #[command]
-pub fn answer_question(answered_correctly: bool) -> Result<bool, GameplayError> {
+pub fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
     log::debug!("Answered correctly: {answered_correctly}");
 
     app_mut().answer_question(answered_correctly).map_err(|e| {

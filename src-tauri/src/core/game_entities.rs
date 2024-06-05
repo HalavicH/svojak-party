@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::core::game_entities::HubStatus::Detected;
+use crate::game_pack::pack_content_entities::Question;
 
 pub const DEFAULT_ICON: &str = "default";
 
@@ -11,7 +12,7 @@ pub enum PlayerState {
     Idle,
     QuestionChooser,
     Target,
-    FirstResponse,
+    Answering,
     Inactive,
     Dead,
     AnsweredCorrectly,
@@ -37,6 +38,21 @@ pub struct Player {
 }
 
 impl Player {
+    pub(crate) fn can_answer(&self) -> bool {
+        match self.state {
+            PlayerState::Idle => true,
+            PlayerState::QuestionChooser => true,
+            PlayerState::Target => true,
+            PlayerState::Answering => true,
+            PlayerState::Inactive => false,
+            PlayerState::Dead => false,
+            PlayerState::AnsweredCorrectly => false,
+            PlayerState::AnsweredWrong => false,
+        }
+    }
+}
+
+impl Player {
     pub fn new(term_id: u8) -> Self {
         Self {
             term_id,
@@ -46,6 +62,20 @@ impl Player {
 
     pub fn allowed_to_click(&self) -> bool {
         self.state != PlayerState::Dead && self.state != PlayerState::Inactive
+    }
+
+    pub fn answered_correctly(&mut self, question: &Question) {
+        self.state = PlayerState::AnsweredCorrectly;
+        self.stats.correct_num += 1;
+        self.stats.total_tries += 1;
+        self.stats.score += question.price;
+    }
+
+    pub fn answered_wrong(&mut self, question: &Question) {
+        self.state = PlayerState::AnsweredWrong;
+        self.stats.wrong_num += 1;
+        self.stats.total_tries += 1;
+        self.stats.score -= question.price;
     }
 }
 
@@ -87,7 +117,7 @@ pub enum GameplayError {
     #[error("HUB operation failed")]
     PackElementNotPresent,
     #[error("Player is not present")]
-    PlayerNotPresent,
+    PlayerNotPresent(u8),
     #[error("HUB operation failed")]
     HubOperationError,
     #[error("Answer forbidden")]

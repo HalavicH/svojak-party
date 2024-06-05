@@ -1,5 +1,6 @@
 use crate::core::game_ctx::state_structs::*;
 use crate::core::game_ctx::GameCtx;
+use crate::core::game_entities::PlayerState;
 use std::any::type_name;
 use std::marker::PhantomData;
 
@@ -52,6 +53,34 @@ impl<State> Game<State> {
             .next()
             .expect("Expected to have type with :: in path")
             .replace(['"', '>'], "")
+    }
+
+    pub(super) fn update_non_active_player_states(&mut self, state_name: &str) {
+        let game = &mut self.ctx;
+        let active_id = game.active_player_id;
+
+        game.players
+            .iter_mut()
+            .filter(|(&id, _)| id != active_id) // Filter out active player
+            .for_each(|(id, p)| {
+                // Logging for debugging purposes
+                log::debug!(
+                    "Game state: {:?}. Player: {}:{:?}",
+                    state_name,
+                    p.term_id,
+                    p.state
+                );
+
+                if p.state == PlayerState::AnsweredWrong {
+                    log::trace!("Player with id {} becomes inactive", id);
+                    p.state = PlayerState::Inactive;
+                }
+
+                if p.state != PlayerState::Dead && p.state != PlayerState::Inactive {
+                    log::trace!("Player with id {} becomes idle", id);
+                    p.state = PlayerState::Idle;
+                }
+            });
     }
 }
 

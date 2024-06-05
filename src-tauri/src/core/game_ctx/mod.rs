@@ -35,12 +35,10 @@ pub struct GameCtx {
 }
 
 impl GameCtx {
-    pub(crate) fn is_active_player(&self, other: &Player) -> bool {
+    pub fn is_active_player(&self, other: &Player) -> bool {
         other.term_id == self.active_player_id
     }
-}
 
-impl GameCtx {
     pub fn set_current_round_by_id(&mut self, index: usize) {
         let round: &Round = self
             .pack_content

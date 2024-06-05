@@ -18,7 +18,7 @@ impl Game<SetupAndLoading> {
     }
 
     pub fn start(
-        self,
+        &self,
         pack_content: PackContent,
         event_rx: Receiver<TermEvent>,
     ) -> Result<Game<PickFirstQuestionChooser>, GameplayError> {
