@@ -35,4 +35,3 @@ pub struct StartNextRound {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct EndTheGame {}
-

@@ -6,8 +6,8 @@ use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
 use crate::core::game_ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
 use crate::core::game_entities::{GamePackError, GameplayError, Player};
-use crate::core::player_listener::discover_and_save_players;
-use crate::core::term_event_processing::start_event_listener;
+use crate::core::player_connection_listener::start_listening_for_players_connection;
+use crate::core::player_event_listener::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
 use crate::hub::hub_api::{HubManager, HubType};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
@@ -15,9 +15,8 @@ use crate::hub::web::web_hub_manager::WebHubManager;
 use crate::types::ArcRwBox;
 use error_stack::{FutureExt, Report, ResultExt};
 use std::ops::Deref;
-use std::sync::{mpsc, Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
-use std::thread::{sleep, spawn, JoinHandle};
-use std::time::Duration;
+use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::thread::JoinHandle;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -188,12 +187,7 @@ impl AppContext {
             return;
         }
 
-        log::info!("Initial setup of player polling thread");
-
-        let handle = spawn(move || loop {
-            discover_and_save_players();
-            sleep(Duration::from_secs(2));
-        });
+        let handle = start_listening_for_players_connection(self.hub_lock());
 
         log::info!("Saving new thread handle");
         self.player_poling_thread_handle = Some(handle)
@@ -221,11 +215,10 @@ impl AppContext {
             _ => Err(self.handle_state_mismatch_error("GameState::SetupAndLoading"))?,
         };
 
-        let (event_tx, event_rx) = mpsc::channel();
-        start_event_listener(hub, event_tx);
+        start_event_listener(hub, game.game_ref().events.clone());
 
         let content = self.game_pack.content.clone();
-        let game = game.start(content, event_rx)?;
+        let game = game.start(content)?;
         // TODO: consider extracting this as another step in the game
         emit_game_state_by_name("PickFirstQuestionChooser"); // Nasty workaround to avoid use after free
         let game = game.pick_first_question_chooser()?;

@@ -1,7 +1,9 @@
 #![allow(unused)]
 
 use crate::hub::hub_api::calc_current_epoch_ms;
-use crate::hub::web::web_server::server::{Persistence, PlayerEvent, PlayerId, PlayerIdentityDto};
+use crate::hub::web::web_server::server::{
+    Persistence, PlayerId, PlayerIdentityDto, PlayerWebEvent,
+};
 use rocket::fairing::AdHoc;
 use rocket::http::Status;
 use rocket::serde::json::serde_json::json;
@@ -37,7 +39,7 @@ fn register_player(
 }
 
 #[post("/event", format = "application/json", data = "<event>")]
-fn process_event(event: Json<PlayerEvent>, state: Persistence) -> Result<Value, Status> {
+fn process_event(event: Json<PlayerWebEvent>, state: Persistence) -> Result<Value, Status> {
     log::debug!("Received event {:?}", event);
 
     let mut state_guard = state

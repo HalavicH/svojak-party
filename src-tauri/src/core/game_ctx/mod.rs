@@ -3,15 +3,14 @@ pub mod game_state;
 pub mod state_processors;
 pub mod state_structs;
 
-use crate::api::events::emit_round;
+use crate::api::events::{emit_players, emit_round};
 use crate::core::game_ctx::game::GameStats;
 use crate::core::game_entities::{Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
-use crate::hub::hub_api::TermEvent;
+use crate::hub::hub_api::PlayerEvent;
 /// Entity which holds the whole game context
 use std::collections::HashMap;
-use std::sync::mpsc::Receiver;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Default, Clone)]
 pub struct GameData {
@@ -28,7 +27,8 @@ pub struct GameData {
     pub(super) current_question: Question,
     /// Stats
     pub(super) round_stats: GameStats,
-    pub(super) events: Option<Arc<Mutex<Box<Receiver<TermEvent>>>>>,
+    /// Event frame. Flushed every new question
+    pub(super) events: Arc<RwLock<Vec<PlayerEvent>>>,
     pub(super) allow_answer_timestamp: u32,
     pub(super) round_duration_min: i32,
 }
@@ -82,6 +82,7 @@ impl GameData {
     }
 
     pub fn set_players(&mut self, players: HashMap<u8, Player>) {
+        emit_players(players.values().map(|p| p.into()).collect());
         self.players = players;
     }
 }

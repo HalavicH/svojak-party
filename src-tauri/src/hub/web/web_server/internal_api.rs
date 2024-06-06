@@ -1,7 +1,9 @@
 #![allow(unused)]
 
-use crate::hub::hub_api::{TermButtonState, TermEvent};
-use crate::hub::web::web_server::server::{Persistence, PlayerEvent, PlayerId, PlayerIdentityDto};
+use crate::hub::hub_api::{PlayerEvent, TermButtonState};
+use crate::hub::web::web_server::server::{
+    Persistence, PlayerId, PlayerIdentityDto, PlayerWebEvent,
+};
 use rgb::{RGB, RGB8};
 use rocket::serde::json::serde_json::json;
 use rocket::serde::json::{Json, Value};
@@ -113,7 +115,7 @@ fn set_term_feedback_led(term_feedback: Json<TermFeedbackState>, state: Persiste
 }
 
 #[get("/get-event-queue", format = "application/json")]
-fn get_event_queue(state: Persistence) -> Json<Vec<TermEvent>> {
+fn get_event_queue(state: Persistence) -> Json<Vec<PlayerEvent>> {
     let guard = state.lock().expect("Poisoned");
     let events = guard.events.clone();
     let term_events = map_player_events_to_term_events(events);
@@ -123,7 +125,7 @@ fn get_event_queue(state: Persistence) -> Json<Vec<TermEvent>> {
 }
 
 #[get("/take-event-queue", format = "application/json")]
-fn take_event_queue(state: Persistence) -> Json<Vec<TermEvent>> {
+fn take_event_queue(state: Persistence) -> Json<Vec<PlayerEvent>> {
     let mut guard = state.lock().expect("Poisoned");
     let events = guard.events.clone();
     let term_events = map_player_events_to_term_events(events);
@@ -144,10 +146,10 @@ fn read_config(rocket_config: &Config) -> String {
     format!("{:#?}", rocket_config)
 }
 
-fn map_player_events_to_term_events(events: Vec<PlayerEvent>) -> Vec<TermEvent> {
+fn map_player_events_to_term_events(events: Vec<PlayerWebEvent>) -> Vec<PlayerEvent> {
     events
         .iter()
-        .map(|e| TermEvent {
+        .map(|e| PlayerEvent {
             term_id: e.id,
             timestamp: e.timestamp,
             state: TermButtonState::from(e.state),

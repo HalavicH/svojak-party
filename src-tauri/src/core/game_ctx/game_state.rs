@@ -1,5 +1,9 @@
 use crate::core::game_ctx::game::GameCtx;
-use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, CalcRoundStats, CalcStatsAndStartNextRound, CheckEndOfRound, ChooseQuestion, DisplayQuestion, EndQuestion, EndTheGame, PickFirstQuestionChooser, SetupAndLoading, StartNextRound, WaitingForAnswerRequests};
+use crate::core::game_ctx::state_structs::{
+    AnswerAttemptReceived, CalcRoundStats, CheckEndOfRound, ChooseQuestion, DisplayQuestion,
+    EndQuestion, EndTheGame, PickFirstQuestionChooser, SetupAndLoading, StartNextRound,
+    WaitingForAnswerRequests,
+};
 use crate::core::game_ctx::GameData;
 
 #[derive(Debug)]
@@ -124,7 +128,7 @@ impl GameState {
             "CalcRoundStats" => GameState::CalcRoundStats(context.transition()),
             "StartNextRound" => GameState::StartNextRound(context.transition()),
             "EndTheGame" => GameState::EndTheGame(context.transition()),
-            &_ => panic!("Invalid state name {}", name)
+            &_ => panic!("Invalid state name {}", name),
         }
     }
 }

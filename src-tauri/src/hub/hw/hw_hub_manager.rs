@@ -2,7 +2,7 @@
 
 use crate::core::game_entities::{HubStatus, Player};
 use crate::hub::hub_api::{
-    calc_current_epoch_ms, HubManager, HubManagerError, TermButtonState, TermEvent,
+    calc_current_epoch_ms, HubManager, HubManagerError, PlayerEvent, TermButtonState,
 };
 use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest, ResponseStatus};
 use crate::hub::hw::internal::hw_hub_device::HwHubCommunicationHandler;
@@ -220,7 +220,7 @@ impl HubManager for HwHubManager {
         map_status_to_result(response.status)
     }
 
-    fn read_event_queue(&self) -> Result<Vec<TermEvent>, HubManagerError> {
+    fn read_event_queue(&self) -> Result<Vec<PlayerEvent>, HubManagerError> {
         log::info!("Reading event queue");
         let handle = self.get_hub_handle_or_err()?;
 
@@ -251,7 +251,7 @@ impl HubManager for HwHubManager {
                     term_id
                 ))?;
 
-            let event = TermEvent {
+            let event = PlayerEvent {
                 term_id,
                 timestamp,
                 state,

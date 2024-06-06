@@ -13,7 +13,7 @@ pub type PlayerId = u8;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct PlayerEvent {
+pub(super) struct PlayerWebEvent {
     pub id: PlayerId,
     pub ip: String,
     pub timestamp: u32,
@@ -34,7 +34,7 @@ pub struct PlayerIdentityDto {
 pub struct ServerState {
     pub base_timestamp: u32,
     pub players: HashMap<PlayerId, PlayerIdentityDto>,
-    pub events: Vec<PlayerEvent>,
+    pub events: Vec<PlayerWebEvent>,
 }
 
 impl ServerState {
@@ -60,7 +60,7 @@ impl ServerState {
         id
     }
 
-    pub fn push_event(&mut self, event: PlayerEvent) {
+    pub fn push_event(&mut self, event: PlayerWebEvent) {
         self.events.push(event);
     }
 

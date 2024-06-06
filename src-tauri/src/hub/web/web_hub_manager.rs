@@ -13,7 +13,7 @@ use tokio::runtime::Runtime;
 
 use crate::core::game_entities::{HubStatus, Player};
 use crate::hub::hub_api::HubManager;
-use crate::hub::hub_api::{HubManagerError, TermButtonState, TermEvent};
+use crate::hub::hub_api::{HubManagerError, PlayerEvent, TermButtonState};
 use crate::hub::web::web_server::internal_api::INTERNAL_API::TAKE_EVENT_QUEUE;
 use crate::hub::web::web_server::internal_api::INTERNAL_API::*;
 use crate::hub::web::web_server::internal_api::{
@@ -238,8 +238,8 @@ impl HubManager for WebHubManager {
         Ok(())
     }
 
-    fn read_event_queue(&self) -> Result<Vec<TermEvent>, HubManagerError> {
-        let events: Vec<TermEvent> = self
+    fn read_event_queue(&self) -> Result<Vec<PlayerEvent>, HubManagerError> {
+        let events: Vec<PlayerEvent> = self
             .rt
             .block_on(async {
                 self.client

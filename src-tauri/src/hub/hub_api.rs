@@ -35,7 +35,7 @@ pub enum HubManagerError {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct TermEvent {
+pub struct PlayerEvent {
     pub term_id: u8,
     pub timestamp: u32,
     pub state: TermButtonState,
@@ -80,7 +80,7 @@ pub trait HubManager: Debug + Send + Sync {
         term_id: u8,
         state: &TermButtonState,
     ) -> Result<(), HubManagerError>;
-    fn read_event_queue(&self) -> Result<Vec<TermEvent>, HubManagerError>;
+    fn read_event_queue(&self) -> Result<Vec<PlayerEvent>, HubManagerError>;
 
     // HW-specific
     fn radio_channel(&self) -> i32 {

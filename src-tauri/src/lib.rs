@@ -4,8 +4,8 @@ pub mod core {
     pub mod app_context;
     pub mod game_ctx;
     pub mod game_entities;
-    pub mod player_listener;
-    pub mod term_event_processing;
+    pub mod player_connection_listener;
+    pub mod player_event_listener;
 }
 
 pub mod game_pack {

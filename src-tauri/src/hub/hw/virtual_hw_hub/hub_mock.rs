@@ -9,7 +9,7 @@ use std::io::ErrorKind;
 use std::sync::{Arc, Mutex};
 use std::thread::{sleep, JoinHandle};
 
-use crate::hub::hub_api::{calc_current_epoch_ms, TermButtonState, TermEvent};
+use crate::hub::hub_api::{calc_current_epoch_ms, PlayerEvent, TermButtonState};
 use crate::hub::hw::internal::api_types::{hub_frame_pos, ResponseStatus};
 use crate::hub::hw::internal::byte_handler::ByteHandler;
 use crate::hub::hw::internal::hw_hub_device::{format_bytes_hex, stuff_bytes};
@@ -38,7 +38,7 @@ pub fn run_hub_mock() -> Result<(Box<dyn SerialPort>, JoinHandle<()>), String> {
 pub struct HubMock {
     port_handle: Box<dyn SerialPort>,
     terminals: Vec<u8>,
-    events: Arc<Mutex<Vec<TermEvent>>>,
+    events: Arc<Mutex<Vec<PlayerEvent>>>,
     byte_handler: ByteHandler,
     base_timestamp: u32,
 }
@@ -194,7 +194,7 @@ impl HubMock {
                     } else {
                         TermButtonState::Released
                     };
-                    let term_event = TermEvent {
+                    let term_event = PlayerEvent {
                         term_id: *id,
                         timestamp,
                         state,
