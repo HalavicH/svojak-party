@@ -2,7 +2,7 @@ use crate::api::events::{
     emit_error, emit_game_state, emit_game_state_by_name, emit_hub_config,
     emit_players_by_game_ctx, emit_question, emit_round,
 };
-use crate::core::game_ctx::game::Game;
+use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
 use crate::core::game_ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
 use crate::core::game_entities::{GamePackError, GameplayError, Player};
@@ -374,7 +374,7 @@ impl AppContext {
         self.hub = context.hub;
         self.player_poling_thread_handle = context.player_poling_thread_handle;
         self.game_pack = context.game_pack;
-        self.set_game_state(GameState::SetupAndLoading(Game::default()));
+        self.set_game_state(GameState::SetupAndLoading(GameCtx::default()));
     }
 
     pub fn _dbg_set_game_state(&mut self, name: String) {

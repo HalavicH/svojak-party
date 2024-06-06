@@ -1,15 +1,15 @@
-use crate::core::game_ctx::game::Game;
+use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, WaitingForAnswerRequests};
 use crate::core::game_entities::{GameplayError, PlayerState};
 
-impl Game<WaitingForAnswerRequests> {
+impl GameCtx<WaitingForAnswerRequests> {
     pub fn request_answer_by_player_id(
         &mut self,
         player_id: u8,
-    ) -> Result<Game<AnswerAttemptReceived>, GameplayError> {
+    ) -> Result<GameCtx<AnswerAttemptReceived>, GameplayError> {
         let game = self;
         let player = game
-            .ctx
+            .data
             .players
             .get_mut(&player_id)
             .ok_or(GameplayError::PlayerNotPresent(player_id))?;

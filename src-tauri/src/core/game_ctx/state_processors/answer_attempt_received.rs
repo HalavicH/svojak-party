@@ -1,13 +1,13 @@
-use crate::core::game_ctx::game::Game;
+use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, DisplayQuestion, EndQuestion};
 use crate::core::game_entities::GameplayError;
 
 pub enum AnswerQuestionResult {
-    EndQuestion(Game<EndQuestion>),
-    DisplayQuestion(Game<DisplayQuestion>),
+    EndQuestion(GameCtx<EndQuestion>),
+    DisplayQuestion(GameCtx<DisplayQuestion>),
 }
 
-impl Game<AnswerAttemptReceived> {
+impl GameCtx<AnswerAttemptReceived> {
     pub fn answer_question(
         &mut self,
         answered_correctly: bool,
@@ -24,33 +24,33 @@ impl Game<AnswerAttemptReceived> {
     }
 
     fn process_stats(&mut self, answered_correctly: bool) -> Result<(), GameplayError> {
-        let player_id = self.ctx.active_player_id;
+        let player_id = self.data.active_player_id;
         let player = self
-            .ctx
+            .data
             .players
             .get_mut(&player_id)
             .ok_or(GameplayError::PlayerNotPresent(player_id))?;
         if answered_correctly {
-            player.answered_correctly(&self.ctx.current_question);
-            self.ctx.round_stats.total_correct_answers += 1;
+            player.answered_correctly(&self.data.current_question);
+            self.data.round_stats.total_correct_answers += 1;
         } else {
-            player.answered_wrong(&self.ctx.current_question);
-            self.ctx.round_stats.total_wrong_answers += 1;
+            player.answered_wrong(&self.data.current_question);
+            self.data.round_stats.total_wrong_answers += 1;
         }
         log::info!("Answered player stats: {:?}", player);
-        self.ctx.round_stats.total_tries += 1;
+        self.data.round_stats.total_tries += 1;
         Ok(())
     }
 
     fn no_players_to_answer_left(&self) -> bool {
-        self.ctx.players.iter().all(|(_, p)| !p.can_answer())
+        self.data.players.iter().all(|(_, p)| !p.can_answer())
     }
 
     fn remove_current_question(&mut self) {
-        let round = &mut self.ctx.current_round;
+        let round = &mut self.data.current_round;
         round.pop_question(
-            &self.ctx.current_question.topic,
-            self.ctx.current_question.price,
+            &self.data.current_question.topic,
+            self.data.current_question.price,
         );
     }
 }

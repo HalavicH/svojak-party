@@ -2,9 +2,9 @@
 
 use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto};
 use crate::core::app_context::app;
-use crate::core::game_ctx::game::Game;
+use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
-use crate::core::game_ctx::GameCtx;
+use crate::core::game_ctx::GameData;
 use crate::core::game_entities::HubStatus;
 use crate::game_pack::pack_content_entities::Round;
 use serde::{Deserialize, Serialize};
@@ -94,7 +94,7 @@ pub fn emit_players(players: PlayersDto) {
     emit(Event::Players, players);
 }
 
-pub fn emit_players_by_game_ctx(game_ctx: &GameCtx) {
+pub fn emit_players_by_game_ctx(game_ctx: &GameData) {
     emit_players(
         game_ctx
             .players_ref_as_vec()

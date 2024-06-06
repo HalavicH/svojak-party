@@ -1,5 +1,5 @@
 use crate::core::game_ctx::state_structs::*;
-use crate::core::game_ctx::GameCtx;
+use crate::core::game_ctx::GameData;
 use crate::core::game_entities::PlayerState;
 use std::any::type_name;
 use std::marker::PhantomData;
@@ -7,44 +7,44 @@ use std::marker::PhantomData;
 pub const INVALID_PLAYER_ID: u8 = 0; // TODO: Consider using Option<u8> instead
 
 #[derive(Debug, Clone)]
-pub struct Game<State = SetupAndLoading> {
+pub struct GameCtx<State = SetupAndLoading> {
     pub(super) state: PhantomData<State>,
-    pub(super) ctx: GameCtx,
+    pub(super) data: GameData,
 }
 
-impl Default for Game {
-    fn default() -> Game<SetupAndLoading> {
+impl Default for GameCtx {
+    fn default() -> GameCtx<SetupAndLoading> {
         Self {
             state: PhantomData::<SetupAndLoading>,
-            ctx: GameCtx::default(),
+            data: GameData::default(),
         }
     }
 }
 
 /// Common implementation for every state of the `GameContext`
-impl<State> Game<State> {
-    pub fn transition<T>(&self) -> Game<T> {
+impl<State> GameCtx<State> {
+    pub fn transition<T>(&self) -> GameCtx<T> {
         let prev_state = Self::full_type_to_name(&format!("{:?}", self.state));
         let next_state = Self::full_type_to_name(type_name::<T>());
         log::debug!("Game transitions '{}' -> '{}'", prev_state, next_state);
-        Game {
+        GameCtx {
             state: PhantomData,
-            ctx: self.ctx.clone(),
+            data: self.data.clone(),
         }
     }
 
-    pub fn new_with_game<T>(game: GameCtx) -> Game<T> {
-        Game {
+    pub fn new_with_game<T>(game: GameData) -> GameCtx<T> {
+        GameCtx {
             state: PhantomData,
-            ctx: game,
+            data: game,
         }
     }
-    pub fn game_mut(&mut self) -> &mut GameCtx {
-        &mut self.ctx
+    pub fn game_mut(&mut self) -> &mut GameData {
+        &mut self.data
     }
 
-    pub fn game_ref(&self) -> &GameCtx {
-        &self.ctx
+    pub fn game_ref(&self) -> &GameData {
+        &self.data
     }
 
     fn full_type_to_name(next_state: &str) -> String {
@@ -56,7 +56,7 @@ impl<State> Game<State> {
     }
 
     pub(super) fn update_non_active_player_states(&mut self, state_name: &str) {
-        let game = &mut self.ctx;
+        let game = &mut self.data;
         let active_id = game.active_player_id;
 
         game.players

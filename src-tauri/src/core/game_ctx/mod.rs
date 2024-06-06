@@ -14,12 +14,11 @@ use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Default, Clone)]
-pub struct GameCtx {
+pub struct GameData {
     /// Entities
     pub(super) pack_content: PackContent,
     pub(super) players: HashMap<u8, Player>,
     /// Game State
-    // game_state: GameState,
     pub(super) current_round_index: usize,
     pub(super) current_round: Round,
     pub(super) active_player_id: u8,
@@ -34,7 +33,7 @@ pub struct GameCtx {
     pub(super) round_duration_min: i32,
 }
 
-impl GameCtx {
+impl GameData {
     pub fn is_active_player(&self, other: &Player) -> bool {
         other.term_id == self.active_player_id
     }
@@ -54,7 +53,7 @@ impl GameCtx {
 /// External api-state API
 /// Get/Set player operations should be available in any state
 /// Round data should be available at any state
-impl GameCtx {
+impl GameData {
     /// Immutable
     pub fn players_map_ref(&self) -> &HashMap<u8, Player> {
         &self.players
@@ -88,7 +87,7 @@ impl GameCtx {
 }
 
 /// Internal API
-impl GameCtx {
+impl GameData {
     pub(super) fn set_active_player_by_id(&mut self, term_id: u8) {
         log::debug!("Looking for user with id: {}", term_id);
         let player = self.player_by_id_mut(&term_id);

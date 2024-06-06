@@ -1,5 +1,5 @@
 use crate::api::events::emit_message;
-use crate::core::game_ctx::game::Game;
+use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::state_structs::{PickFirstQuestionChooser, SetupAndLoading};
 use crate::core::game_entities::GameplayError;
 use crate::game_pack::pack_content_entities::PackContent;
@@ -7,9 +7,9 @@ use crate::hub::hub_api::TermEvent;
 use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 
-impl Game<SetupAndLoading> {
+impl GameCtx<SetupAndLoading> {
     pub fn set_round_duration(&mut self, round_duration_min: i32) {
-        let ctx = &mut self.ctx;
+        let ctx = &mut self.data;
         ctx.round_duration_min = round_duration_min;
         emit_message(format!(
             "Selected round duration of: {}",
@@ -21,9 +21,9 @@ impl Game<SetupAndLoading> {
         &self,
         pack_content: PackContent,
         event_rx: Receiver<TermEvent>,
-    ) -> Result<Game<PickFirstQuestionChooser>, GameplayError> {
+    ) -> Result<GameCtx<PickFirstQuestionChooser>, GameplayError> {
         let mut game = self.transition();
-        let ctx = &mut game.ctx;
+        let ctx = &mut game.data;
         ctx.pack_content = pack_content;
         if ctx.players.len() < 2 {
             log::info!("Not enough players to run the game.");
