@@ -85,6 +85,13 @@ impl GameData {
         emit_players(players.values().map(|p| p.into()).collect());
         self.players = players;
     }
+
+    pub fn take_events(&self) -> Vec<PlayerEvent> {
+        let mut guard = self.events.write().expect("Expected to get events reader");
+        let events_batch = guard.clone();
+        guard.clear();
+        events_batch
+    }
 }
 
 /// Internal API
