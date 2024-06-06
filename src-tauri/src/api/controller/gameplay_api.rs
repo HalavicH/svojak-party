@@ -38,7 +38,13 @@ pub fn select_question(topic: String, price: i32) -> Result<(), GameplayError> {
 /// Allows events from players to be processed
 #[command]
 pub fn allow_answer() -> Result<(), GameplayError> {
-    app_mut().allow_answer().map_err(|e| {
+    let mut guard = app_mut();
+    guard.allow_answer().map_err(|e| {
+        log::error!("{:?}", e);
+        e.current_context().clone()
+    })?;
+
+    guard.wait_for_quickest_player_to_click().map_err(|e| {
         log::error!("{:?}", e);
         e.current_context().clone()
     })

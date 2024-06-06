@@ -32,9 +32,9 @@
     }
 
     async function startTheGame() {
+        await goToQuiz();
         await callBackend(TauriApiCommand.START_NEW_GAME);
         notify.info(`Game started`);
-        await goToQuiz();
     }
 
     async function goToMenu() {

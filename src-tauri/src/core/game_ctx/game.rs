@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::thread::sleep;
 use std::time::Duration;
+use crate::api::events::emit_players_by_players_map;
 
 pub const INVALID_PLAYER_ID: u8 = 0; // TODO: Consider using Option<u8> instead
 const FASTEST_CLICK_ITERATION_DUR: Duration = Duration::from_secs(1);
@@ -87,6 +88,7 @@ impl<State> GameCtx<State> {
                     p.state = PlayerState::Idle;
                 }
             });
+        emit_players_by_players_map(&game.players);
     }
 }
 

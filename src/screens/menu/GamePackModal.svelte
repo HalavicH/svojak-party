@@ -34,10 +34,10 @@
 
     function startTheGame() {
         console.log("Start pressed");
+        closeModal();
         navTo(Views.QUIZ);
         callBackend(TauriApiCommand.START_NEW_GAME).then(() => {
-            closeModal();
-            navTo(Views.MENU);
+            // navTo(Views.MENU);
         })
     }
 

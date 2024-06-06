@@ -3,7 +3,7 @@ pub mod game_state;
 pub mod state_processors;
 pub mod state_structs;
 
-use crate::api::events::{emit_players, emit_round};
+use crate::api::events::{emit_players, emit_players_by_game_data, emit_players_by_players_map, emit_round};
 use crate::core::game_ctx::game::GameStats;
 use crate::core::game_entities::{Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
@@ -119,6 +119,8 @@ impl GameData {
     pub(super) fn set_active_player_state(&mut self, player_state: PlayerState) {
         let id = self.active_player_id;
         let player = self.player_by_id_mut(&id);
+        log::info!("Player with id: {} changes state from {:?} to {:?}", id, player.state, player_state);
         player.state = player_state;
+        emit_players_by_players_map(&self.players);
     }
 }

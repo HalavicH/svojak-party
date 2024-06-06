@@ -5,7 +5,7 @@ use crate::core::app_context::app;
 use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
 use crate::core::game_ctx::GameData;
-use crate::core::game_entities::HubStatus;
+use crate::core::game_entities::{HubStatus, Player};
 use crate::game_pack::pack_content_entities::Round;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -94,7 +94,7 @@ pub fn emit_players(players: PlayersDto) {
     emit(Event::Players, players);
 }
 
-pub fn emit_players_by_game_ctx(game_ctx: &GameData) {
+pub fn emit_players_by_game_data(game_ctx: &GameData) {
     emit_players(
         game_ctx
             .players_ref_as_vec()
@@ -102,6 +102,10 @@ pub fn emit_players_by_game_ctx(game_ctx: &GameData) {
             .map(|p| p.into())
             .collect(),
     )
+}
+
+pub fn emit_players_by_players_map(players: &HashMap<u8, Player>) {
+    emit_players(players.values().map(|p| p.into()).collect())
 }
 
 pub fn emit_pack_info(pack_info: PackInfoDto) {

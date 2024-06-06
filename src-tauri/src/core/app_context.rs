@@ -1,5 +1,5 @@
 use crate::api::events::{
-    emit_error, emit_game_state, emit_hub_config, emit_players_by_game_ctx, emit_question,
+    emit_error, emit_game_state, emit_hub_config, emit_players_by_game_data, emit_question,
     emit_round,
 };
 use crate::core::game_ctx::game::GameCtx;
@@ -196,7 +196,7 @@ impl AppContext {
     pub fn emit_game_config_locking_hub(&self) {
         emit_hub_config(self.hub_mut().deref().into());
         let game_ctx = self.game_state.game_ctx_ref();
-        emit_players_by_game_ctx(game_ctx);
+        emit_players_by_game_data(game_ctx);
     }
 
     pub fn emit_game_context(&self) {

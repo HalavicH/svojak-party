@@ -1,4 +1,4 @@
-use crate::api::events::{emit_game_state_by_name, emit_players_by_game_ctx};
+use crate::api::events::{emit_game_state_by_name, emit_players_by_game_data};
 use crate::core::game_ctx::game::{GameCtx, INVALID_PLAYER_ID};
 use crate::core::game_ctx::state_structs::{DisplayQuestion, WaitingForAnswerRequests};
 use crate::core::game_entities::GameplayError;
@@ -14,7 +14,7 @@ impl GameCtx<DisplayQuestion> {
 
         game.data.active_player_id = INVALID_PLAYER_ID;
         game.update_non_active_player_states("DisplayQuestion");
-        emit_players_by_game_ctx(&game.data);
+        emit_players_by_game_data(&game.data);
         game.data.answer_allowed = true;
 
         emit_game_state_by_name("WaitingForAnswerRequests");
