@@ -7,6 +7,7 @@
     import {initEventListeners, setupEventListener} from "./lib/events.js";
     import Button from "./components/generic/Button.svelte";
     import DebugButton from "./screens/DebugButton.svelte";
+    import DebugState from "./screens/DebugState.svelte";
 
     setupEventListener('message', (event) => {
         const message = event.payload;
@@ -30,6 +31,7 @@
         <Quiz/>
     {/if}
     <DebugButton/>
+    <DebugState/>
 </main>
 
 <style>

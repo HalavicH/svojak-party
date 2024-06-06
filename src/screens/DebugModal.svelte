@@ -2,13 +2,21 @@
     import BaseModal from "../components/abstract/BaseModal.svelte";
     import ItemsBlock from "../components/generic/ItemsBlock.svelte";
     import Row from "../components/generic/Row.svelte";
-    import {TauriApiCommand, callBackend} from "../lib/commands.js";
+    import {callBackend, TauriApiCommand} from "../lib/commands.js";
     import {notify} from "../lib/notifications.js";
-    import {currentPlayersStore, currentPackInfoStore, navTo, GameState} from "../lib/stores.js";
+    import {
+        currentGameStateStore,
+        currentHubConfigStore,
+        currentPackInfoStore,
+        currentPlayersStore,
+        currentRoundStore,
+        currentQuestionStore,
+        GameState,
+        navTo
+    } from "../lib/stores.js";
     import {Views} from "./views.js";
     import SecondaryButton from "../components/generic/SecondaryButton.svelte";
     import {isRunningInTauri} from "../lib/misc.js";
-    import {currentGameStateStore} from "../lib/stores.js";
 
     // Provided by 'modals'
     export let isOpen;
@@ -52,6 +60,11 @@
         } else {
             currentGameStateStore.set({gameState: state});
         }
+    }
+
+    function renderStoreContent(store) {
+        // Pretty print json with 4 spaces per tab
+        return JSON.stringify(store, null, 4);
     }
 </script>
 
@@ -110,6 +123,26 @@
             </div>
         </Row>
     </ItemsBlock>
+    <ItemsBlock title="Stores content">
+    <!-- JSON view -->
+        <p>Game state store</p>
+        <div class="json-view"><pre>{renderStoreContent($currentGameStateStore)}</pre></div>
+
+        <p>Question store</p>
+        <div class="json-view"><pre>{renderStoreContent($currentQuestionStore)}</pre></div>
+
+        <p>Players store</p>
+        <div class="json-view"><pre>{renderStoreContent($currentPlayersStore)}</pre></div>
+
+        <p>Hub config store</p>
+        <div class="json-view"><pre>{renderStoreContent($currentHubConfigStore)}</pre></div>
+
+        <p>Pack info store</p>
+        <div class="json-view"><pre>{renderStoreContent($currentPackInfoStore)}</pre></div>
+
+        <p>Round store</p>
+        <div class="json-view"><pre>{renderStoreContent($currentRoundStore)}</pre></div>
+    </ItemsBlock>
 </BaseModal>
 
 <style>
@@ -120,28 +153,28 @@
         /*width: 60%;*/
     }
 
+    .json-view {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        font-family: monospace;
+        font-size: 1em;
+        text-align: left;
+        padding-left: 5px;
+        border: 1px solid gray;
+        border-radius: 5px;
+    }
+
     .item {
         flex: 0 0 auto;
-        /* Adjust width and height as needed */
-        /*width: 100px;*/
-        /*height: 100px;*/
-        /* Add margin or padding if desired */
         margin: 5px;
-        /* Additional styling as needed */
-        /*background-color: #f0f0f0;*/
-        /*border: 1px solid #ccc;*/
     }
 
     p {
         text-align: left;
     }
 
-    tr {
-        /*display: flex;*/
-    }
-
     td {
-        /*border: 1px solid #0f0f0f;*/
         padding: 5px;
     }
 

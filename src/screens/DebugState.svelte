@@ -1,38 +1,21 @@
 <script>
-    import {doWithSound, getClickSound} from "../lib/sound.js";
-    import {closeModal, openModal} from "svelte-modals";
-    import DebugModal from "./DebugModal.svelte";
-
-    export let id = "";
-    export let text = "Debug";
-    export let style = "";
-    export let onClick = openDebugMenu;
-
-    function openDebugMenu() {
-        closeModal();
-        openModal(DebugModal)
-        console.log("Pressed");
-    }
-
-    function handleClick() {
-        doWithSound(onClick, getClickSound());
-    }
+    import {currentGameStateStore} from "../lib/stores.js";
 </script>
 
 <div class="debug-button">
-    <button id={id} type="button" {style} on:click={handleClick}>{text}</button>
+    <span class="stuff">{$currentGameStateStore.gameState}</span>
 </div>
 
 
 <style>
     .debug-button {
         position: absolute;
-        bottom: 1em;
-        left: 50%;
+        top: 1em;
+        left: 20%;
         transform: translateX(-50%);
     }
 
-    button {
+    .stuff {
         border-radius: 8px;
         border: 1px solid #ffffff;
         padding: 0.1em 0.3em;
@@ -46,13 +29,4 @@
         cursor: pointer;
     }
 
-    button:hover {
-        border-color: #396cd8;
-        filter: drop-shadow(0 0 0.3em #24c8db);
-    }
-
-    button:active {
-        border-color: #396cd8;
-        background-color: var(--primary-button-active-color);
-    }
 </style>
