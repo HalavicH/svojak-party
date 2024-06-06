@@ -18,7 +18,6 @@ impl Game<DisplayQuestion> {
         game.ctx.answer_allowed = true;
 
         emit_game_state_by_name("WaitingForAnswerRequests");
-        // game_ctx.game.set_active_player_state(PlayerState::Answering);
         let game_ctx: Game<WaitingForAnswerRequests> = game.transition();
         Ok(game_ctx)
     }

@@ -124,7 +124,7 @@ struct GameStateDto {
 
 pub fn emit_game_state(game_state: &GameState) {
     let game_state_dto = GameStateDto {
-        gameState: game_state.state_name().to_string(),
+        gameState: game_state.name().to_string(),
     };
     emit(Event::GameState, game_state_dto);
 }
