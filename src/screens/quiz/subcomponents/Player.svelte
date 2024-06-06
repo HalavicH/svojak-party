@@ -14,8 +14,8 @@
                 return 'question-chooser';
             case PlayerState.Target:
                 return 'target-player';
-            case PlayerState.FirstResponse:
-                return 'first-response';
+            case PlayerState.Answering:
+                return 'answering';
             case PlayerState.Inactive:
             case PlayerState.Dead:
                 return 'inactive';
@@ -24,7 +24,7 @@
             case PlayerState.AnsweredWrong:
                 return 'wrong-answer';
             default:
-                return '';
+                return 'unknown-state';
         }
     }
 </script>
@@ -72,7 +72,7 @@
         border: 1px solid #818181;
     }
 
-    .badge.first-response {
+    .badge.answering {
         color: #ffffff;
         background: rgba(45, 62, 163, 0.5);
         border: 1px solid #3844b3;
@@ -105,6 +105,13 @@
         background: rgba(82, 170, 101, 0.6);
         border: 1px solid #52aa65;
         box-shadow: 0 0 0.5em #58db24;
+    }
+
+    .badge.unknown-state {
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid #000000;
+        box-shadow: 0 0 0.5em #000000;
     }
 
     .icon {

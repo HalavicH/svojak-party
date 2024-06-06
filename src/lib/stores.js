@@ -17,7 +17,7 @@ export const PlayerState = {
     Idle: 'Idle',
     QuestionChooser: 'QuestionChooser',
     Target: 'Target',
-    FirstResponse: 'FirstResponse',
+    Answering: 'Answering',
     Inactive: 'Inactive',
     Dead: 'Dead',
     AnsweredCorrectly: 'AnsweredCorrectly',
