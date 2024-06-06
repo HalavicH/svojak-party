@@ -1,6 +1,6 @@
 use crate::api::events::{
-    emit_error, emit_game_state, emit_game_state_by_name, emit_hub_config,
-    emit_players_by_game_ctx, emit_question, emit_round,
+    emit_error, emit_game_state, emit_hub_config, emit_players_by_game_ctx, emit_question,
+    emit_round,
 };
 use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
@@ -219,8 +219,16 @@ impl AppContext {
 
         let content = self.game_pack.content.clone();
         let game = game.start(content)?;
-        // TODO: consider extracting this as another step in the game
-        emit_game_state_by_name("PickFirstQuestionChooser"); // Nasty workaround to avoid use after free
+        self.set_game_state(GameState::PickFirstQuestionChooser(game));
+        Ok(())
+    }
+
+    pub fn pick_first_question_chooser(&mut self) -> error_stack::Result<(), GameplayError> {
+        let game = match &mut self.game_state {
+            GameState::PickFirstQuestionChooser(game) => game,
+            _ => Err(self.handle_state_mismatch_error("GameState::PickFirstQuestionChooser"))?,
+        };
+
         let game = game.pick_first_question_chooser()?;
         self.set_game_state(GameState::ChooseQuestion(game));
         Ok(())
@@ -248,6 +256,18 @@ impl AppContext {
         Ok(())
     }
 
+    pub fn wait_for_quickest_player_to_click(&mut self) -> error_stack::Result<(), GameplayError> {
+        let game = match &mut self.game_state {
+            GameState::WaitingForAnswerRequests(game) => game,
+            _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
+        };
+
+        let id = game.get_fastest_click_player_id()?;
+        let game_ctx = game.request_answer_by_player_id(id)?;
+        self.set_game_state(GameState::AnswerAttemptReceived(game_ctx));
+        Ok(())
+    }
+
     pub fn answer_question(
         &mut self,
         answered_correctly: bool,
@@ -264,7 +284,10 @@ impl AppContext {
         });
         Ok(())
     }
+}
 
+/// Helper methods
+impl AppContext {
     fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
         let state_mismatch = self.game_state.show_state_mismatch(expected_state);
         emit_error(format!("Can't allow answer: {}", state_mismatch));

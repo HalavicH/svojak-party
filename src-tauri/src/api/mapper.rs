@@ -125,7 +125,6 @@ impl From<&Round> for RoundDto {
             .topics
             .values()
             .map(|theme| {
-                log::info!("{theme:#?}");
                 let mut game_questions: Vec<Question> = theme.questions.values().cloned().collect();
 
                 game_questions.sort_by(|q1, q2| q1.price.cmp(&q2.price));
