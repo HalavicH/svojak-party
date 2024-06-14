@@ -18,17 +18,17 @@ impl GameCtx<SetupAndLoading> {
         &self,
         pack_content: PackContent,
     ) -> Result<GameCtx<PickFirstQuestionChooser>, GameplayError> {
-        let mut game = self.transition();
-        let ctx = &mut game.data;
-        ctx.pack_content = pack_content;
-        if ctx.players.len() < 2 {
+        let mut ctx = self.transition();
+        let game = &mut ctx.data;
+        game.pack_content = pack_content;
+        if game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::NotEnoughPlayers);
         }
 
-        ctx.current_round_index = 0;
-        ctx.set_current_round_by_id(0);
+        game.current_round_index = 0;
+        game.set_current_round_by_id(0);
 
-        Ok(game)
+        Ok(ctx)
     }
 }

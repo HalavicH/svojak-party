@@ -35,8 +35,7 @@ impl GameCtx<PickFirstQuestionChooser> {
 
         emit_message(format!("Fastest player with id: {}", term_id));
         self.data.set_active_player_by_id(term_id);
-        self.data
-            .set_active_player_state(PlayerState::QuestionChooser);
+        self.data.set_active_player_state(PlayerState::QuestionChooser);
         Ok(self.transition())
     }
 }

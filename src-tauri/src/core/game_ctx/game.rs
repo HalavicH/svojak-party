@@ -64,7 +64,7 @@ impl<State> GameCtx<State> {
 
     pub(super) fn update_non_active_player_states(&mut self, state_name: &str) {
         let game = &mut self.data;
-        let active_id = game.current_player_id;
+        let active_id = game.active_player_id;
 
         game.players
             .iter_mut()
@@ -110,11 +110,6 @@ impl<State> GameCtx<State> {
 
         log::info!("Fastest click from user: {}", id);
         Ok(id)
-    }
-    
-    pub fn current_player_clone(&self) -> Player {
-        let id = self.data.current_player_id;
-        self.data.player_by_id(id).clone()
     }
 
     fn active_players(&mut self) -> HashMap<u8, Player> {

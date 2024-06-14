@@ -15,27 +15,30 @@ use std::sync::{Arc, RwLock};
 #[derive(Debug, Default, Clone)]
 pub struct GameData {
     /// Entities
-    pub(super) pack_content: PackContent,
-    pub(super) players: HashMap<u8, Player>,
+    pack_content: PackContent,
+    players: HashMap<u8, Player>,
     /// Game State
-    pub(super) current_round_index: usize,
-    pub(super) current_round: Round,
-    pub(super) current_player_id: u8,
+    current_round_index: usize,
+    current_round: Round,
+    active_player_id: u8,
     // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
-    pub(super) answer_allowed: bool,
+    answer_allowed: bool,
     /// Current question
-    pub(super) current_question: Question,
+    current_question: Question,
     /// Stats
-    pub(super) round_stats: GameStats,
+    round_stats: GameStats,
     /// Event frame. Flushed every new question
-    pub(super) events: Arc<RwLock<Vec<PlayerEvent>>>,
-    pub(super) allow_answer_timestamp: u32,
-    pub(super) round_duration_min: i32,
+    events: Arc<RwLock<Vec<PlayerEvent>>>,
+    allow_answer_timestamp: u32,
+    round_duration_min: i32,
 }
 
 impl GameData {
+    pub fn events_clone(&self) -> Arc<RwLock<Vec<PlayerEvent>>> {
+        self.events.clone()
+    }
     pub fn is_active_player(&self, other: &Player) -> bool {
-        other.term_id == self.current_player_id
+        other.term_id == self.active_player_id
     }
 
     pub fn set_current_round_by_id(&mut self, index: usize) {
@@ -48,11 +51,18 @@ impl GameData {
         let round_dto = round.into();
         emit_round(round_dto);
     }
+
+    pub fn current_player_clone(&self) -> Player {
+        let id = self.active_player_id;
+        log::debug!("Trying to get player by id: {}", id);
+        self.player_by_id(id).clone()
+    }
 }
 
 /// External api-state API
 /// Get/Set player operations should be available in any state
 /// Round data should be available at any state
+/// Avoid returning mutable references to the internal state to prevent event synchronization issues
 impl GameData {
     /// Immutable
     pub fn players_map_ref(&self) -> &HashMap<u8, Player> {
@@ -77,13 +87,21 @@ impl GameData {
         self.players = HashMap::default();
     }
 
-    pub fn players_map_mut(&mut self) -> &mut HashMap<u8, Player> {
-        &mut self.players
-    }
-
     pub fn set_players(&mut self, players: HashMap<u8, Player>) {
         emit_players(players.values().map(|p| p.into()).collect());
         self.players = players;
+    }
+
+    pub fn set_active_player_state(&mut self, player_state: PlayerState) {
+        let id = self.active_player_id;
+        let player = self.player_by_id_mut(&id);
+        log::info!("Player with id: {} changes state from {:?} to {:?}", id, player.state, player_state);
+        player.state = player_state;
+        emit_players_by_players_map(&self.players);
+    }
+
+    pub fn set_active_player_id(&mut self, term_id: u8) {
+        self.active_player_id = term_id;
     }
 
     pub fn take_events(&self) -> Vec<PlayerEvent> {
@@ -99,16 +117,10 @@ impl GameData {
     pub(super) fn set_active_player_by_id(&mut self, term_id: u8) {
         log::debug!("Looking for user with id: {}", term_id);
         let player = self.player_by_id_mut(&term_id);
-        self.current_player_id = player.term_id;
+        self.active_player_id = player.term_id;
     }
 
-    pub(super) fn active_player_mut(&mut self) -> &mut Player {
-        let id = self.current_player_id;
-        log::debug!("Looking for user with id: {}", id);
-        self.player_by_id_mut(&id)
-    }
-
-    pub(super) fn player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
+    fn player_by_id_mut(&mut self, term_id: &u8) -> &mut Player {
         let msg = format!(
             "Expected to have term_id: {} in players map: {:?}",
             term_id, self.players
@@ -116,19 +128,11 @@ impl GameData {
         self.players.get_mut(term_id).expect(&msg)
     }
 
-    pub(super) fn player_by_id(&self, term_id: u8) -> &Player {
+    fn player_by_id(&self, term_id: u8) -> &Player {
         let msg = format!(
             "Expected to have term_id: {} in players map: {:?}",
             term_id, self.players
         );
         self.players.get(&term_id).expect(&msg)
-    }
-
-    pub(super) fn set_active_player_state(&mut self, player_state: PlayerState) {
-        let id = self.current_player_id;
-        let player = self.player_by_id_mut(&id);
-        log::info!("Player with id: {} changes state from {:?} to {:?}", id, player.state, player_state);
-        player.state = player_state;
-        emit_players_by_players_map(&self.players);
     }
 }

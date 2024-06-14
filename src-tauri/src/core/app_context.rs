@@ -122,7 +122,7 @@ impl AppContext {
 
         match hub_guard.set_hw_hub_radio_channel(channel_id) {
             Ok(_) => {
-                drop(hub_guard); // To release lock
+                emit_hub_config(self.hub().deref().into());
             }
             Err(e) => {
                 log::error!("{:#?}", e);
@@ -148,6 +148,7 @@ impl AppContext {
                 self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
+        emit_hub_config(self.hub().deref().into());
     }
 
     pub fn discover_hub_and_players(&mut self, path: String) {
@@ -171,7 +172,11 @@ impl AppContext {
 
         let result = self.hub_mut().probe(&path);
         match result {
-            Ok(_) => self.run_polling_for_players(),
+            Ok(_) => {
+                emit_hub_config(self.hub().deref().into());
+
+                self.run_polling_for_players()
+            },
             Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err),
         }
     }
@@ -194,12 +199,14 @@ impl AppContext {
         self.player_poling_thread_handle = Some(handle)
     }
 
+    #[deprecated]
     pub fn emit_game_config_locking_hub(&self) {
         emit_hub_config(self.hub_mut().deref().into());
         let game_ctx = self.game_state.game_ctx_ref();
         emit_players_by_game_data(game_ctx);
     }
 
+    #[deprecated]
     pub fn emit_game_context(&self) {
         emit_game_state(&self.game_state);
         emit_round(self.game_state.game_ctx_ref().current_round_ref().into());
@@ -216,7 +223,7 @@ impl AppContext {
             _ => Err(self.handle_state_mismatch_error("GameState::SetupAndLoading"))?,
         };
 
-        start_event_listener(hub, game.game_ref().events.clone());
+        start_event_listener(hub, game.game_ref().events_clone());
 
         let content = self.game_pack.content.clone();
         let game = game.start(content)?;
@@ -421,6 +428,8 @@ impl AppContext {
         self.player_poling_thread_handle = context.player_poling_thread_handle;
         self.game_pack = context.game_pack;
         self.set_game_state(GameState::SetupAndLoading(GameCtx::default()));
+        self.emit_game_config_locking_hub();
+        self.emit_game_context();
     }
 
     pub fn _dbg_set_game_state(&mut self, name: String) {
@@ -428,5 +437,7 @@ impl AppContext {
             &name,
             self.game_state.game_ctx_ref().clone(),
         ));
+        self.emit_game_config_locking_hub();
+        self.emit_game_context();
     }
 }

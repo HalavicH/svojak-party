@@ -8,10 +8,8 @@ impl GameCtx<WaitingForAnswerRequests> {
         &mut self,
         player_id: u8,
     ) -> Result<GameCtx<AnswerAttemptReceived>, GameplayError> {
-        self.data.current_player_id = player_id;
-        let player = self.current_player_mut();
-        player.state = PlayerState::Answering;
-        emit_players_by_players_map(&self.data.players);
+        self.data.set_active_player_id(player_id);
+        self.data.set_active_player_state(PlayerState::Answering);
         Ok(self.transition())
     }
 }

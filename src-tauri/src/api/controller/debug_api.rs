@@ -13,16 +13,12 @@ use tauri::command;
 pub fn dbg_set_game_state(name: String) {
     let mut app = app_mut();
     app._dbg_set_game_state(name);
-    app.emit_game_config_locking_hub();
-    app.emit_game_context();
 }
 
 #[command]
 pub fn dbg_reset_game() {
     let mut app = app_mut();
     app._dbg_reset_game();
-    app.emit_game_config_locking_hub();
-    app.emit_game_context();
 }
 
 /// HUB Debug API
