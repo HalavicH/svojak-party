@@ -63,9 +63,18 @@ pub fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
 
 /// Finished current question and set's state to 'show answer'
 #[command]
-pub fn finish_question_prematurely_and_show_answer() {
+pub fn stop_asking_and_show_answer() {
     todo!("Rework");
-    app_mut().finish_question_prematurely().map_err(|e| {
+    app_mut().stop_asking_and_show_answer().map_err(|e| {
+        log::error!("Operation failed: {:?}", e);
+        e.current_context().clone()
+    });
+}
+
+/// Finished current question and set's state to 'show answer'
+#[command]
+pub fn finish_question() {
+    app_mut().finish_question().map_err(|e| {
         log::error!("Operation failed: {:?}", e);
         e.current_context().clone()
     });

@@ -20,7 +20,7 @@ pub struct GameData {
     /// Game State
     pub(super) current_round_index: usize,
     pub(super) current_round: Round,
-    pub(super) active_player_id: u8,
+    pub(super) current_player_id: u8,
     // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
     pub(super) answer_allowed: bool,
     /// Current question
@@ -35,7 +35,7 @@ pub struct GameData {
 
 impl GameData {
     pub fn is_active_player(&self, other: &Player) -> bool {
-        other.term_id == self.active_player_id
+        other.term_id == self.current_player_id
     }
 
     pub fn set_current_round_by_id(&mut self, index: usize) {
@@ -99,11 +99,11 @@ impl GameData {
     pub(super) fn set_active_player_by_id(&mut self, term_id: u8) {
         log::debug!("Looking for user with id: {}", term_id);
         let player = self.player_by_id_mut(&term_id);
-        self.active_player_id = player.term_id;
+        self.current_player_id = player.term_id;
     }
 
     pub(super) fn active_player_mut(&mut self) -> &mut Player {
-        let id = self.active_player_id;
+        let id = self.current_player_id;
         log::debug!("Looking for user with id: {}", id);
         self.player_by_id_mut(&id)
     }
@@ -116,8 +116,16 @@ impl GameData {
         self.players.get_mut(term_id).expect(&msg)
     }
 
+    pub(super) fn player_by_id(&self, term_id: u8) -> &Player {
+        let msg = format!(
+            "Expected to have term_id: {} in players map: {:?}",
+            term_id, self.players
+        );
+        self.players.get(&term_id).expect(&msg)
+    }
+
     pub(super) fn set_active_player_state(&mut self, player_state: PlayerState) {
-        let id = self.active_player_id;
+        let id = self.current_player_id;
         let player = self.player_by_id_mut(&id);
         log::info!("Player with id: {} changes state from {:?} to {:?}", id, player.state, player_state);
         player.state = player_state;

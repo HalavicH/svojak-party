@@ -5,7 +5,9 @@
 </script>
 
 <div class="viewport">
-    {JSON.stringify(question)}
+    <pre style="text-align: start">
+        {JSON.stringify(question, null, 2)}
+    </pre>
     <!--    <div class="slider"></div>-->
     <!--    <div class="navigation">-->
     <!--        <button id="prev-button" class="prev-button">&lt;</button>-->

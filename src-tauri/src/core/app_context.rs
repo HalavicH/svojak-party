@@ -17,6 +17,7 @@ use error_stack::{FutureExt, Report, ResultExt};
 use std::ops::Deref;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::JoinHandle;
+use crate::core::game_ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -284,6 +285,35 @@ impl AppContext {
         });
         Ok(())
     }
+
+    ///////
+
+
+    pub fn finish_question(&mut self) -> error_stack::Result<(), GameplayError> {
+        let game = match &mut self.game_state {
+            GameState::EndQuestion(game) => game,
+            _ => Err(self.handle_state_mismatch_error("GameState::EndQuestion"))?,
+        };
+
+        let game = game.finish_question()?;
+        self.set_game_state(GameState::CheckEndOfRound(game));
+        self.check_end_of_round()?;
+        Ok(())
+    }
+
+    pub fn check_end_of_round(&mut self) -> error_stack::Result<(), GameplayError> {
+        let game = match &mut self.game_state {
+            GameState::CheckEndOfRound(game) => game,
+            _ => Err(self.handle_state_mismatch_error("GameState::CheckEndOfRound"))?,
+        };
+
+        let path = game.check_end_of_round()?;
+        self.set_game_state(match path {
+            CheckEndOfRoundResult::ChooseQuestion(game) => GameState::ChooseQuestion(game),
+            CheckEndOfRoundResult::CalcRoundStats(game) => GameState::CalcRoundStats(game),
+        });
+        Ok(())
+    }
 }
 
 /// Helper methods
@@ -298,7 +328,7 @@ impl AppContext {
 /// Old Game API
 #[deprecated]
 impl AppContext {
-    pub fn finish_question_prematurely(&mut self) -> error_stack::Result<(), GameplayError> {
+    pub fn stop_asking_and_show_answer(&mut self) -> error_stack::Result<(), GameplayError> {
         // self.__old_game.answer_allowed = false;
         // self.allow_answer_timestamp
         //     .swap(u32::MAX, Ordering::Relaxed);

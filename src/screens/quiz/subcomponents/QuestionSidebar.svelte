@@ -1,5 +1,5 @@
 <script>
-    import {currentQuestionStore, currentRoundStore} from "../../../lib/stores.js";
+    import {currentGameStateStore, currentRoundStore, GameState} from "../../../lib/stores.js";
     import Button from "../../../components/generic/Button.svelte";
     import {TauriApiCommand, callBackend} from "../../../lib/commands.js";
     import AllowAnswerButton from "./AllowAnswerButton.svelte";
@@ -11,11 +11,12 @@
     import QuestionMetaData from "./QuestionMetaData.svelte";
 
     $: currentRound = $currentRoundStore;
+    $: state = $currentGameStateStore.gameState;
 
     // $: clickAllowed = currentQuestionStore.questionState === "ANSWERING";
     // $: noPlayersToAnswerLeft = currentQuestionStore.playersToAnswer.length === 0;
-    $: clickAllowed = false;
-    $: noPlayersToAnswerLeft = false;
+    $: clickAllowed = state === GameState.AnswerAttemptReceived;
+    $: noPlayersToAnswerLeft = state === GameState.WaitingForAnswerRequests;
 
     async function allowAnswer() {
         await callBackend(TauriApiCommand.ALLOW_ANSWER);

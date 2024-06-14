@@ -65,7 +65,13 @@ impl Round {
             return None;
         };
 
+        self.questions_left -= 1;
+        log::debug!("Questions left: {}", self.questions_left);
         topic.questions.remove(&price)
+    }
+
+    pub fn is_over(&self) -> bool {
+        self.questions_left == 0
     }
 }
 

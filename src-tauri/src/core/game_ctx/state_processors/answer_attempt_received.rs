@@ -24,7 +24,7 @@ impl GameCtx<AnswerAttemptReceived> {
     }
 
     fn process_stats(&mut self, answered_correctly: bool) -> Result<(), GameplayError> {
-        let player_id = self.data.active_player_id;
+        let player_id = self.data.current_player_id;
         let player = self
             .data
             .players

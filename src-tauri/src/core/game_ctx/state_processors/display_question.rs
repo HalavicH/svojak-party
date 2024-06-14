@@ -12,7 +12,7 @@ impl GameCtx<DisplayQuestion> {
         game.data.allow_answer_timestamp = timestamp;
         log::info!("Current answer base timestamp: {}", timestamp);
 
-        game.data.active_player_id = INVALID_PLAYER_ID;
+        game.data.current_player_id = INVALID_PLAYER_ID;
         game.update_non_active_player_states("DisplayQuestion");
         emit_players_by_game_data(&game.data);
         game.data.answer_allowed = true;

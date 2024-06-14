@@ -24,18 +24,18 @@ export const TauriApiCommand = {
     SAVE_ROUND_DURATION: 'save_round_duration',
     START_NEW_GAME: 'start_new_game',
 
-    /////////// LEGACY API ////////////
-    FETCH_CONFIGURATION: 'fetch_configuration',
-    DISCOVER_PLAYERS: 'discover_players',
-    // Debug API
-    SETUP_HUB_CONNECTION: 'setup_hub_connection',
-    SEND_RAW_REQUEST_FRAME: 'send_raw_request_frame',
-    SEND_HUB_COMMAND: 'send_hub_command',
     // Gameplay API
     SELECT_QUESTION: 'select_question',
     ALLOW_ANSWER: 'allow_answer',
     ANSWER_QUESTION: 'answer_question',
     FINISH_QUESTION_PREMATURELY_AND_SHOW_ANSWER: 'finish_question_prematurely_and_show_answer',
+    FINISH_QUESTION: 'finish_question',
+    /////////// LEGACY API ////////////
+    // Debug API
+    SETUP_HUB_CONNECTION: 'setup_hub_connection',
+    SEND_RAW_REQUEST_FRAME: 'send_raw_request_frame',
+    SEND_HUB_COMMAND: 'send_hub_command',
+
     INIT_NEXT_ROUND: 'init_next_round',
     SEND_PIP_VICTIM: 'send_pip_victim',
     GET_ACTIVE_PLAYER_ID: 'get_active_player_id',

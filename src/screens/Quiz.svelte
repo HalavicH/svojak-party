@@ -8,6 +8,8 @@
     import MenuButton from "./quiz/subcomponents/MenuButton.svelte";
     import PickFirstQuestionChooser from "./quiz/PickFirstQuestionChooser.svelte";
     import Centered from "../components/generic/Centered.svelte";
+    import Button from "../components/generic/Button.svelte";
+    import EndQuestionScreen from "./quiz/subcomponents/EndQuestionScreen.svelte";
 
     $: gameState = $currentGameStateStore.gameState;
 </script>
@@ -29,6 +31,8 @@
                 || gameState === GameState.AnswerAttemptReceived
         }
             <QuestionView/>
+        {:else if gameState === GameState.EndQuestion}
+            <EndQuestionScreen/>
         {:else}
             <Row>
                 <div>Unhandled state: {gameState}</div>

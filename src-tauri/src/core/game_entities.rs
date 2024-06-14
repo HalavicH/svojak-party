@@ -40,14 +40,8 @@ pub struct Player {
 impl Player {
     pub(crate) fn can_answer(&self) -> bool {
         match self.state {
-            PlayerState::Idle => true,
-            PlayerState::QuestionChooser => true,
-            PlayerState::Target => true,
-            PlayerState::Answering => true,
-            PlayerState::Inactive => false,
-            PlayerState::Dead => false,
-            PlayerState::AnsweredCorrectly => false,
-            PlayerState::AnsweredWrong => false,
+            PlayerState::Idle | PlayerState::QuestionChooser | PlayerState::Target | PlayerState::Answering => true,
+            PlayerState::Inactive | PlayerState::Dead | PlayerState::AnsweredCorrectly | PlayerState::AnsweredWrong => false,
         }
     }
 }
@@ -116,7 +110,7 @@ pub enum GameplayError {
 
     #[error("HUB operation failed")]
     PackElementNotPresent,
-    #[error("Player is not present")]
+    #[error("Player {0} not present")]
     PlayerNotPresent(u8),
     #[error("HUB operation failed")]
     HubOperationError,
