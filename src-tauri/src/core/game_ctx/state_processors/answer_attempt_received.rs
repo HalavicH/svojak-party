@@ -1,3 +1,4 @@
+use crate::api::events::emit_round;
 use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, DisplayQuestion, EndQuestion};
 use crate::core::game_entities::GameplayError;
@@ -14,8 +15,10 @@ impl GameCtx<AnswerAttemptReceived> {
     ) -> Result<AnswerQuestionResult, GameplayError> {
         self.process_stats(answered_correctly)?;
         self.update_non_active_player_states("AnswerAttemptReceived");
-        if answered_correctly || !self.no_players_to_answer_left() {
-            log::info!("Removing question from the pack");
+        let no_players_to_answer_left = self.no_players_to_answer_left();
+        log::debug!("Anwsered correctly: {}, players to answer left: {}", answered_correctly, no_players_to_answer_left);
+        if answered_correctly || no_players_to_answer_left {
+            log::info!("Removing correctly answered question from the pack");
             self.remove_current_question();
             Ok(AnswerQuestionResult::EndQuestion(self.transition()))
         } else {
@@ -48,9 +51,10 @@ impl GameCtx<AnswerAttemptReceived> {
 
     fn remove_current_question(&mut self) {
         let round = &mut self.data.current_round;
-        round.pop_question(
-            &self.data.current_question.topic,
-            self.data.current_question.price,
-        );
+        let topic = &self.data.current_question.topic;
+        let price = self.data.current_question.price;
+        log::debug!("Removing question from the pack: topic: {}, price: {}", topic, price);
+        round.pop_question(topic, price);
+        emit_round((&self.data.current_round).into());
     }
 }

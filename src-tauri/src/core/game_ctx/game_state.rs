@@ -30,7 +30,7 @@ pub enum GameState {
 
     /// The quickest player pressed the 'Answer' button first, and now they have the right to try answering the question.
     /// Next state: `EndQuestion` (when the verbal answer from the player is correct or no players are left after wrong answers)
-    ///        or: `DisplayQuestion` (when the verbal answer from the player is wrong and remaining players are available)
+    ///         or: `DisplayQuestion` (when the verbal answer from the player is wrong and remaining players are available)
     AnswerAttemptReceived(GameCtx<AnswerAttemptReceived>),
 
     /// Any player answered the question correctly or all players answered the question wrong.
@@ -41,12 +41,12 @@ pub enum GameState {
 
     /// Check if the round is over. If all questions in the round are answered, proceed to round-end actions.
     /// Next state: `CalcRoundStats` (when the round is over)
-    ///        or: `ChooseQuestion` (when the round is continuing)
+    ///         or: `ChooseQuestion` (when the round is continuing)
     CheckEndOfRound(GameCtx<CheckEndOfRound>),
 
     /// Display round statistics, eliminate players with negative scores, etc.
     /// Next state: `StartNextRound` (when a new round is available)
-    ///        or: `EndTheGame` (when all rounds are played)
+    ///         or: `EndTheGame` (when all rounds are played)
     CalcRoundStats(GameCtx<CalcRoundStats>),
 
     /// Start the next round by resetting game state and proceeding to question selection.
