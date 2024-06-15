@@ -48,13 +48,4 @@ impl GameCtx<AnswerAttemptReceived> {
     fn no_players_to_answer_left(&self) -> bool {
         self.data.players.iter().all(|(_, p)| !p.can_answer())
     }
-
-    fn remove_current_question(&mut self) {
-        let round = &mut self.data.current_round;
-        let topic = &self.data.current_question.topic;
-        let price = self.data.current_question.price;
-        log::debug!("Removing question from the pack: topic: {}, price: {}", topic, price);
-        round.pop_question(topic, price);
-        emit_round((&self.data.current_round).into());
-    }
 }

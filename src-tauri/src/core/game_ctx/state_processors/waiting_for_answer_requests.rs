@@ -10,6 +10,7 @@ impl GameCtx<WaitingForAnswerRequests> {
     ) -> Result<GameCtx<AnswerAttemptReceived>, GameplayError> {
         self.data.set_active_player_id(player_id);
         self.data.set_active_player_state(PlayerState::Answering);
+        self.data.answer_allowed = false;
         Ok(self.transition())
     }
 }

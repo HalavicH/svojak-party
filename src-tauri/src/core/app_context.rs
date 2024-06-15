@@ -218,61 +218,61 @@ impl AppContext {
 impl AppContext {
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
         let hub = self.hub_lock();
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::SetupAndLoading(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::SetupAndLoading"))?,
         };
 
-        start_event_listener(hub, game.game_ref().events_clone());
+        start_event_listener(hub, ctx.game_ref().events_clone());
 
         let content = self.game_pack.content.clone();
-        let game = game.start(content)?;
-        self.set_game_state(GameState::PickFirstQuestionChooser(game));
+        let ctx = ctx.start(content)?;
+        self.set_game_state(GameState::PickFirstQuestionChooser(ctx));
         Ok(())
     }
 
     pub fn pick_first_question_chooser(&mut self) -> error_stack::Result<(), GameplayError> {
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::PickFirstQuestionChooser(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::PickFirstQuestionChooser"))?,
         };
 
-        let game = game.pick_first_question_chooser()?;
-        self.set_game_state(GameState::ChooseQuestion(game));
+        let ctx = ctx.pick_first_question_chooser()?;
+        self.set_game_state(GameState::ChooseQuestion(ctx));
         Ok(())
     }
 
     pub fn select_question(&mut self, topic: &str, price: i32) -> Result<(), GameplayError> {
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::ChooseQuestion(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::ChooseQuestion"))?,
         };
 
-        let game = game.choose_question(topic, price)?;
-        self.set_game_state(GameState::DisplayQuestion(game));
+        let ctx = ctx.choose_question(topic, price)?;
+        self.set_game_state(GameState::DisplayQuestion(ctx));
         Ok(())
     }
 
     pub fn allow_answer(&mut self) -> error_stack::Result<(), GameplayError> {
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::DisplayQuestion(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
         };
 
-        let game = game.allow_answer()?;
-        self.set_game_state(GameState::WaitingForAnswerRequests(game));
+        let ctx = ctx.allow_answer()?;
+        self.set_game_state(GameState::WaitingForAnswerRequests(ctx));
         Ok(())
     }
 
     pub fn wait_for_quickest_player_to_click(&mut self) -> error_stack::Result<(), GameplayError> {
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::WaitingForAnswerRequests(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
         };
 
-        let id = game.get_fastest_click_player_id()?;
-        let game_ctx = game.request_answer_by_player_id(id)?;
-        self.set_game_state(GameState::AnswerAttemptReceived(game_ctx));
+        let id = ctx.get_fastest_click_player_id()?;
+        let ctx = ctx.request_answer_by_player_id(id)?;
+        self.set_game_state(GameState::AnswerAttemptReceived(ctx));
         Ok(())
     }
 
@@ -280,41 +280,49 @@ impl AppContext {
         &mut self,
         answered_correctly: bool,
     ) -> error_stack::Result<(), GameplayError> {
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::AnswerAttemptReceived(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::AnswerAttemptReceived"))?,
         };
 
-        let path = game.answer_question(answered_correctly)?;
+        let path = ctx.answer_question(answered_correctly)?;
         self.set_game_state(match path {
-            Aqr::EndQuestion(game) => GameState::EndQuestion(game),
-            Aqr::DisplayQuestion(game) => GameState::DisplayQuestion(game),
+            Aqr::EndQuestion(ctx) => GameState::EndQuestion(ctx),
+            Aqr::DisplayQuestion(ctx) => GameState::DisplayQuestion(ctx),
         });
         Ok(())
     }
 
-    ///////
+    pub fn stop_asking_and_show_answer(&mut self) -> error_stack::Result<(), GameplayError> {
+        let ctx = match &mut self.game_state {
+            GameState::DisplayQuestion(game) => game,
+            _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
+        };
 
+        let ctx = ctx.finish_question_preemptively()?;
+        self.set_game_state(GameState::EndQuestion(ctx));
+        Ok(())
+    }
 
     pub fn finish_question(&mut self) -> error_stack::Result<(), GameplayError> {
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::EndQuestion(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::EndQuestion"))?,
         };
 
-        let game = game.finish_question()?;
-        self.set_game_state(GameState::CheckEndOfRound(game));
+        let ctx = ctx.finish_question()?;
+        self.set_game_state(GameState::CheckEndOfRound(ctx));
         self.check_end_of_round()?;
         Ok(())
     }
 
     pub fn check_end_of_round(&mut self) -> error_stack::Result<(), GameplayError> {
-        let game = match &mut self.game_state {
+        let ctx = match &mut self.game_state {
             GameState::CheckEndOfRound(game) => game,
             _ => Err(self.handle_state_mismatch_error("GameState::CheckEndOfRound"))?,
         };
 
-        let path = game.check_end_of_round()?;
+        let path = ctx.check_end_of_round()?;
         self.set_game_state(match path {
             CheckEndOfRoundResult::ChooseQuestion(game) => GameState::ChooseQuestion(game),
             CheckEndOfRoundResult::CalcRoundStats(game) => GameState::CalcRoundStats(game),
@@ -335,25 +343,6 @@ impl AppContext {
 /// Old Game API
 #[deprecated]
 impl AppContext {
-    pub fn stop_asking_and_show_answer(&mut self) -> error_stack::Result<(), GameplayError> {
-        // self.__old_game.answer_allowed = false;
-        // self.allow_answer_timestamp
-        //     .swap(u32::MAX, Ordering::Relaxed);
-        //
-        // self.__old_game.round_stats.total_tries += 1;
-        // self.__old_game.round_stats.total_wrong_answers += 1;
-        //
-        // let theme = self.__old_game.question_theme.clone();
-        // let price = self.__old_game.question_price;
-        // log::info!(">>> Trying to remove question from category: {theme}, price: {price}");
-        //
-        // self.update_game_state(OldGameState::ChooseQuestion);
-        // self.update_non_target_player_states();
-        //
-        // self.remove_question(&theme, &price)
-        //     .change_context(GameplayError::PackElementNotPresent)?;
-        Ok(())
-    }
 
     fn remove_question(
         &mut self,

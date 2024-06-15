@@ -28,7 +28,7 @@ export const TauriApiCommand = {
     SELECT_QUESTION: 'select_question',
     ALLOW_ANSWER: 'allow_answer',
     ANSWER_QUESTION: 'answer_question',
-    FINISH_QUESTION_PREMATURELY_AND_SHOW_ANSWER: 'finish_question_prematurely_and_show_answer',
+    STOP_ASKING_AND_SHOW_ANSWER: 'stop_asking_and_show_answer',
     FINISH_QUESTION: 'finish_question',
     /////////// LEGACY API ////////////
     // Debug API

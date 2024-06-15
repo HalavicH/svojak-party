@@ -30,8 +30,8 @@
         await callBackend(TauriApiCommand.ANSWER_QUESTION, {answeredCorrectly: false});
     }
 
-    async function showAnswerAndEndQuestion() {
-        await callBackend(TauriApiCommand.FINISH_QUESTION_PREMATURELY_AND_SHOW_ANSWER);
+    async function stopAskingAndShowAnswer() {
+        await callBackend(TauriApiCommand.STOP_ASKING_AND_SHOW_ANSWER);
     }
 </script>
 
@@ -50,7 +50,7 @@
         <VSpacing size="0.5em"/>
         <WrongAnswerButton onClick={wrongAnswer} active={clickAllowed}/>
         <VSpacing size="0.5em"/>
-        <Button text="Show answer and end question" onClick={showAnswerAndEndQuestion} active={clickAllowed && noPlayersToAnswerLeft}/>
+        <Button text="Show answer and end question" onClick={stopAskingAndShowAnswer} active={clickAllowed && noPlayersToAnswerLeft}/>
     </div>
 </div>
 

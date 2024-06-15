@@ -1,6 +1,6 @@
 use crate::api::events::{emit_game_state_by_name, emit_players_by_game_data};
 use crate::core::game_ctx::game::{GameCtx, INVALID_PLAYER_ID};
-use crate::core::game_ctx::state_structs::{DisplayQuestion, WaitingForAnswerRequests};
+use crate::core::game_ctx::state_structs::{DisplayQuestion, EndQuestion, WaitingForAnswerRequests};
 use crate::core::game_entities::GameplayError;
 use crate::hub::hub_api::calc_current_epoch_ms;
 
@@ -20,5 +20,11 @@ impl GameCtx<DisplayQuestion> {
         emit_game_state_by_name("WaitingForAnswerRequests");
         let game_ctx: GameCtx<WaitingForAnswerRequests> = game.transition();
         Ok(game_ctx)
+    }
+
+    pub fn finish_question_preemptively(&mut self) -> Result<GameCtx<EndQuestion>, GameplayError> {
+        log::info!("Removing not answered question from the pack");
+        self.remove_current_question();
+        Ok(self.transition())
     }
 }

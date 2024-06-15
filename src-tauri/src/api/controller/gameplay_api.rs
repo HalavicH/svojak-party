@@ -48,7 +48,6 @@ pub fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
 /// Finished current question and set's state to 'show answer'
 #[command]
 pub fn stop_asking_and_show_answer() {
-    todo!("Rework");
     app_mut().stop_asking_and_show_answer().map_err(map_game_error);
 }
 
