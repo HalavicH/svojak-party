@@ -214,14 +214,20 @@ impl AppContext {
     }
 }
 
+macro_rules! get_ctx_ensuring_state {
+    ($self:ident, $state_variant:ident) => {
+        match &mut $self.game_state {
+            GameState::$state_variant(state) => state,
+            _ => Err($self.handle_state_mismatch_error(concat!("GameState::", stringify!($state_variant))))?,
+        }
+    };
+}
+
 /// Game API
 impl AppContext {
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
         let hub = self.hub_lock();
-        let ctx = match &mut self.game_state {
-            GameState::SetupAndLoading(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::SetupAndLoading"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
 
         start_event_listener(hub, ctx.game_ref().events_clone());
 
@@ -232,10 +238,7 @@ impl AppContext {
     }
 
     pub fn pick_first_question_chooser(&mut self) -> error_stack::Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::PickFirstQuestionChooser(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::PickFirstQuestionChooser"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, PickFirstQuestionChooser);
 
         let ctx = ctx.pick_first_question_chooser()?;
         self.set_game_state(GameState::ChooseQuestion(ctx));
@@ -243,10 +246,7 @@ impl AppContext {
     }
 
     pub fn select_question(&mut self, topic: &str, price: i32) -> Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::ChooseQuestion(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::ChooseQuestion"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, ChooseQuestion);
 
         let ctx = ctx.choose_question(topic, price)?;
         self.set_game_state(GameState::DisplayQuestion(ctx));
@@ -254,10 +254,7 @@ impl AppContext {
     }
 
     pub fn allow_answer(&mut self) -> error_stack::Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::DisplayQuestion(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, DisplayQuestion);
 
         let ctx = ctx.allow_answer()?;
         self.set_game_state(GameState::WaitingForAnswerRequests(ctx));
@@ -265,10 +262,7 @@ impl AppContext {
     }
 
     pub fn wait_for_quickest_player_to_click(&mut self) -> error_stack::Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::WaitingForAnswerRequests(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, WaitingForAnswerRequests);
 
         let id = ctx.get_fastest_click_player_id()?;
         let ctx = ctx.request_answer_by_player_id(id)?;
@@ -280,10 +274,7 @@ impl AppContext {
         &mut self,
         answered_correctly: bool,
     ) -> error_stack::Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::AnswerAttemptReceived(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::AnswerAttemptReceived"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, AnswerAttemptReceived);
 
         let path = ctx.answer_question(answered_correctly)?;
         self.set_game_state(match path {
@@ -294,10 +285,7 @@ impl AppContext {
     }
 
     pub fn stop_asking_and_show_answer(&mut self) -> error_stack::Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::DisplayQuestion(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::DisplayQuestion"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, DisplayQuestion);
 
         let ctx = ctx.finish_question_preemptively()?;
         self.set_game_state(GameState::EndQuestion(ctx));
@@ -305,10 +293,7 @@ impl AppContext {
     }
 
     pub fn finish_question(&mut self) -> error_stack::Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::EndQuestion(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::EndQuestion"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, EndQuestion);
 
         let ctx = ctx.finish_question()?;
         self.set_game_state(GameState::CheckEndOfRound(ctx));
@@ -317,10 +302,7 @@ impl AppContext {
     }
 
     pub fn check_end_of_round(&mut self) -> error_stack::Result<(), GameplayError> {
-        let ctx = match &mut self.game_state {
-            GameState::CheckEndOfRound(game) => game,
-            _ => Err(self.handle_state_mismatch_error("GameState::CheckEndOfRound"))?,
-        };
+        let ctx = get_ctx_ensuring_state!(self, CheckEndOfRound);
 
         let path = ctx.check_end_of_round()?;
         self.set_game_state(match path {
@@ -335,7 +317,7 @@ impl AppContext {
 impl AppContext {
     fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
         let state_mismatch = self.game_state.show_state_mismatch(expected_state);
-        emit_error(format!("Can't allow answer: {}", state_mismatch));
+        emit_error(format!("Context retrieval failure: {}", state_mismatch));
         GameplayError::OperationForbidden
     }
 }
