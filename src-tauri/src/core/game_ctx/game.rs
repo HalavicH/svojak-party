@@ -8,7 +8,9 @@ use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::thread::sleep;
 use std::time::Duration;
+use rocket::serde::Serialize;
 use rocket::yansi::Paint;
+use crate::api::dto::PlayerEndRoundStatsDto;
 use crate::api::events::{emit_players_by_players_map, emit_round};
 
 pub const INVALID_PLAYER_ID: u8 = 0; // TODO: Consider using Option<u8> instead
@@ -206,8 +208,13 @@ impl<State> GameCtx<State> {
 
 ///// LEGACY
 #[derive(Default, Debug, Clone)]
-pub struct GameStats {
+pub struct RoundStats {
+    pub round_name: String,
+    pub questions_played: i32,
+    pub normal_questions_played: i32,
+    pub pip_questions_played: i32,
     pub total_correct_answers: i32,
     pub total_wrong_answers: i32,
     pub total_tries: i32,
+    pub round_time: String,
 }

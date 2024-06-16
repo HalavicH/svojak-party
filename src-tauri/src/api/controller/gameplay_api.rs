@@ -16,13 +16,12 @@ pub async fn start_new_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
     let mut app = app_mut();
     app.start_new_game().map_err(map_game_error)?;
-    app.pick_first_question_chooser().map_err(map_game_error)?;
     Ok(())
 }
 
 /// Select question to be played
 #[command]
-pub fn select_question(topic: String, price: i32) -> Result<(), GameplayError> {
+pub async fn select_question(topic: String, price: i32) -> Result<(), GameplayError> {
     let mut app = app_mut();
 
     app.select_question(&topic, price)?;
@@ -39,7 +38,7 @@ pub async fn allow_answer() -> Result<(), GameplayError> {
 
 /// Provide answer to active question
 #[command]
-pub fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
+pub async fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
     log::debug!("Answered correctly: {answered_correctly}");
 
     app_mut().answer_question(answered_correctly).map_err(map_game_error)
@@ -47,23 +46,23 @@ pub fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
 
 /// Finished current question and set's state to 'show answer'
 #[command]
-pub fn stop_asking_and_show_answer() -> Result<(), GameplayError> {
+pub async fn stop_asking_and_show_answer() -> Result<(), GameplayError> {
     app_mut().stop_asking_and_show_answer().map_err(map_game_error)
 }
 
 /// Finished current question and set's state to 'show answer'
 #[command]
-pub fn finish_question() -> Result<(), GameplayError> {
+pub async fn finish_question() -> Result<(), GameplayError> {
     app_mut().finish_question().map_err(map_game_error)
 }
 
 /// Initiate next round
 #[command]
-pub fn init_next_round() -> Result<(), GameplayError> {
-    app_mut().init_next_round().map_err(map_game_error)
+pub async fn init_next_round() -> Result<(), GameplayError> {
+    app_mut().process_end_of_round().map_err(map_game_error)
 }
 
 #[command]
-pub fn send_pip_victim(victim_id: i32) {
+pub async fn send_pip_victim(victim_id: i32) {
     log::debug!("Victim id is: {}", victim_id);
 }

@@ -49,6 +49,7 @@ fn main() {
             send_pip_victim,
             stop_asking_and_show_answer,
             finish_question,
+            init_next_round
         ])
         .run(tauri::generate_context!())
         .expect("Can't start Tauri app");

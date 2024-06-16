@@ -1,6 +1,7 @@
 <script>
     import {currentRoundStatsStore} from "../../../../lib/stores.js";
     import Table from "../../../../components/generic/Table.svelte";
+    import {DFL_PLAYER_ICON} from "../../../../lib/misc.js"
 
     currentRoundStatsStore.subscribe(value => {
         console.log(value);
@@ -16,8 +17,6 @@
         if (stats.roundTimeSec < 60) {
             return stats.roundTimeSec + "s";
         }
-        // return Math.floor(stats.roundTimeSec / 60) + ":" + stats.roundTimeSec % 60;
-        // With leading zero
         return Math.floor(stats.roundTimeSec / 60) + ":" + (stats.roundTimeSec % 60).toString().padStart(2, '0');
     }
 
@@ -26,56 +25,20 @@
 </script>
 
 <!--
-roundStatsMock = {
-    roundName: "Злий Репер Зеник",
-    questionsPlayed: 4,
-    normalQuestionNum: 3,
-    pigInPokeQuestionNum: 1,
-    totalCorrectAnswers: 4,
-    totalWrongAnswers: 3,
-    totalTries: 7,
-    roundTimeSec: 666,
-    players: [
-        {
-            id: 1,
-            name: "HalavicH",
-            score: 500,
-            playerIconPath: DFL_PLAYER_ICON,
-            totalAnswers: 3,
-            answeredCorrectly: 2,
-            answeredWrong: 1,
-        },
-        {
-            id: 2,
-            name: "Button",
-            score: -100,
-            playerIconPath: DFL_PLAYER_ICON,
-            totalAnswers: 2,
-            answeredCorrectly: 1,
-            answeredWrong: 1,
-        },
-        {
-            id: 3,
-            name: "Baadtrip",
-            score: 200,
-            playerIconPath: DFL_PLAYER_ICON,
-            totalAnswers: 1,
-            answeredCorrectly: 1,
-            answeredWrong: 0,
-        },
-        {
-            id: 4,
-            name: "Valadis",
-            score: 400,
-            playerIconPath: DFL_PLAYER_ICON,
-            totalAnswers: 1,
-            answeredCorrectly: 0,
-            answeredWrong: 1,
-        }
-    ]
+#[derive(Debug, Serialize, Clone)]
+#[allow(non_snake_case)]
+pub struct RoundStatsDto {
+    pub roundName: String,
+    pub questionsPlayed: i32,
+    pub normalQuestionsPlayed: i32,
+    pub pigInPokeQuestionPlayed: i32,
+    pub totalCorrectAnswers: i32,
+    pub totalWrongAnswers: i32,
+    pub totalTries: i32,
+    pub roundTime: i32,
+    pub players: Vec<PlayerEndRoundStatsDto>,
 }
 -->
-
 <div>
     <h2>Round '{stats.roundName}' finished!</h2>
     <div class="common-stats">
@@ -86,11 +49,11 @@ roundStatsMock = {
             </tr>
             <tr>
                 <td>Normal questions:</td>
-                <td>{stats.normalQuestionNum}</td>
+                <td>{stats.normalQuestionsPlayed}</td>
             </tr>
             <tr>
                 <td>Pig in poke questions:</td>
-                <td>{stats.pigInPokeQuestionNum}</td>
+                <td>{stats.pigInPokeQuestionPlayed}</td>
             </tr>
             <tr>
                 <td>Total correct answers:</td>
@@ -112,7 +75,7 @@ roundStatsMock = {
     <Table headers={["", "Player", "Score", "Total answers", "Correct answers", "Wrong answers"]}>
         {#each stats.players as player}
             <tr>
-                <td><img class="icon" src={player.playerIconPath} alt=""/></td>
+                <td><img class="icon" src={player.playerIconPath === "default" ? DFL_PLAYER_ICON : player.playerIconPath} alt=""/></td>
                 <td>{player.name}</td>
                 <td>{player.score}</td>
                 <td>{player.totalAnswers}</td>

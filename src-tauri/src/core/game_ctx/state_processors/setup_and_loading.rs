@@ -1,6 +1,6 @@
 use crate::api::events::emit_message;
 use crate::core::game_ctx::game::GameCtx;
-use crate::core::game_ctx::state_structs::{PickFirstQuestionChooser, SetupAndLoading};
+use crate::core::game_ctx::state_structs::{PickFirstQuestionChooser, SetupAndLoading, StartNextRound};
 use crate::core::game_entities::GameplayError;
 use crate::game_pack::pack_content_entities::PackContent;
 
@@ -17,7 +17,7 @@ impl GameCtx<SetupAndLoading> {
     pub fn start(
         &self,
         pack_content: PackContent,
-    ) -> Result<GameCtx<PickFirstQuestionChooser>, GameplayError> {
+    ) -> Result<GameCtx<StartNextRound>, GameplayError> {
         let mut ctx = self.transition();
         let game = &mut ctx.data;
         game.pack_content = pack_content;
@@ -25,9 +25,6 @@ impl GameCtx<SetupAndLoading> {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::NotEnoughPlayers);
         }
-
-        game.current_round_index = 0;
-        game.set_current_round_by_id(0);
 
         Ok(ctx)
     }

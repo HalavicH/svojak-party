@@ -3,7 +3,7 @@ use crate::api::dto::{
     TopicDto,
 };
 use crate::api::dto::{PackInfoDto, PlayerDto, QuestionBriefDto};
-use crate::core::game_ctx::game::GameStats;
+use crate::core::game_ctx::game::RoundStats;
 use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{Atom, PackContent, Question, Round};
 use crate::hub::hub_api::HubManager;
@@ -76,18 +76,18 @@ impl From<&PackContent> for PackInfoDto {
 
 pub fn game_to_round_stats_dto(
     round: &Round,
-    stats: &GameStats,
+    stats: &RoundStats,
     players: Vec<Player>,
 ) -> RoundStatsDto {
     RoundStatsDto {
         roundName: round.name.to_owned(),
-        questionNumber: round.question_count,
-        normalQuestionNum: round.normal_question_count,
-        pigInPokeQuestionNum: round.pip_question_count,
+        questionsPlayed: round.question_count,
+        normalQuestionsPlayed: round.normal_question_count,
+        pigInPokeQuestionPlayed: round.pip_question_count,
         totalCorrectAnswers: stats.total_correct_answers,
         totalWrongAnswers: stats.total_wrong_answers,
         totalTries: stats.total_tries,
-        roundTime: "Not tracked".to_owned(),
+        roundTimeSec: 666,
         players: players
             .iter()
             .map(|p| PlayerEndRoundStatsDto {
@@ -96,8 +96,8 @@ pub fn game_to_round_stats_dto(
                 score: p.stats.score,
                 playerIconPath: p.icon.to_owned(),
                 totalAnswers: p.stats.total_tries,
-                answeredCorrectly: p.stats.correct_num,
-                answeredWrong: p.stats.wrong_num,
+                answeredCorrectly: p.stats.answered_correctly,
+                answeredWrong: p.stats.answered_wrong,
             })
             .collect(),
     }

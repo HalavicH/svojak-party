@@ -234,7 +234,9 @@ impl AppContext {
 
         let content = self.game_pack.content.clone();
         let ctx = ctx.start(content)?;
-        self.set_game_state(GameState::PickFirstQuestionChooser(ctx));
+        self.set_game_state(GameState::StartNextRound(ctx));
+        self.init_next_round()?;
+        self.pick_first_question_chooser()?;
         Ok(())
     }
 
@@ -313,19 +315,28 @@ impl AppContext {
         Ok(())
     }
 
-    pub fn init_next_round(&mut self) -> error_stack::Result<(), GameplayError> {
+    pub fn process_end_of_round(&mut self) -> error_stack::Result<(), GameplayError> {
         let ctx = get_ctx_ensuring_state!(self, ShowRoundStats);
 
         let path = ctx.get_end_round_path()?;
         match path {
-            RoundStatsResult::PickFirstQuestionChooser(ctx) => {
-                self.set_game_state(GameState::PickFirstQuestionChooser(ctx));
+            RoundStatsResult::StartNextRound(ctx) => {
+                self.set_game_state(GameState::StartNextRound(ctx));
+                self.init_next_round()?;
                 self.pick_first_question_chooser()?;
             },
             RoundStatsResult::EndTheGame(ctx) => {
                 self.set_game_state(GameState::EndTheGame(ctx))
             },
         }
+        Ok(())
+    }
+
+    fn init_next_round(&mut self) -> error_stack::Result<(), GameplayError> {
+        let ctx = get_ctx_ensuring_state!(self, StartNextRound);
+
+        let ctx = ctx.init_next_round()?;
+        self.set_game_state(GameState::PickFirstQuestionChooser(ctx));
         Ok(())
     }
 }

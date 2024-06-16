@@ -8,7 +8,7 @@ import {
     currentHubConfigStore,
     currentPackInfoStore,
     currentPlayersStore,
-    currentQuestionStore,
+    currentQuestionStore, currentRoundStatsStore,
     currentRoundStore
 } from "./stores.js";
 
@@ -19,6 +19,7 @@ export const TauriEvents = {
     Round: "Round",
     Question: "Question",
     GameState: "GameState",
+    RoundStats: "RoundStats",
 }
 
 export function initEventListeners() {
@@ -28,6 +29,7 @@ export function initEventListeners() {
     listenAndStoreEvent(TauriEvents.Round, currentRoundStore);
     listenAndStoreEvent(TauriEvents.Question, currentQuestionStore);
     listenAndStoreEvent(TauriEvents.GameState, currentGameStateStore);
+    listenAndStoreEvent(TauriEvents.RoundStats, currentRoundStatsStore);
 
     console.log("################################################");
     console.log("##### ALL EVENT LISTENERS HAS BEEN LOADED ######");

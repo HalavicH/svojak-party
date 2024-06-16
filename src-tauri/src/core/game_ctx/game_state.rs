@@ -108,7 +108,7 @@ impl GameState {
             GameState::AnswerAttemptReceived(_) => "AnswerAttemptReceived",
             GameState::EndQuestion(_) => "EndQuestion",
             GameState::CheckEndOfRound(_) => "CheckEndOfRound",
-            GameState::ShowRoundStats(_) => "CalcRoundStats",
+            GameState::ShowRoundStats(_) => "ShowRoundStats",
             GameState::StartNextRound(_) => "StartNextRound",
             GameState::EndTheGame(_) => "EndTheGame",
         }

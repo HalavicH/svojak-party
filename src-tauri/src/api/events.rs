@@ -1,6 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto};
+use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto, RoundStatsDto};
 use crate::core::app_context::app;
 use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
@@ -25,6 +25,7 @@ pub enum Event {
     Round,
     Question,
     GameState,
+    RoundStats,
 }
 
 /// Impl enum to &str conversion
@@ -41,6 +42,7 @@ impl<'a> From<Event> for &'a str {
             Event::Round => "Round",
             Event::Question => "Question",
             Event::GameState => "GameState",
+            Event::RoundStats => "RoundStats",
         }
     }
 }
@@ -118,6 +120,10 @@ pub fn emit_round(round: RoundDto) {
 
 pub fn emit_question(question: QuestionDto) {
     emit(Event::Question, question);
+}
+
+pub fn emit_round_stats(round: RoundStatsDto) {
+    emit(Event::RoundStats, round);
 }
 
 #[allow(non_snake_case)]

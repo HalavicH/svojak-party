@@ -202,8 +202,8 @@ const mockQuestion = {
 let roundStatsMock = {
     roundName: "Злий Репер Зеник",
     questionsPlayed: 4,
-    normalQuestionNum: 3,
-    pigInPokeQuestionNum: 1,
+    normalQuestionsPlayed: 3,
+    pigInPokeQuestionPlayed: 1,
     totalCorrectAnswers: 4,
     totalWrongAnswers: 3,
     totalTries: 7,

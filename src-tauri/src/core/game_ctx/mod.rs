@@ -4,7 +4,7 @@ pub mod state_processors;
 pub mod state_structs;
 
 use crate::api::events::{emit_players, emit_players_by_game_data, emit_players_by_players_map, emit_question, emit_round};
-use crate::core::game_ctx::game::GameStats;
+use crate::core::game_ctx::game::RoundStats;
 use crate::core::game_entities::{Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub::hub_api::PlayerEvent;
@@ -26,7 +26,7 @@ pub struct GameData {
     /// Current question
     current_question: Question,
     /// Stats
-    round_stats: GameStats,
+    round_stats: RoundStats,
     /// Event frame. Flushed every new question
     events: Arc<RwLock<Vec<PlayerEvent>>>,
     allow_answer_timestamp: u32,
@@ -35,7 +35,8 @@ pub struct GameData {
 
 impl GameData {
     pub fn has_next_round(&self) -> bool {
-        self.current_round_index + 1 < self.pack_content.rounds.len()
+        log::debug!("Current round index: {}, rounds len: {}", self.current_round_index, self.pack_content.rounds.len());
+        self.current_round_index < self.pack_content.rounds.len()
     }
 
     pub fn events_clone(&self) -> Arc<RwLock<Vec<PlayerEvent>>> {
@@ -46,15 +47,18 @@ impl GameData {
         other.term_id == self.active_player_id
     }
 
-    pub fn set_current_round_by_id(&mut self, index: usize) {
+    pub fn set_next_round(&mut self) {
+        let index = self.current_round_index;
+        log::debug!("Incrementing round index to: {}", index);
         let round: &Round = self
             .pack_content
             .rounds
             .get(index)
-            .expect("Expected to have round with index");
+            .unwrap_or_else(|| panic!("Expected to have round with index: {index}"));
         self.current_round = round.clone();
         let round_dto = round.into();
         emit_round(round_dto);
+        self.current_round_index += 1;
     }
 
     pub fn current_player_clone(&self) -> Player {

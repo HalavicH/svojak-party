@@ -22,8 +22,8 @@ pub enum PlayerState {
 #[derive(Default, Debug, Eq, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PlayerStats {
     pub score: i32,
-    pub correct_num: i32,
-    pub wrong_num: i32,
+    pub answered_correctly: i32,
+    pub answered_wrong: i32,
     pub total_tries: i32,
 }
 
@@ -60,14 +60,14 @@ impl Player {
 
     pub fn answered_correctly(&mut self, question: &Question) {
         self.state = PlayerState::AnsweredCorrectly;
-        self.stats.correct_num += 1;
+        self.stats.answered_correctly += 1;
         self.stats.total_tries += 1;
         self.stats.score += question.price;
     }
 
     pub fn answered_wrong(&mut self, question: &Question) {
         self.state = PlayerState::AnsweredWrong;
-        self.stats.wrong_num += 1;
+        self.stats.answered_wrong += 1;
         self.stats.total_tries += 1;
         self.stats.score -= question.price;
     }

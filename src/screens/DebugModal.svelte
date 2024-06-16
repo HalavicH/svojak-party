@@ -83,7 +83,6 @@
     async function waitForState(desiredState) {
         let gameState;
         currentGameStateStore.subscribe((state) => {
-            console.log("Current state: ", state);
             gameState = state.gameState;
         });
         let tries = 10;
