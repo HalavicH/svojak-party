@@ -4,7 +4,7 @@ use crate::core::game_ctx::state_structs::{
     EndQuestion, EndTheGame, PickFirstQuestionChooser, SetupAndLoading, StartNextRound,
     WaitingForAnswerRequests,
 };
-use crate::core::game_ctx::GameData;
+use crate::core::game_ctx::game_data::GameData;
 
 #[derive(Debug)]
 pub enum GameState {

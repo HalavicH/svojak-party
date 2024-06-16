@@ -4,7 +4,7 @@ use crate::api::dto::{HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, Question
 use crate::core::app_context::app;
 use crate::core::game_ctx::game_ctx::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
-use crate::core::game_ctx::GameData;
+use crate::core::game_ctx::game_data::GameData;
 use crate::core::game_entities::{HubStatus, Player};
 use crate::game_pack::pack_content_entities::Round;
 use serde::{Deserialize, Serialize};

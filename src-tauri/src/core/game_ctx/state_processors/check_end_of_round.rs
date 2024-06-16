@@ -16,7 +16,7 @@ impl GameCtx<CheckEndOfRound> {
     ) -> Result<CheckEndOfRoundResult, GameplayError> {
         if self.data.current_round.is_over() {
             log::info!("Round is over! Transitioning to CalcRoundStats");
-            emit_round_stats(self.to_round_stats_dto());
+            emit_round_stats(self.data.to_round_stats_dto());
             Ok(CheckEndOfRoundResult::ShowRoundStats(self.transition()))
         } else {
             let questions_left = self.data.current_round.questions_left;
@@ -28,34 +28,6 @@ impl GameCtx<CheckEndOfRound> {
         }
     }
 
-    fn to_round_stats_dto(&self) -> RoundStatsDto {
-        // self.data.round_stats
-        let stats = &self.data.round_stats;
-        RoundStatsDto {
-            roundName: stats.round_name.clone(),
-            questionsPlayed: self.data.current_round.question_count,
-            normalQuestionsPlayed: stats.normal_questions_played,
-            pigInPokeQuestionPlayed: stats.pip_questions_played,
-            totalCorrectAnswers: stats.total_correct_answers,
-            totalWrongAnswers: stats.total_wrong_answers,
-            totalTries: stats.total_tries,
-            roundTimeSec: 666,
-            players: self.data.players
-                .iter()
-                .map(|(_, p)| {
-                    PlayerEndRoundStatsDto {
-                        id: p.term_id as i32,
-                        name: p.name.clone(),
-                        score: p.stats.score,
-                        playerIconPath: p.icon.clone(),
-                        totalAnswers: p.stats.total_tries,
-                        answeredCorrectly: p.stats.answered_correctly,
-                        answeredWrong: p.stats.answered_wrong,
-                    }
-                })
-                .collect(),
-        }
-    }
 
     fn reactivate_inactive_players(&mut self) {
         let game = &mut self.data;
