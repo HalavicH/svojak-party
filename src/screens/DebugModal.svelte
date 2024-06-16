@@ -68,15 +68,74 @@
         return JSON.stringify(store, null, 4);
     }
 
+    async function sleep(time) {
+        await new Promise(r => setTimeout(r, time));
+    }
+
     async function initAndLoadAndStart() {
         await openKefLoh();
         await setDemoHub();
         // Sleep for 1 second to let the hub load
-        await new Promise(r => setTimeout(r, 2000));
+        await sleep(2000);
         await startTheGame();
     }
 
-    async function playRound() {
+    async function waitForState(desiredState) {
+        let gameState;
+        currentGameStateStore.subscribe((state) => {
+            console.log("Current state: ", state);
+            gameState = state.gameState;
+        });
+        let tries = 10;
+        while (gameState !== desiredState && tries-- > 0) {
+            notify.info("Current state: " + gameState + ". Waiting for: " + desiredState);
+            await sleep(1000);
+        }
+    }
+
+    async function processQuestionPlaySkip(question, topic) {
+        // notify.info(`Playing question: ${question.price}`);
+        console.log("Playing question: ", question.price);
+        await waitForState(GameState.ChooseQuestion);
+        // Select the question
+        await callBackend(TauriApiCommand.SELECT_QUESTION, {
+            topic: topic.topicName,
+            price: question.price
+        });
+        console.log("Selected question: ", question.price)
+        await waitForState(GameState.DisplayQuestion);
+        // Allow players to answer
+        await callBackend(TauriApiCommand.STOP_ASKING_AND_SHOW_ANSWER);
+        await waitForState(GameState.EndQuestion);
+        await callBackend(TauriApiCommand.FINISH_QUESTION);
+        console.log("Finished question: ", question.price)
+    }
+
+    async function processQuestionPlayCorrect(question, topic) {
+        // notify.info(`Playing question: ${question.price}`);
+        console.log("Playing question: ", question.price);
+        await waitForState(GameState.ChooseQuestion);
+        // Select the question
+        await callBackend(TauriApiCommand.SELECT_QUESTION, {
+            topic: topic.topicName,
+            price: question.price
+        });
+        console.log("Selected question: ", question.price)
+        await waitForState(GameState.DisplayQuestion);
+        // Allow players to answer
+        await callBackend(TauriApiCommand.ALLOW_ANSWER);
+        console.log("Allowed answer: ", question.price)
+        // Wait for answers
+        await waitForState(GameState.AnswerAttemptReceived);
+        // Press 'correct answer'
+        await callBackend(TauriApiCommand.ANSWER_QUESTION, {answeredCorrectly: true});
+        console.log("Answered correctly: ", question.price)
+        await waitForState(GameState.EndQuestion);
+        await callBackend(TauriApiCommand.FINISH_QUESTION);
+        console.log("Finished question: ", question.price)
+    }
+
+    async function playRound(playHandler) {
         // For each question in the round
         // 1. Select the question
         // 2. Allow players to answer
@@ -84,6 +143,17 @@
         // 4. Press 'correct answer'
         // 5. Press next question
         // 6. Repeat
+        let round = $currentRoundStore;
+        // notify.info(`Playing round: ${round.roundName}`);
+        console.log("Playing round: ", round.roundName)
+        for (const topic of round.roundTopics) {
+            // notify.info(`Playing topic: ${topic.topicName}`);
+            console.log("Playing topic: ", topic.topicName)
+            for (const question of topic.questions) {
+                await playHandler(question, topic);
+            }
+        }
+        notify.info(`Finished round: ${round.roundName}`);
     }
 </script>
 
@@ -132,9 +202,15 @@
             <tbody>
             <tr>
                 <td>
-                    <SecondaryButton text="Play round (all correct)" onClick={playRound}/>
+                    <SecondaryButton text="Play round (all correct)" onClick={() => playRound(processQuestionPlayCorrect)}/>
                 </td>
-                <td><p>Set's state to SetupAndLoading. Clears players and hub</p></td>
+                <td><p>Play the round until done (answer correctly)</p></td>
+            </tr>
+            <tr>
+                <td>
+                    <SecondaryButton text="Play round (all skip)" onClick={() => playRound(processQuestionPlaySkip)}/>
+                </td>
+                <td><p>Play the round until done (all skip)</p></td>
             </tr>
             </tbody>
         </table>

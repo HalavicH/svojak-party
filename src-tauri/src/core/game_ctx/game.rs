@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::thread::sleep;
 use std::time::Duration;
+use rocket::yansi::Paint;
 use crate::api::events::{emit_players_by_players_map, emit_round};
 
 pub const INVALID_PLAYER_ID: u8 = 0; // TODO: Consider using Option<u8> instead
@@ -33,7 +34,7 @@ impl<State> GameCtx<State> {
     pub fn transition<T>(&self) -> GameCtx<T> {
         let prev_state = Self::full_type_to_name(&format!("{:?}", self.state));
         let next_state = Self::full_type_to_name(type_name::<T>());
-        log::debug!("Game transitions '{}' -> '{}'", prev_state, next_state);
+        log::debug!("Game transitions '{}' -> '{}'", prev_state.cyan(), next_state.green());
         GameCtx {
             state: PhantomData,
             data: self.data.clone(),
