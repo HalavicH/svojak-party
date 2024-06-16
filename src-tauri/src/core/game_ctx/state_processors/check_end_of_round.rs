@@ -1,6 +1,6 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_players_by_players_map, emit_round_stats};
-use crate::core::game_ctx::game::{GameCtx, RoundStats};
+use crate::core::game_ctx::game_ctx::{GameCtx, RoundStats};
 use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, ShowRoundStats, CheckEndOfRound, ChooseQuestion, EndQuestion, WaitingForAnswerRequests};
 use crate::core::game_entities::{GameplayError, PlayerState};
 

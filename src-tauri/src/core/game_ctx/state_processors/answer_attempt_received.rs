@@ -1,5 +1,5 @@
 use crate::api::events::emit_round;
-use crate::core::game_ctx::game::GameCtx;
+use crate::core::game_ctx::game_ctx::GameCtx;
 use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, DisplayQuestion, EndQuestion};
 use crate::core::game_entities::GameplayError;
 

@@ -1,10 +1,10 @@
-pub mod game;
+pub mod game_ctx;
 pub mod game_state;
 pub mod state_processors;
 pub mod state_structs;
 
 use crate::api::events::{emit_players, emit_players_by_game_data, emit_players_by_players_map, emit_question, emit_round};
-use crate::core::game_ctx::game::RoundStats;
+use crate::core::game_ctx::game_ctx::RoundStats;
 use crate::core::game_entities::{Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub::hub_api::PlayerEvent;

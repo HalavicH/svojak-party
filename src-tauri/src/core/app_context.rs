@@ -2,7 +2,7 @@ use crate::api::events::{
     emit_error, emit_game_state, emit_hub_config, emit_players_by_game_data, emit_question,
     emit_round,
 };
-use crate::core::game_ctx::game::GameCtx;
+use crate::core::game_ctx::game_ctx::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
 use crate::core::game_ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
 use crate::core::game_entities::{GamePackError, GameplayError, Player};
