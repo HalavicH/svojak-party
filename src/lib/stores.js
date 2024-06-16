@@ -199,6 +199,55 @@ const mockQuestion = {
     answer: String,
 }
 
+let roundStatsMock = {
+    roundName: "Злий Репер Зеник",
+    questionsPlayed: 4,
+    normalQuestionNum: 3,
+    pigInPokeQuestionNum: 1,
+    totalCorrectAnswers: 4,
+    totalWrongAnswers: 3,
+    totalTries: 7,
+    roundTimeSec: 666,
+    players: [
+        {
+            id: 1,
+            name: "HalavicH",
+            score: 500,
+            playerIconPath: DFL_PLAYER_ICON,
+            totalAnswers: 3,
+            answeredCorrectly: 2,
+            answeredWrong: 1,
+        },
+        {
+            id: 2,
+            name: "Button",
+            score: -100,
+            playerIconPath: DFL_PLAYER_ICON,
+            totalAnswers: 2,
+            answeredCorrectly: 1,
+            answeredWrong: 1,
+        },
+        {
+            id: 3,
+            name: "Baadtrip",
+            score: 200,
+            playerIconPath: DFL_PLAYER_ICON,
+            totalAnswers: 1,
+            answeredCorrectly: 1,
+            answeredWrong: 0,
+        },
+        {
+            id: 4,
+            name: "Valadis",
+            score: 400,
+            playerIconPath: DFL_PLAYER_ICON,
+            totalAnswers: 1,
+            answeredCorrectly: 0,
+            answeredWrong: 1,
+        }
+    ]
+};
+
 // Game stores
 export const currentHubConfigStore = writable(mockHubConfig);
 export const currentPlayersStore = writable(mockPlayers);
@@ -206,6 +255,7 @@ export const currentPackInfoStore = writable(mockPackInfo);
 export const currentRoundStore = writable(mockRound);
 export const currentQuestionStore = writable(mockQuestion);
 export const currentGameStateStore = writable({gameState: GameState.SetupAndLoading});
+export const currentRoundStatsStore = writable(roundStatsMock);
 
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");

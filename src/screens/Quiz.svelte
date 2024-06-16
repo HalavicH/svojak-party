@@ -8,8 +8,10 @@
     import MenuButton from "./quiz/subcomponents/MenuButton.svelte";
     import PickFirstQuestionChooser from "./quiz/PickFirstQuestionChooser.svelte";
     import Centered from "../components/generic/Centered.svelte";
-    import Button from "../components/generic/Button.svelte";
     import EndQuestionScreen from "./quiz/subcomponents/EndQuestionScreen.svelte";
+    import RoundStatsView from "./quiz/subcomponents/stats/RoundStatsView.svelte";
+    import Button from "../components/generic/Button.svelte";
+    import NextRoundButton from "./quiz/subcomponents/stats/NextRoundButton.svelte";
 
     $: gameState = $currentGameStateStore.gameState;
 </script>
@@ -27,19 +29,25 @@
         {:else if gameState === GameState.ChooseQuestion}
             <RoundView/>
         {:else if gameState === GameState.DisplayQuestion
-                || gameState === GameState.WaitingForAnswerRequests
-                || gameState === GameState.AnswerAttemptReceived
+        || gameState === GameState.WaitingForAnswerRequests
+        || gameState === GameState.AnswerAttemptReceived
         }
             <QuestionView/>
         {:else if gameState === GameState.EndQuestion}
             <EndQuestionScreen/>
+        {:else if gameState === GameState.ShowRoundStats}
+            <RoundStatsView/>
         {:else}
             <Row>
                 <div>Unhandled state: {gameState}</div>
             </Row>
         {/if}
     </div>
-    <PlayersView/>
+    {#if gameState === GameState.ShowRoundStats}
+        <NextRoundButton/>
+    {:else}
+        <PlayersView/>
+    {/if}
 </div>
 
 <style>

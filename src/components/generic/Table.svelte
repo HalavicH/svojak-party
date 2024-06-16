@@ -1,9 +1,10 @@
 <!-- Table.svelte -->
 <script>
     export let headers;
+    export let style = '';
 </script>
 
-<table class="dark-table">
+<table class="dark-table" style={style}>
     <tbody>
     <tr class="dark-table-labels">
         {#each headers as header}
@@ -38,13 +39,4 @@
         border-radius: 10px;
         align-items: center;
     }
-
-    .player-image {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-    }
-
-
 </style>
