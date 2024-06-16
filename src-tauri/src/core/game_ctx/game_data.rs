@@ -10,11 +10,11 @@ use crate::hub::hub_api::PlayerEvent;
 #[derive(Debug, Default, Clone)]
 pub struct GameData {
     /// Entities
-    pub pack_content: PackContent,
+    pack_content: PackContent,
     pub players: HashMap<u8, Player>,
     /// Game State
-    pub current_round_index: usize,
-    pub current_round: Round,
+    current_round_index: usize,
+    current_round: Round,
     pub active_player_id: u8,
     // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
     pub answer_allowed: bool,
@@ -26,6 +26,40 @@ pub struct GameData {
     pub events: Arc<RwLock<Vec<PlayerEvent>>>,
     pub allow_answer_timestamp: u32,
     pub round_duration_min: i32,
+}
+
+impl GameData {
+    pub fn set_pack_content(&mut self, pack_content: PackContent) {
+        self.pack_content = pack_content;
+    }
+
+    pub fn remove_current_question(&mut self) {
+        let topic = &self.current_question.topic.clone();
+        let price = self.current_question.price;
+        log::debug!("Removing question from the pack: topic: {}, price: {}", topic, price);
+        self.pop_question(topic, price);
+        emit_round((&self.current_round).into());
+    }
+
+    fn pop_question(&mut self, topic_name: &str, price: i32) -> Option<Question> {
+        let Some(topic) = self.current_round.topics.get_mut(topic_name) else {
+            log::error!(
+                "Topic with name: {} not found in round with name: {}",
+                topic_name,
+                self.current_round.name
+            );
+            return None;
+        };
+
+        self.current_round.questions_left -= 1;
+        log::debug!("Questions left: {}", self.current_round.questions_left);
+        topic.questions.remove(&price)
+    }
+
+    pub fn get_question(&self, topic_name: &str, price: i32) -> Option<&Question> {
+        let topic = self.current_round.topics.get(topic_name)?;
+        topic.questions.get(&price)
+    }
 }
 
 impl GameData {

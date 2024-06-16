@@ -14,12 +14,12 @@ impl GameCtx<CheckEndOfRound> {
     pub fn check_end_of_round(
         &mut self,
     ) -> Result<CheckEndOfRoundResult, GameplayError> {
-        if self.data.current_round.is_over() {
+        if self.data.current_round_ref().is_round_over() {
             log::info!("Round is over! Transitioning to CalcRoundStats");
             emit_round_stats(self.data.to_round_stats_dto());
             Ok(CheckEndOfRoundResult::ShowRoundStats(self.transition()))
         } else {
-            let questions_left = self.data.current_round.questions_left;
+            let questions_left = self.data.current_round_ref().questions_left;
             log::info!("Round still has {} questions! Transitioning to ChooseQuestion", questions_left);
             log::debug!("Setting active player state to 'QuestionChooser'");
             self.data.set_active_player_state(PlayerState::QuestionChooser);

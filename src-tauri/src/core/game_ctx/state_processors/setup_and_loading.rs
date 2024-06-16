@@ -20,7 +20,7 @@ impl GameCtx<SetupAndLoading> {
     ) -> Result<GameCtx<StartNextRound>, GameplayError> {
         let mut ctx = self.transition();
         let game = &mut ctx.data;
-        game.pack_content = pack_content;
+        game.set_pack_content(pack_content);
         if game.players.len() < 2 {
             log::info!("Not enough players to run the game.");
             return Err(GameplayError::NotEnoughPlayers);

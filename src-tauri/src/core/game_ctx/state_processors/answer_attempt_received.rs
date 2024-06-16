@@ -19,7 +19,7 @@ impl GameCtx<AnswerAttemptReceived> {
         log::debug!("Anwsered correctly: {}, players to answer left: {}", answered_correctly, no_players_to_answer_left);
         if answered_correctly || no_players_to_answer_left {
             log::info!("Removing correctly answered question from the pack");
-            self.remove_current_question();
+            self.data.remove_current_question();
             Ok(AnswerQuestionResult::EndQuestion(self.transition()))
         } else {
             Ok(AnswerQuestionResult::DisplayQuestion(self.transition()))

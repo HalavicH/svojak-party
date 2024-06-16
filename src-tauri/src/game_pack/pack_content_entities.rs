@@ -55,22 +55,7 @@ pub struct Round {
 }
 
 impl Round {
-    pub fn pop_question(&mut self, topic_name: &str, price: i32) -> Option<Question> {
-        let Some(topic) = self.topics.get_mut(topic_name) else {
-            log::error!(
-                "Topic with name: {} not found in round with name: {}",
-                topic_name,
-                self.name
-            );
-            return None;
-        };
-
-        self.questions_left -= 1;
-        log::debug!("Questions left: {}", self.questions_left);
-        topic.questions.remove(&price)
-    }
-
-    pub fn is_over(&self) -> bool {
+    pub fn is_round_over(&self) -> bool {
         self.questions_left == 0
     }
 }

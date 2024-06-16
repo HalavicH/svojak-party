@@ -24,7 +24,7 @@ impl GameCtx<DisplayQuestion> {
 
     pub fn finish_question_preemptively(&mut self) -> Result<GameCtx<EndQuestion>, GameplayError> {
         log::info!("Removing not answered question from the pack");
-        self.remove_current_question();
+        self.data.remove_current_question();
         Ok(self.transition())
     }
 }

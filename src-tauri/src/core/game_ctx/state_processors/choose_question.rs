@@ -11,10 +11,9 @@ impl GameCtx<ChooseQuestion> {
         let mut game: GameCtx<DisplayQuestion> = self.transition();
         let data = &mut game.data;
         let question = data
-            .current_round
-            .pop_question(topic, price)
+            .get_question(topic, price)
             .ok_or(GameplayError::PackElementNotPresent)?;
-        data.set_current_question(question);
+        data.set_current_question(question.clone());
 
         data.set_active_player_state(PlayerState::Idle);
 
