@@ -11,7 +11,7 @@
     .debug-button {
         position: absolute;
         top: 1em;
-        left: 20%;
+        left: 70%;
         transform: translateX(-50%);
     }
 

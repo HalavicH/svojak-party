@@ -9,14 +9,15 @@
         currentHubConfigStore,
         currentPackInfoStore,
         currentPlayersStore,
-        currentRoundStore,
         currentQuestionStore,
+        currentRoundStore,
         GameState,
         navTo
     } from "../lib/stores.js";
     import {Views} from "./views.js";
     import SecondaryButton from "../components/generic/SecondaryButton.svelte";
     import {isRunningInTauri} from "../lib/misc.js";
+    import HSpacing from "../components/generic/HSpacing.svelte";
 
     // Provided by 'modals'
     export let isOpen;
@@ -66,19 +67,31 @@
         // Pretty print json with 4 spaces per tab
         return JSON.stringify(store, null, 4);
     }
+
+    async function initAndLoadAndStart() {
+        await openKefLoh();
+        await setDemoHub();
+        // Sleep for 1 second to let the hub load
+        await new Promise(r => setTimeout(r, 2000));
+        await startTheGame();
+    }
+
+    async function playRound() {
+        // For each question in the round
+        // 1. Select the question
+        // 2. Allow players to answer
+        // 3. Wait for answers
+        // 4. Press 'correct answer'
+        // 5. Press next question
+        // 6. Repeat
+    }
 </script>
 
 <BaseModal {isOpen}>
     <h2>Debug Mode</h2>
-    <ItemsBlock title="Backend Actions">
+    <ItemsBlock title="Startup Actions">
         <table>
             <tbody>
-            <tr>
-                <td>
-                    <SecondaryButton text="Reset Game" onClick={resetGame}/>
-                </td>
-                <td><p>Set's state to SetupAndLoading. Clears players and hub</p></td>
-            </tr>
             <tr>
                 <td>
                     <SecondaryButton text="Init Demo Hub" onClick={setDemoHub}/>
@@ -103,12 +116,45 @@
                     <p>Starts new game with current config</p>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <SecondaryButton text="Init + load + start" onClick={initAndLoadAndStart}/>
+                </td>
+                <td>
+                    <p>Starts new game with current config</p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </ItemsBlock>
+    <ItemsBlock title="Gameplay actions">
+        <table>
+            <tbody>
+            <tr>
+                <td>
+                    <SecondaryButton text="Play round (all correct)" onClick={playRound}/>
+                </td>
+                <td><p>Set's state to SetupAndLoading. Clears players and hub</p></td>
+            </tr>
+            </tbody>
+        </table>
+    </ItemsBlock>
+    <ItemsBlock title="Misc">
+        <table>
+            <tbody>
+            <tr>
+                <td>
+                    <SecondaryButton text="Reset Game" onClick={resetGame}/>
+                </td>
+                <td><p>Set's state to SetupAndLoading. Clears players and hub</p></td>
+            </tr>
             </tbody>
         </table>
     </ItemsBlock>
     <ItemsBlock title="Go to:">
         <Row>
             <SecondaryButton text="Menu" onClick={goToMenu}/>
+            <HSpacing size="1em"/>
             <SecondaryButton text="Quiz" onClick={goToQuiz}/>
         </Row>
     </ItemsBlock>
@@ -124,24 +170,36 @@
         </Row>
     </ItemsBlock>
     <ItemsBlock title="Stores content">
-    <!-- JSON view -->
+        <!-- JSON view -->
         <p>Game state store</p>
-        <div class="json-view"><pre>{renderStoreContent($currentGameStateStore)}</pre></div>
+        <div class="json-view">
+            <pre>{renderStoreContent($currentGameStateStore)}</pre>
+        </div>
 
         <p>Question store</p>
-        <div class="json-view"><pre>{renderStoreContent($currentQuestionStore)}</pre></div>
+        <div class="json-view">
+            <pre>{renderStoreContent($currentQuestionStore)}</pre>
+        </div>
 
         <p>Players store</p>
-        <div class="json-view"><pre>{renderStoreContent($currentPlayersStore)}</pre></div>
+        <div class="json-view">
+            <pre>{renderStoreContent($currentPlayersStore)}</pre>
+        </div>
 
         <p>Hub config store</p>
-        <div class="json-view"><pre>{renderStoreContent($currentHubConfigStore)}</pre></div>
+        <div class="json-view">
+            <pre>{renderStoreContent($currentHubConfigStore)}</pre>
+        </div>
 
         <p>Pack info store</p>
-        <div class="json-view"><pre>{renderStoreContent($currentPackInfoStore)}</pre></div>
+        <div class="json-view">
+            <pre>{renderStoreContent($currentPackInfoStore)}</pre>
+        </div>
 
         <p>Round store</p>
-        <div class="json-view"><pre>{renderStoreContent($currentRoundStore)}</pre></div>
+        <div class="json-view">
+            <pre>{renderStoreContent($currentRoundStore)}</pre>
+        </div>
     </ItemsBlock>
 </BaseModal>
 
