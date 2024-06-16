@@ -3,7 +3,7 @@ pub mod game_state;
 pub mod state_processors;
 pub mod state_structs;
 
-use crate::api::events::{emit_players, emit_players_by_game_data, emit_players_by_players_map, emit_round};
+use crate::api::events::{emit_players, emit_players_by_game_data, emit_players_by_players_map, emit_question, emit_round};
 use crate::core::game_ctx::game::GameStats;
 use crate::core::game_entities::{Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
@@ -102,6 +102,11 @@ impl GameData {
 
     pub fn set_active_player_id(&mut self, term_id: u8) {
         self.active_player_id = term_id;
+    }
+
+    pub fn set_current_question(&mut self, question: Question) {
+        self.current_question = question;
+        emit_question((&self.current_question).into());
     }
 
     pub fn take_events(&self) -> Vec<PlayerEvent> {
