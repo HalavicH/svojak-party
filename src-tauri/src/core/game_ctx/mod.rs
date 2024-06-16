@@ -34,9 +34,14 @@ pub struct GameData {
 }
 
 impl GameData {
+    pub fn has_next_round(&self) -> bool {
+        self.current_round_index + 1 < self.pack_content.rounds.len()
+    }
+
     pub fn events_clone(&self) -> Arc<RwLock<Vec<PlayerEvent>>> {
         self.events.clone()
     }
+
     pub fn is_active_player(&self, other: &Player) -> bool {
         other.term_id == self.active_player_id
     }

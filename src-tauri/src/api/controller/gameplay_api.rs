@@ -57,6 +57,12 @@ pub fn finish_question() -> Result<(), GameplayError> {
     app_mut().finish_question().map_err(map_game_error)
 }
 
+/// Initiate next round
+#[command]
+pub fn init_next_round() -> Result<(), GameplayError> {
+    app_mut().init_next_round().map_err(map_game_error)
+}
+
 #[command]
 pub fn send_pip_victim(victim_id: i32) {
     log::debug!("Victim id is: {}", victim_id);

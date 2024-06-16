@@ -18,6 +18,7 @@ use std::ops::Deref;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::JoinHandle;
 use crate::core::game_ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
+use crate::core::game_ctx::state_processors::show_round_stats::RoundStatsResult;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -311,6 +312,22 @@ impl AppContext {
         });
         Ok(())
     }
+
+    pub fn init_next_round(&mut self) -> error_stack::Result<(), GameplayError> {
+        let ctx = get_ctx_ensuring_state!(self, ShowRoundStats);
+
+        let path = ctx.get_end_round_path()?;
+        match path {
+            RoundStatsResult::PickFirstQuestionChooser(ctx) => {
+                self.set_game_state(GameState::PickFirstQuestionChooser(ctx));
+                self.pick_first_question_chooser()?;
+            },
+            RoundStatsResult::EndTheGame(ctx) => {
+                self.set_game_state(GameState::EndTheGame(ctx))
+            },
+        }
+        Ok(())
+    }
 }
 
 /// Helper methods
@@ -320,74 +337,6 @@ impl AppContext {
         emit_error(format!("Context retrieval failure: {}", state_mismatch));
         GameplayError::OperationForbidden
     }
-}
-
-/// Old Game API
-#[deprecated]
-impl AppContext {
-
-    fn remove_question(
-        &mut self,
-        theme: &String,
-        price: &i32,
-    ) -> error_stack::Result<(), GamePackError> {
-        // log::info!("Try to remove question from category: {theme}, price: {price}");
-        // let round = self.__old_game.get_current_round_mut();
-        // let theme = round
-        //     .themes
-        //     .get_mut(theme)
-        //     .ok_or(GamePackError::ThemeNotPresent)
-        //     .into_report()
-        //     .attach_printable(format!("Can't find theme: {theme:?}"))?;
-        //
-        // let _ = theme
-        //     .pop_question(price)
-        //     .ok_or(GamePackError::QuestionNotPresent)
-        //     .into_report()
-        //     .attach_printable(format!(
-        //         "Can't find question with price {price:?} in theme: {theme:?}"
-        //     ))?;
-        //
-        // round.questions_left -= 1;
-        // log::info!("Question left: {}", round.questions_left);
-        Ok(())
-    }
-
-    pub fn no_players_to_answer_left(&self) -> bool {
-        // let players_left = self
-        //     .__old_game
-        //     .players
-        //     .iter()
-        //     .filter(|(_, p)| {
-        //         p.state != PlayerState::Inactive
-        //             && p.state != PlayerState::Dead
-        //             && p.state != PlayerState::AnsweredWrong
-        //     })
-        //     .count();
-        // log::debug!("Players to answer left: {}", players_left);
-        // players_left == 0
-        true
-    }
-
-    // pub fn fetch_round_stats(&self) -> RoundStatsDto {
-    //     let round = self.__old_game.get_current_round();
-    //     let players = self.__old_game.players.values().cloned().collect();
-    //     game_to_round_stats_dto(round, &self.__old_game.round_stats, players)
-    // }
-
-    // fn update_game_state(&mut self, new_state: OldGameState) {
-    //     log::info!(
-    //         "Game state {:?} -> {:?}",
-    //         self.__old_game.game_state(),
-    //         new_state
-    //     );
-    //     self.__old_game.set_game_state(new_state);
-    //     self.update_non_target_player_states();
-    // }
-
-    // fn get_player_keys(&self) -> Vec<u8> {
-    //     self.__old_game.players.keys().copied().collect()
-    // }
 }
 
 /// Debug API
