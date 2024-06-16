@@ -1,18 +1,32 @@
 <script>
     import {closeModal} from 'svelte-modals';
     import {doWithSound, getWhooshSound} from "../../lib/sound.js";
+    import { onMount } from 'svelte';
 
     // provided by Modals
     export let isOpen;
+    let contentsRef;
 
     function handleCloseModal() {
         doWithSound(closeModal, getWhooshSound());
+    }
+
+    // Ensure the modal content scrolls to the top when it opens
+    onMount(() => {
+        if (contentsRef) {
+            contentsRef.scrollTop = 0;
+        }
+    });
+
+    // Watch for changes in isOpen and scroll to top when it opens
+    $: if (isOpen && contentsRef) {
+        contentsRef.scrollTop = 0;
     }
 </script>
 
 {#if isOpen}
     <div role="dialog" class="modal">
-        <div class="contents">
+        <div class="contents" bind:this={contentsRef}>
             <div class="close-panel">
                 <span class="close" on:click={handleCloseModal}>&times;</span>
             </div>
@@ -37,8 +51,6 @@
         justify-content: center;
         align-items: center;
         overflow: auto; /* Allow scrolling if the modal content overflows */
-
-        /* allow click-through to backdrop */
         pointer-events: none;
     }
 
@@ -52,7 +64,6 @@
         background: var(--modal-background-color);
         display: flex;
         flex-direction: column;
-        justify-content: center;
         pointer-events: auto;
         overflow: auto; /* Allow scrolling within the modal content if it exceeds the max-height */
     }
