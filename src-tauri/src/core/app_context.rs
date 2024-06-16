@@ -307,7 +307,7 @@ impl AppContext {
         let path = ctx.check_end_of_round()?;
         self.set_game_state(match path {
             CheckEndOfRoundResult::ChooseQuestion(game) => GameState::ChooseQuestion(game),
-            CheckEndOfRoundResult::CalcRoundStats(game) => GameState::CalcRoundStats(game),
+            CheckEndOfRoundResult::ShowRoundStats(game) => GameState::ShowRoundStats(game),
         });
         Ok(())
     }

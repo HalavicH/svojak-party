@@ -28,7 +28,7 @@ pub struct CheckEndOfRound {}
 pub struct CalcStatsAndStartNextRound {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct CalcRoundStats {}
+pub struct ShowRoundStats {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct StartNextRound {}

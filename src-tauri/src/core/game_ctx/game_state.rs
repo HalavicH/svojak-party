@@ -1,6 +1,6 @@
 use crate::core::game_ctx::game::GameCtx;
 use crate::core::game_ctx::state_structs::{
-    AnswerAttemptReceived, CalcRoundStats, CheckEndOfRound, ChooseQuestion, DisplayQuestion,
+    AnswerAttemptReceived, ShowRoundStats, CheckEndOfRound, ChooseQuestion, DisplayQuestion,
     EndQuestion, EndTheGame, PickFirstQuestionChooser, SetupAndLoading, StartNextRound,
     WaitingForAnswerRequests,
 };
@@ -47,7 +47,7 @@ pub enum GameState {
     /// Display round statistics, eliminate players with negative scores, etc.
     /// Next state: `StartNextRound` (when a new round is available)
     ///         or: `EndTheGame` (when all rounds are played)
-    CalcRoundStats(GameCtx<CalcRoundStats>),
+    ShowRoundStats(GameCtx<ShowRoundStats>),
 
     /// Start the next round by resetting game state and proceeding to question selection.
     /// Next state: `ChooseQuestion` (when the first question of the new round is picked)
@@ -76,7 +76,7 @@ impl GameState {
             GameState::AnswerAttemptReceived(game_ctx) => game_ctx.game_mut(),
             GameState::EndQuestion(game_ctx) => game_ctx.game_mut(),
             GameState::CheckEndOfRound(game_ctx) => game_ctx.game_mut(),
-            GameState::CalcRoundStats(game) => game.game_mut(),
+            GameState::ShowRoundStats(game) => game.game_mut(),
             GameState::StartNextRound(game) => game.game_mut(),
             GameState::EndTheGame(game) => game.game_mut(),
         }
@@ -92,7 +92,7 @@ impl GameState {
             GameState::AnswerAttemptReceived(game_ctx) => game_ctx.game_ref(),
             GameState::EndQuestion(game_ctx) => game_ctx.game_ref(),
             GameState::CheckEndOfRound(game_ctx) => game_ctx.game_ref(),
-            GameState::CalcRoundStats(game) => game.game_ref(),
+            GameState::ShowRoundStats(game) => game.game_ref(),
             GameState::StartNextRound(game) => game.game_ref(),
             GameState::EndTheGame(game) => game.game_ref(),
         }
@@ -108,7 +108,7 @@ impl GameState {
             GameState::AnswerAttemptReceived(_) => "AnswerAttemptReceived",
             GameState::EndQuestion(_) => "EndQuestion",
             GameState::CheckEndOfRound(_) => "CheckEndOfRound",
-            GameState::CalcRoundStats(_) => "CalcRoundStats",
+            GameState::ShowRoundStats(_) => "CalcRoundStats",
             GameState::StartNextRound(_) => "StartNextRound",
             GameState::EndTheGame(_) => "EndTheGame",
         }
@@ -125,7 +125,7 @@ impl GameState {
             "AnswerAttemptReceived" => GameState::AnswerAttemptReceived(context.transition()),
             "EndQuestion" => GameState::EndQuestion(context.transition()),
             "CheckEndOfRound" => GameState::CheckEndOfRound(context.transition()),
-            "CalcRoundStats" => GameState::CalcRoundStats(context.transition()),
+            "CalcRoundStats" => GameState::ShowRoundStats(context.transition()),
             "StartNextRound" => GameState::StartNextRound(context.transition()),
             "EndTheGame" => GameState::EndTheGame(context.transition()),
             &_ => panic!("Invalid state name {}", name),

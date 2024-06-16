@@ -1,12 +1,12 @@
 use crate::api::events::emit_players_by_players_map;
 use crate::core::game_ctx::game::GameCtx;
-use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, CalcRoundStats, CheckEndOfRound, ChooseQuestion, EndQuestion, WaitingForAnswerRequests};
+use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, ShowRoundStats, CheckEndOfRound, ChooseQuestion, EndQuestion, WaitingForAnswerRequests};
 use crate::core::game_entities::{GameplayError, PlayerState};
 
 
 pub enum CheckEndOfRoundResult {
     ChooseQuestion(GameCtx<ChooseQuestion>),
-    CalcRoundStats(GameCtx<CalcRoundStats>),
+    ShowRoundStats(GameCtx<ShowRoundStats>),
 }
 
 impl GameCtx<CheckEndOfRound> {
@@ -15,7 +15,7 @@ impl GameCtx<CheckEndOfRound> {
     ) -> Result<CheckEndOfRoundResult, GameplayError> {
         if self.data.current_round.is_over() {
             log::info!("Round is over! Transitioning to CalcRoundStats");
-            Ok(CheckEndOfRoundResult::CalcRoundStats(self.transition()))
+            Ok(CheckEndOfRoundResult::ShowRoundStats(self.transition()))
         } else {
             let questions_left = self.data.current_round.questions_left;
             log::info!("Round still has {} questions! Transitioning to ChooseQuestion", questions_left);

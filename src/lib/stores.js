@@ -34,7 +34,9 @@ export const GameState = {
     AnswerAttemptReceived: 'AnswerAttemptReceived',
     EndQuestion: 'EndQuestion',
     CheckEndOfRound: 'CheckEndOfRound',
-    CalcStatsAndStartNextRound: 'CalcStatsAndStartNextRound',
+    ShowRoundStats: 'ShowRoundStats',
+    StartNextRound: 'StartNextRound',
+    EndTheGame: 'EndTheGame',
 }
 
 
