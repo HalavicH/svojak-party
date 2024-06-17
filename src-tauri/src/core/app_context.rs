@@ -5,7 +5,9 @@ use crate::api::events::{
 use crate::core::game_ctx::game_ctx::GameCtx;
 use crate::core::game_ctx::game_state::GameState;
 use crate::core::game_ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
-use crate::core::game_entities::{GamePackError, GameplayError, Player};
+use crate::core::game_ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
+use crate::core::game_ctx::state_processors::show_round_stats::RoundStatsResult;
+use crate::core::game_entities::{GameplayError, Player};
 use crate::core::player_connection_listener::start_listening_for_players_connection;
 use crate::core::player_event_listener::start_event_listener;
 use crate::game_pack::game_pack_entites::GamePack;
@@ -13,12 +15,10 @@ use crate::hub::hub_api::{HubManager, HubType};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
 use crate::types::ArcRwBox;
-use error_stack::{FutureExt, Report, ResultExt};
+use error_stack::Report;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::JoinHandle;
-use crate::core::game_ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
-use crate::core::game_ctx::state_processors::show_round_stats::RoundStatsResult;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -177,7 +177,7 @@ impl AppContext {
                 emit_hub_config(self.hub().deref().into());
 
                 self.run_polling_for_players()
-            },
+            }
             Err(err) => log::error!("Can't initialize hub on port: {}. Error: {:?}", path, err),
         }
     }
@@ -200,14 +200,12 @@ impl AppContext {
         self.player_poling_thread_handle = Some(handle)
     }
 
-    #[deprecated]
     pub fn emit_game_config_locking_hub(&self) {
         emit_hub_config(self.hub_mut().deref().into());
         let game_ctx = self.game_state.game_ctx_ref();
         emit_players_by_game_data(game_ctx);
     }
 
-    #[deprecated]
     pub fn emit_game_context(&self) {
         emit_game_state(&self.game_state);
         emit_round(self.game_state.game_ctx_ref().current_round_ref().into());
@@ -219,7 +217,8 @@ macro_rules! get_ctx_ensuring_state {
     ($self:ident, $state_variant:ident) => {
         match &mut $self.game_state {
             GameState::$state_variant(state) => state,
-            _ => Err($self.handle_state_mismatch_error(concat!("GameState::", stringify!($state_variant))))?,
+            _ => Err($self
+                .handle_state_mismatch_error(concat!("GameState::", stringify!($state_variant))))?,
         }
     };
 }
@@ -324,10 +323,8 @@ impl AppContext {
                 self.set_game_state(GameState::StartNextRound(ctx));
                 self.init_next_round()?;
                 self.pick_first_question_chooser()?;
-            },
-            RoundStatsResult::EndTheGame(ctx) => {
-                self.set_game_state(GameState::EndTheGame(ctx))
-            },
+            }
+            RoundStatsResult::EndTheGame(ctx) => self.set_game_state(GameState::EndTheGame(ctx)),
         }
         Ok(())
     }

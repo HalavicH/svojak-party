@@ -2,7 +2,6 @@ use crate::api::dto::PlayerDto;
 use crate::api::events::*;
 use crate::core::app_context::{app, app_mut};
 use crate::core::game_entities::{Player, PlayerState};
-use rocket::http::hyper::body::HttpBody;
 use tauri::{command, Window};
 
 /// Dirty hack to capture window handle

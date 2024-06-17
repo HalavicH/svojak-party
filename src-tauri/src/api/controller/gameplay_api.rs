@@ -1,7 +1,7 @@
-use error_stack::Report;
 use crate::api::events::emit_error;
 use crate::core::app_context::app_mut;
 use crate::core::game_entities::GameplayError;
+use error_stack::Report;
 use tauri::command;
 
 fn map_game_error(e: Report<GameplayError>) -> GameplayError {
@@ -33,7 +33,9 @@ pub async fn select_question(topic: String, price: i32) -> Result<(), GameplayEr
 pub async fn allow_answer() -> Result<(), GameplayError> {
     let mut guard = app_mut();
     guard.allow_answer().map_err(map_game_error)?;
-    guard.wait_for_quickest_player_to_click().map_err(map_game_error)
+    guard
+        .wait_for_quickest_player_to_click()
+        .map_err(map_game_error)
 }
 
 /// Provide answer to active question
@@ -41,13 +43,17 @@ pub async fn allow_answer() -> Result<(), GameplayError> {
 pub async fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
     log::debug!("Answered correctly: {answered_correctly}");
 
-    app_mut().answer_question(answered_correctly).map_err(map_game_error)
+    app_mut()
+        .answer_question(answered_correctly)
+        .map_err(map_game_error)
 }
 
 /// Finished current question and set's state to 'show answer'
 #[command]
 pub async fn stop_asking_and_show_answer() -> Result<(), GameplayError> {
-    app_mut().stop_asking_and_show_answer().map_err(map_game_error)
+    app_mut()
+        .stop_asking_and_show_answer()
+        .map_err(map_game_error)
 }
 
 /// Finished current question and set's state to 'show answer'

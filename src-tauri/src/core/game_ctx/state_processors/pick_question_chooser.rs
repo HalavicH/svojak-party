@@ -3,24 +3,6 @@ use crate::core::game_ctx::game_ctx::GameCtx;
 use crate::core::game_ctx::state_structs::{ChooseQuestion, PickFirstQuestionChooser};
 use crate::core::game_entities::{GameplayError, PlayerState};
 use crate::hub::hub_api::calc_current_epoch_ms;
-use std::time::{Duration, Instant};
-
-struct FastestClickRequest {
-    start_time: Instant,
-    timeout: Duration,
-}
-
-impl FastestClickRequest {
-    pub fn new(start_time: Instant, timeout: Duration) -> Self {
-        Self {
-            start_time,
-            timeout,
-        }
-    }
-    pub(crate) fn is_timed_out(&self) -> bool {
-        self.start_time.elapsed() >= self.timeout
-    }
-}
 
 impl GameCtx<PickFirstQuestionChooser> {
     pub fn pick_first_question_chooser(
@@ -35,7 +17,8 @@ impl GameCtx<PickFirstQuestionChooser> {
 
         emit_message(format!("Fastest player with id: {}", term_id));
         self.data.set_active_player_by_id(term_id);
-        self.data.set_active_player_state(PlayerState::QuestionChooser);
+        self.data
+            .set_active_player_state(PlayerState::QuestionChooser);
         Ok(self.transition())
     }
 }

@@ -1,4 +1,3 @@
-use crate::api::events::emit_players_by_players_map;
 use crate::core::game_ctx::game_ctx::GameCtx;
 use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, WaitingForAnswerRequests};
 use crate::core::game_entities::{GameplayError, PlayerState};

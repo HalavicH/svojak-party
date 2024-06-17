@@ -1,4 +1,3 @@
-use crate::api::events::emit_round;
 use crate::core::game_ctx::game_ctx::GameCtx;
 use crate::core::game_ctx::state_structs::{AnswerAttemptReceived, DisplayQuestion, EndQuestion};
 use crate::core::game_entities::GameplayError;
@@ -16,7 +15,11 @@ impl GameCtx<AnswerAttemptReceived> {
         self.process_stats(answered_correctly)?;
         self.update_non_active_player_states("AnswerAttemptReceived");
         let no_players_to_answer_left = self.no_players_to_answer_left();
-        log::debug!("Anwsered correctly: {}, players to answer left: {}", answered_correctly, no_players_to_answer_left);
+        log::debug!(
+            "Anwsered correctly: {}, players to answer left: {}",
+            answered_correctly,
+            no_players_to_answer_left
+        );
         if answered_correctly || no_players_to_answer_left {
             log::info!("Removing correctly answered question from the pack");
             self.data.remove_current_question();

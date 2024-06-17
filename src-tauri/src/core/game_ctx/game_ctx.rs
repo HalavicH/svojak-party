@@ -1,17 +1,15 @@
-use crate::core::game_ctx::state_structs::*;
+use crate::api::events::emit_players_by_players_map;
 use crate::core::game_ctx::game_data::GameData;
+use crate::core::game_ctx::state_structs::*;
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
 use crate::hub::hub_api::{PlayerEvent, TermButtonState};
 use error_stack::ResultExt;
+use rocket::yansi::Paint;
 use std::any::type_name;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::thread::sleep;
 use std::time::Duration;
-use rocket::serde::Serialize;
-use rocket::yansi::Paint;
-use crate::api::dto::PlayerEndRoundStatsDto;
-use crate::api::events::{emit_players_by_players_map, emit_round};
 
 pub const INVALID_PLAYER_ID: u8 = 0; // TODO: Consider using Option<u8> instead
 const FASTEST_CLICK_ITERATION_DUR: Duration = Duration::from_secs(1);
@@ -36,7 +34,11 @@ impl<State> GameCtx<State> {
     pub fn transition<T>(&self) -> GameCtx<T> {
         let prev_state = Self::full_type_to_name(&format!("{:?}", self.state));
         let next_state = Self::full_type_to_name(type_name::<T>());
-        log::debug!("Game transitions '{}' -> '{}'", prev_state.cyan(), next_state.green());
+        log::debug!(
+            "Game transitions '{}' -> '{}'",
+            prev_state.cyan(),
+            next_state.green()
+        );
         GameCtx {
             state: PhantomData,
             data: self.data.clone(),
@@ -182,7 +184,7 @@ impl<State> GameCtx<State> {
                         e.term_id,
                         e
                     );
-                    false;
+                    return false;
                 }
                 true
             })

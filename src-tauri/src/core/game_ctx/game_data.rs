@@ -1,11 +1,11 @@
-use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_players, emit_players_by_players_map, emit_question, emit_round};
 use crate::core::game_ctx::game_ctx::RoundStats;
 use crate::core::game_entities::{Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub::hub_api::PlayerEvent;
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Default, Clone)]
 pub struct GameData {
@@ -36,7 +36,11 @@ impl GameData {
     pub fn remove_current_question(&mut self) {
         let topic = &self.current_question.topic.clone();
         let price = self.current_question.price;
-        log::debug!("Removing question from the pack: topic: {}, price: {}", topic, price);
+        log::debug!(
+            "Removing question from the pack: topic: {}, price: {}",
+            topic,
+            price
+        );
         self.pop_question(topic, price);
         emit_round((&self.current_round).into());
     }
@@ -64,7 +68,11 @@ impl GameData {
 
 impl GameData {
     pub fn has_next_round(&self) -> bool {
-        log::debug!("Current round index: {}, rounds len: {}", self.current_round_index, self.pack_content.rounds.len());
+        log::debug!(
+            "Current round index: {}, rounds len: {}",
+            self.current_round_index,
+            self.pack_content.rounds.len()
+        );
         self.current_round_index < self.pack_content.rounds.len()
     }
 
@@ -133,7 +141,12 @@ impl GameData {
     pub fn set_active_player_state(&mut self, player_state: PlayerState) {
         let id = self.active_player_id;
         let player = self.player_by_id_mut(&id);
-        log::info!("Player with id: {} changes state from {:?} to {:?}", id, player.state, player_state);
+        log::info!(
+            "Player with id: {} changes state from {:?} to {:?}",
+            id,
+            player.state,
+            player_state
+        );
         player.state = player_state;
         emit_players_by_players_map(&self.players);
     }
@@ -165,18 +178,17 @@ impl GameData {
             totalWrongAnswers: stats.total_wrong_answers,
             totalTries: stats.total_tries,
             roundTimeSec: 666,
-            players: self.players
-                .iter()
-                .map(|(_, p)| {
-                    PlayerEndRoundStatsDto {
-                        id: p.term_id as i32,
-                        name: p.name.clone(),
-                        score: p.stats.score,
-                        playerIconPath: p.icon.clone(),
-                        totalAnswers: p.stats.total_tries,
-                        answeredCorrectly: p.stats.answered_correctly,
-                        answeredWrong: p.stats.answered_wrong,
-                    }
+            players: self
+                .players
+                .values()
+                .map(|p| PlayerEndRoundStatsDto {
+                    id: p.term_id as i32,
+                    name: p.name.clone(),
+                    score: p.stats.score,
+                    playerIconPath: p.icon.clone(),
+                    totalAnswers: p.stats.total_tries,
+                    answeredCorrectly: p.stats.answered_correctly,
+                    answeredWrong: p.stats.answered_wrong,
                 })
                 .collect(),
         }

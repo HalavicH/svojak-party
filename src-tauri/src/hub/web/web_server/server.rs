@@ -31,7 +31,7 @@ pub struct PlayerIdentityDto {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct ServerState {
+pub(super) struct ServerState {
     pub base_timestamp: u32,
     pub players: HashMap<PlayerId, PlayerIdentityDto>,
     pub events: Vec<PlayerWebEvent>,
@@ -80,8 +80,8 @@ impl ServerState {
     }
 }
 
-pub type SharedServerState = Mutex<ServerState>;
-pub type Persistence<'a> = &'a State<Mutex<ServerState>>;
+pub(super) type SharedServerState = Mutex<ServerState>;
+pub(super) type Persistence<'a> = &'a State<Mutex<ServerState>>;
 
 pub fn setup() -> rocket::fairing::AdHoc {
     rocket::fairing::AdHoc::on_ignite("Persistence-API", |rocket| async {

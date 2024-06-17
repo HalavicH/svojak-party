@@ -1,10 +1,10 @@
 use crate::core::game_ctx::game_ctx::GameCtx;
+use crate::core::game_ctx::game_data::GameData;
 use crate::core::game_ctx::state_structs::{
-    AnswerAttemptReceived, ShowRoundStats, CheckEndOfRound, ChooseQuestion, DisplayQuestion,
-    EndQuestion, EndTheGame, PickFirstQuestionChooser, SetupAndLoading, StartNextRound,
+    AnswerAttemptReceived, CheckEndOfRound, ChooseQuestion, DisplayQuestion, EndQuestion,
+    EndTheGame, PickFirstQuestionChooser, SetupAndLoading, ShowRoundStats, StartNextRound,
     WaitingForAnswerRequests,
 };
-use crate::core::game_ctx::game_data::GameData;
 
 #[derive(Debug)]
 pub enum GameState {

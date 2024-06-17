@@ -1,7 +1,5 @@
-use crate::api::events::{emit_hub_config, emit_message};
 use crate::core::app_context::{app, app_mut};
 use crate::hub::hub_api::HubType;
-use std::ops::Deref;
 use tauri::command;
 
 /// Set hub type to web or serial

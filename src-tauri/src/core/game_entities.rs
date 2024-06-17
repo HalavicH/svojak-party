@@ -40,8 +40,14 @@ pub struct Player {
 impl Player {
     pub(crate) fn can_answer(&self) -> bool {
         match self.state {
-            PlayerState::Idle | PlayerState::QuestionChooser | PlayerState::Target | PlayerState::Answering => true,
-            PlayerState::Inactive | PlayerState::Dead | PlayerState::AnsweredCorrectly | PlayerState::AnsweredWrong => false,
+            PlayerState::Idle
+            | PlayerState::QuestionChooser
+            | PlayerState::Target
+            | PlayerState::Answering => true,
+            PlayerState::Inactive
+            | PlayerState::Dead
+            | PlayerState::AnsweredCorrectly
+            | PlayerState::AnsweredWrong => false,
         }
     }
 }
