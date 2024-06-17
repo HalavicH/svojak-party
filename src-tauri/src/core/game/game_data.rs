@@ -1,6 +1,6 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_players, emit_players_by_players_map, emit_question, emit_round};
-use crate::core::game_ctx::game_ctx::RoundStats;
+use crate::core::game::game_ctx::RoundStats;
 use crate::core::game_entities::{Player, PlayerState};
 use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub::hub_api::PlayerEvent;

@@ -1,6 +1,6 @@
 use crate::api::events::{emit_players_by_players_map, emit_round_stats};
-use crate::core::game_ctx::game_ctx::GameCtx;
-use crate::core::game_ctx::state_structs::{CheckEndOfRound, ChooseQuestion, ShowRoundStats};
+use crate::core::game::game_ctx::GameCtx;
+use crate::core::game::state_structs::{CheckEndOfRound, ChooseQuestion, ShowRoundStats};
 use crate::core::game_entities::{GameplayError, PlayerState};
 
 pub enum CheckEndOfRoundResult {

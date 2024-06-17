@@ -1,5 +1,5 @@
-use crate::core::game_ctx::game_ctx::GameCtx;
-use crate::core::game_ctx::state_structs::{PickFirstQuestionChooser, StartNextRound};
+use crate::core::game::game_ctx::GameCtx;
+use crate::core::game::state_structs::{PickFirstQuestionChooser, StartNextRound};
 use crate::core::game_entities::GameplayError;
 
 impl GameCtx<StartNextRound> {

@@ -3,7 +3,7 @@ use crate::api::dto::{
     TopicDto,
 };
 use crate::api::dto::{PackInfoDto, PlayerDto, QuestionBriefDto};
-use crate::core::game_ctx::game_ctx::RoundStats;
+use crate::core::game::game_ctx::RoundStats;
 use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{Atom, PackContent, Question, Round};
 use crate::hub::hub_api::HubManager;

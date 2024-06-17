@@ -1,6 +1,6 @@
-use crate::core::game_ctx::game_ctx::GameCtx;
-use crate::core::game_ctx::game_data::GameData;
-use crate::core::game_ctx::state_structs::{
+use crate::core::game::game_ctx::GameCtx;
+use crate::core::game::game_data::GameData;
+use crate::core::game::state_structs::{
     AnswerAttemptReceived, CheckEndOfRound, ChooseQuestion, DisplayQuestion, EndQuestion,
     EndTheGame, PickFirstQuestionChooser, SetupAndLoading, ShowRoundStats, StartNextRound,
     WaitingForAnswerRequests,

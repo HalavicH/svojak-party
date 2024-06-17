@@ -2,11 +2,11 @@ use crate::api::events::{
     emit_error, emit_game_state, emit_hub_config, emit_players_by_game_data, emit_question,
     emit_round,
 };
-use crate::core::game_ctx::game_ctx::GameCtx;
-use crate::core::game_ctx::game_state::GameState;
-use crate::core::game_ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
-use crate::core::game_ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
-use crate::core::game_ctx::state_processors::show_round_stats::RoundStatsResult;
+use crate::core::game::game_ctx::GameCtx;
+use crate::core::game::game_state::GameState;
+use crate::core::game::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
+use crate::core::game::state_processors::check_end_of_round::CheckEndOfRoundResult;
+use crate::core::game::state_processors::show_round_stats::RoundStatsResult;
 use crate::core::game_entities::{GameplayError, Player};
 use crate::core::player_connection_listener::start_listening_for_players_connection;
 use crate::core::player_event_listener::start_event_listener;
