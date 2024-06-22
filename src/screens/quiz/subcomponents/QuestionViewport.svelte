@@ -1,22 +1,59 @@
+<!--<script>-->
+<!--    import {currentQuestionStore} from "../../../lib/stores.js";-->
+
+<!--    $: question = $currentQuestionStore;-->
+<!--</script>-->
+
+<!--<div class="viewport">-->
+<!--    <pre style="text-align: start">-->
+<!--        {JSON.stringify(question, null, 2)}-->
+<!--    </pre>-->
+<!--    &lt;!&ndash;    <div class="slider"></div>&ndash;&gt;-->
+<!--    &lt;!&ndash;    <div class="navigation">&ndash;&gt;-->
+<!--    &lt;!&ndash;        <button id="prev-button" class="prev-button">&lt;</button>&ndash;&gt;-->
+<!--    &lt;!&ndash;        <button id="next-button" class="next-button">&gt;</button>&ndash;&gt;-->
+<!--    &lt;!&ndash;    </div>&ndash;&gt;-->
+<!--</div>-->
+
 <script>
-    import {currentQuestionStore} from "../../../lib/stores.js";
+    // import Swiper core and required modules
+    import {A11y, Navigation, Pagination, Scrollbar} from 'swiper';
+    import {currentQuestionStore, QuestionMediaType} from "../../../lib/stores.js";
+
+    import {Swiper, SwiperSlide} from 'swiper/svelte';
+
+    // Import Swiper styles
+    import 'swiper/css';
+    import 'swiper/css/navigation';
+    import 'swiper/css/pagination';
+    import 'swiper/css/scrollbar';
+    import {convertFileSrc} from "@tauri-apps/api/tauri";
+    import Scenario from "./Scenario.svelte";
 
     $: question = $currentQuestionStore;
 </script>
 
 <div class="viewport">
-    <pre style="text-align: start">
-        {JSON.stringify(question, null, 2)}
-    </pre>
-    <!--    <div class="slider"></div>-->
-    <!--    <div class="navigation">-->
-    <!--        <button id="prev-button" class="prev-button">&lt;</button>-->
-    <!--        <button id="next-button" class="next-button">&gt;</button>-->
-    <!--    </div>-->
+    <Swiper
+            modules={[Navigation, Pagination, Scrollbar, A11y]}
+            slidesPerView={1}
+            navigation={{enabled: true}}
+            pagination={{ clickable: true }}
+            scrollbar={{ draggable: true }}
+            on:slideChange={() => console.log('slide change')}
+            on:swiper={(e) => console.log(e.detail[0])}
+    >
+        {#each question.scenario as scenario}
+            <SwiperSlide>
+                <Scenario {scenario}/>
+            </SwiperSlide>
+        {/each}
+    </Swiper>
 </div>
 
+
 <style>
-    .viewport {
+    .viewport1 {
         display: flex;
         flex-direction: row;
         justify-content: center;
@@ -28,6 +65,12 @@
         background-color: rgba(181, 229, 172, 0.16);
         border: solid 3px var(--items-block-border-color);
         border-radius: inherit;
+    }
+
+    .viewport {
+        display: flex;
+        height: 66vh;
+        width: 70vw;
     }
 
     .question-text {
@@ -51,40 +94,18 @@
         color: var(--text-color);
     }
 
-    .slider {
+    .slide {
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
-    .slider img,
-    .slider video {
+    .slide img,
+    .slide video {
         object-fit: contain;
         max-width: 100%;
         max-height: 100%;
         width: auto;
         height: auto;
-    }
-
-    .navigation {
-        position: absolute;
-        top: 60%;
-        transform: translateY(-50%);
-        z-index: 1;
-    }
-
-    .prev-button,
-    .next-button {
-        font-size: 24px;
-        padding: 10px 20px;
-        background-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .prev-button {
-        margin-right: 10px;
-    }
-
-    .next-button {
-        margin-left: 10px;
     }
 </style>

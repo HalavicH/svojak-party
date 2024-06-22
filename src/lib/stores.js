@@ -167,13 +167,13 @@ const mockRound = {
     ],
 };
 
-const QuestionType = {
+export const QuestionType = {
     Normal: 'Normal',
     PigInPoke: 'PigInPoke',
     Auction: 'Auction',
 }
 
-const QuestionMediaType = {
+export const QuestionMediaType = {
     Text: 'Text',
     Voice: 'Voice',
     Video: 'Video',
@@ -193,7 +193,7 @@ const mockQuestion = {
         },
         {
             mediaType: QuestionMediaType.Image,
-            content: "/tauri.svg",
+            content: "/bc-logo.png",
         }
     ],
     answer: String,

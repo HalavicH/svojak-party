@@ -65,7 +65,7 @@
         flex-direction: column;
         justify-content: flex-end;
 
-        width: 20%;
+        width: 25vw;
         border-radius: 0.5em;
     }
 
