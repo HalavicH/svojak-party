@@ -6,6 +6,7 @@ use std::error::Error;
 use std::path::Path;
 use std::sync::Arc;
 use std::{fmt, fs, io};
+use tauri::api::path::{app_cache_dir, home_dir};
 use tempfile::TempDir;
 use unic_normal::StrNormalForm;
 use urlencoding::decode;
@@ -34,11 +35,16 @@ impl Error for GamePackLoadingError {}
 pub fn load_game_pack(game_archive_path: &str) -> Result<GamePack, GamePackLoadingError> {
     validate_pack_path(game_archive_path)?;
 
-    let temp_dir = create_temp_directory()
-        .change_context(GamePackLoadingError::InternalError)
-        .attach_printable("Can't create temp directory")?;
+    // let temp_dir = create_temp_directory()
+    //     .change_context(GamePackLoadingError::InternalError)
+    //     .attach_printable("Can't create temp directory")?;
+    let home = home_dir().expect("Expected home directory");
+    let temp_dir_path = home.join("svoyak").join("siq_temp");
+    //  Create  directory if it doesn't exist
+    if !temp_dir_path.exists() {
+        fs::create_dir_all(&temp_dir_path).expect("Failed to create temp directory");
+    }
 
-    let temp_dir_path = temp_dir.path();
     let tmp_dir_path_str = temp_dir_path
         .to_str()
         .ok_or(GamePackLoadingError::InternalError)?;
@@ -46,7 +52,7 @@ pub fn load_game_pack(game_archive_path: &str) -> Result<GamePack, GamePackLoadi
     unarchive_zip(game_archive_path, tmp_dir_path_str)?;
 
     let locations = PackLocationData {
-        base_dir: Some(temp_dir.clone()),
+        base_dir: Some(temp_dir_path.clone()),
         content_file_path: temp_dir_path.join(PACKAGE_CONTENT_FILE_NAME),
         audio_path: temp_dir_path.join(PACKAGE_AUDIO_DIR_NAME),
         images_path: temp_dir_path.join(PACKAGE_IMAGES_DIR_NAME),

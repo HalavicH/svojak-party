@@ -18,7 +18,7 @@
 
 <div class="slide">
     {#if scenario.mediaType === QuestionMediaType.Image}
-        <img src={scenario.content} alt="Image"/>
+        <img src={content} alt="Image"/>
     {:else if scenario.mediaType === QuestionMediaType.Video}
         <video controls>
             <source src={content} type="video/mp4"/>
@@ -39,3 +39,17 @@
         </div>
     {/if}
 </div>
+
+<style>
+    .slide {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+    .question-text {
+        font-size: 1.5em;
+        text-align: center;
+    }
+</style>

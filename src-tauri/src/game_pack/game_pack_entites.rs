@@ -13,8 +13,7 @@ pub struct PackLoaderError {}
 
 #[derive(Default, Debug, Clone)]
 pub struct PackLocationData {
-    // !warning: if you lose this pointer, temp directory will be deleted
-    pub base_dir: Option<Arc<TempDir>>,
+    pub base_dir: Option<PathBuf>,
     pub content_file_path: PathBuf,
     pub video_path: PathBuf,
     pub images_path: PathBuf,

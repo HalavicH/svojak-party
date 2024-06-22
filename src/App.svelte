@@ -8,7 +8,7 @@
     import DebugButton from "./screens/DebugButton.svelte";
     import DebugState from "./screens/DebugState.svelte";
     import {convertFileSrc} from "@tauri-apps/api/tauri";
-    import {homeDir, resolve} from "@tauri-apps/api/path";
+    import {appCacheDir, appDataDir, homeDir, resolve} from "@tauri-apps/api/path";
     import {tempdir} from "@tauri-apps/api/os";
 
     setupEventListener('message', (event) => {
@@ -27,17 +27,24 @@
     homeDir().then(home => {
         console.log("Home:", home);
         // resolve(home, "RustroverProjects/svojak-hw/public/bc-logo.png")
-        resolve("/Users/oleksandrkholiavko/RustroverProjects/svojak-hw/public/bc-logo.png")
+        // resolve("/Users/oleksandrkholiavko/RustroverProjects/svojak-hw/public/bc-logo.png")
+        // resolve("/Users/oleksandrkholiavko/RustroverProjects/1765ff27-6ed1-4119-9edc-b0b97ec60d9f.jpg")
+        // resolve("/Users/oleksandrkholiavko/1765ff27-6ed1-4119-9edc-b0b97ec60d9f.jpg")
+        // resolve("/Users/oleksandrkholiavko/.svoyak/1765ff27-6ed1-4119-9edc-b0b97ec60d9f.jpg")
+        resolve("/Users/oleksandrkholiavko/svo.yak/1765ff27-6ed1-4119-9edc-b0b97ec60d9f.jpg")
+        // resolve("/Users/oleksandrkholiavko/.svoyak/siq_temp/Images/1765ff27-6ed1-4119-9edc-b0b97ec60d9f.jpg")
             .then(path => {
                 console.log("Resolved to: ", path)
                 return convertFileSrc(path);
             })
             .then(url => {
+                console.log("URL: ", url)
                 src = url
             })
     });
 
     tempdir().then(path => console.log("Tmp:", path));
+    appDataDir().then(path => console.log("Cache:", path));
 
     initEventListeners();
 </script>

@@ -23,13 +23,15 @@
         "all": true,
         "scope": {
           "allow": [
-            "**"
+            "**",
+            "**/\\.*"
           ]
         }
       },
       "protocol": {
         "assetScope": [
-          "**"
+          "**",
+          "**/\\.*"
         ],
         "all": true,
         "asset": true
