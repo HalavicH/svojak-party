@@ -10,6 +10,8 @@ use tempfile::TempDir;
 use unic_normal::StrNormalForm;
 use urlencoding::decode;
 use zip::ZipArchive;
+use uuid::{Uuid};
+use crate::game_pack::pack_content_entities::{PackContent, QuestionMediaType};
 
 #[derive(Debug, Clone, Serialize)]
 pub enum GamePackLoadingError {
@@ -54,14 +56,46 @@ pub fn load_game_pack(game_archive_path: &str) -> Result<GamePack, GamePackLoadi
     normalize_pack_entities_filenames(&locations)?;
 
     let err_message = format!("Can't load pack {game_archive_path}");
-    let game_package = load_pack_content(&locations)
+    let mut game_package = load_pack_content(&locations)
         .change_context(GamePackLoadingError::CorruptedPack(err_message.clone()))
         .attach_printable(err_message)?;
 
+    simplify_pack_assets_paths(&locations, &mut game_package);
     Ok(GamePack {
         location: locations,
         content: game_package,
     })
+}
+
+impl QuestionMediaType {
+    fn get_media_dir<'a>(&'a self, locations: &'a PackLocationData) -> Option<&Path> {
+        match self {
+            QuestionMediaType::Voice => Some(&locations.audio_path),
+            QuestionMediaType::Video => Some(&locations.video_path),
+            QuestionMediaType::Image => Some(&locations.images_path),
+            _ => None,
+        }
+    }
+}
+
+fn simplify_pack_assets_paths(locations: &PackLocationData, pack_content: &mut PackContent) {
+    // generate uuid for each filename, rename the file and update the path in the pack content
+    pack_content.rounds.iter_mut().for_each(|r| {
+        r.topics.iter_mut().for_each(|(_, theme)| {
+            theme.questions.iter_mut().for_each(|(_, q)| {
+                q.scenario.iter_mut().for_each(|a| {
+                    let media_dir = a.atom_type.get_media_dir(locations);
+                    let Some(media_dir) = media_dir else { return };
+
+                    let file_name = Uuid::new_v4().to_string() + "." + Path::new(&a.content).extension().expect("Expected file extension").to_str().unwrap();
+                    let new_path = media_dir.join(file_name);
+                    log::debug!("Renaming file: {} -> {}", a.content, new_path.to_str().unwrap());
+                    fs::rename(&a.content, &new_path).expect("Failed to rename file");
+                    a.content = new_path.to_str().unwrap().to_owned();
+                });
+            });
+        });
+    });
 }
 
 fn normalize_pack_entities_filenames(

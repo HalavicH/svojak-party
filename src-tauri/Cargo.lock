@@ -4104,6 +4104,7 @@ dependencies = [
  "tokio",
  "unic-normal",
  "urlencoding",
+ "uuid",
  "zip",
 ]
 
