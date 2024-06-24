@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::core::game_entities::HubStatus::Detected;
-use crate::game_pack::pack_content_entities::Question;
+use crate::core::game_pack::pack_content_entities::Question;
 
 pub const DEFAULT_ICON: &str = "default";
 

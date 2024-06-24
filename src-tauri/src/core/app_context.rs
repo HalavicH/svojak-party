@@ -10,7 +10,7 @@ use crate::core::game::state_processors::show_round_stats::RoundStatsResult;
 use crate::core::game_entities::{GameplayError, Player};
 use crate::core::player_connection_listener::start_listening_for_players_connection;
 use crate::core::player_event_listener::start_event_listener;
-use crate::game_pack::game_pack_entites::GamePack;
+use crate::core::game_pack::game_pack_entites::GamePack;
 use crate::hub::hub_api::{HubManager, HubType};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;

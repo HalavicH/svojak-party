@@ -1,6 +1,6 @@
-use crate::game_pack::game_pack_entites::*;
-use crate::game_pack::pack_content_entities::{PackContent, QuestionMediaType};
-use crate::game_pack::pack_content_loader::load_pack_content;
+use crate::core::game_pack::game_pack_entites::*;
+use crate::core::game_pack::pack_content_entities::{PackContent, QuestionMediaType};
+use crate::core::game_pack::pack_content_loader::load_pack_content;
 use error_stack::{IntoReport, Report, Result, ResultExt};
 use serde::Serialize;
 use std::error::Error;

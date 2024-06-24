@@ -8,10 +8,10 @@ use unic_normal::StrNormalForm;
 use urlencoding::encode;
 
 use crate::host_api::dto::QuestionType;
-use crate::game_pack::game_pack_entites::PackLocationData;
-use crate::game_pack::game_pack_loader::GamePackLoadingError;
-use crate::game_pack::pack_content_dto::*;
-use crate::game_pack::pack_content_entities::*;
+use crate::core::game_pack::game_pack_entites::PackLocationData;
+use crate::core::game_pack::game_pack_loader::GamePackLoadingError;
+use crate::core::game_pack::pack_content_dto::*;
+use crate::core::game_pack::pack_content_entities::*;
 
 #[derive(Debug)]
 pub struct ParsePackContentError;

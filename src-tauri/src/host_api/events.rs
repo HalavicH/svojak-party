@@ -9,7 +9,7 @@ use crate::core::game::game_ctx::GameCtx;
 use crate::core::game::game_data::GameData;
 use crate::core::game::game_state::GameState;
 use crate::core::game_entities::{HubStatus, Player};
-use crate::game_pack::pack_content_entities::Round;
+use crate::core::game_pack::pack_content_entities::Round;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Debug;

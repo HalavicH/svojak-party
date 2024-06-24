@@ -1,5 +1,5 @@
 use crate::core::game_entities::{HubStatus, Player, PlayerState};
-use crate::game_pack::pack_content_entities::QuestionMediaType;
+use crate::core::game_pack::pack_content_entities::QuestionMediaType;
 use crate::types::Image;
 use serde::{Deserialize, Serialize};
 

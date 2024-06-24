@@ -2,7 +2,7 @@ use crate::host_api::events::emit_message;
 use crate::core::game::game_ctx::GameCtx;
 use crate::core::game::state_structs::{SetupAndLoading, StartNextRound};
 use crate::core::game_entities::GameplayError;
-use crate::game_pack::pack_content_entities::PackContent;
+use crate::core::game_pack::pack_content_entities::PackContent;
 
 impl GameCtx<SetupAndLoading> {
     pub fn set_round_duration(&mut self, round_duration_min: i32) {

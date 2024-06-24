@@ -4,7 +4,7 @@ use crate::host_api::dto::{
 };
 use crate::host_api::dto::{PackInfoDto, PlayerDto, QuestionBriefDto};
 use crate::core::game_entities::Player;
-use crate::game_pack::pack_content_entities::{Atom, PackContent, Question, Round, RoundStats};
+use crate::core::game_pack::pack_content_entities::{Atom, PackContent, Question, Round, RoundStats};
 use crate::hub::hub_api::HubManager;
 
 /// Hub manager
