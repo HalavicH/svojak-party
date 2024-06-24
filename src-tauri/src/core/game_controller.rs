@@ -66,7 +66,8 @@ impl Default for GameController {
     }
 }
 
-/// Field Access API
+
+/// Deprecated API which needs to be moved to player server
 impl GameController {
     pub fn drop_hub(&mut self) {
         self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
@@ -95,31 +96,6 @@ impl GameController {
             })
             .expect("Poisoned")
     }
-
-    pub fn set_game_pack(&mut self, pack: GamePack) {
-        self.game_pack = pack;
-    }
-
-    /// This method should be used for every state change to ensure event emission
-    pub fn set_game_state(&mut self, state: GameState) {
-        self.game_state = state;
-        emit_game_state(&self.game_state);
-    }
-}
-
-/// Setup API
-impl GameController {
-    pub fn save_round_duration(&mut self, round_duration_minutes: i32) {
-        if let GameState::SetupAndLoading(game) = &mut self.game_state {
-            game.set_round_duration(round_duration_minutes)
-        } else {
-            let state_mismatch = self
-                .game_state
-                .show_state_mismatch("GameState::SetupAndLoading");
-            emit_error(format!("Can't setup round duration. {}", state_mismatch));
-        }
-    }
-
     pub fn set_hub_radio_channel(&self, channel_id: u8) {
         let mut hub_guard = self.hub_mut();
 
@@ -133,7 +109,6 @@ impl GameController {
             }
         };
     }
-
     pub fn select_hub_type(&mut self, hub_type: HubType) {
         log::info!("Strong count to hub: {}", Arc::strong_count(&self.hub));
         log::info!("Weak count to hub: {}", Arc::weak_count(&self.hub));
@@ -204,19 +179,35 @@ impl GameController {
         log::info!("Saving new thread handle");
         self.player_poling_thread_handle = Some(handle)
     }
+}
 
-    pub fn emit_game_config_locking_hub(&self) {
+/// Internal API
+impl GameController {
+    /// This method should be used for every state change to ensure event emission
+    pub fn set_game_state(&mut self, state: GameState) {
+        self.game_state = state;
+        emit_game_state(&self.game_state);
+    }
+
+    fn emit_game_config_locking_hub(&self) {
         emit_hub_config(self.hub_mut().deref().into());
         let game_ctx = self.game_state.game_ctx_ref();
         emit_players_by_game_data(game_ctx);
     }
 
-    pub fn emit_game_context(&self) {
+    fn emit_game_context(&self) {
         emit_game_state(&self.game_state);
         emit_round(self.game_state.game_ctx_ref().current_round_ref().into());
         emit_question(self.game_state.game_ctx_ref().current_question_ref().into());
     }
+
+    fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
+        let state_mismatch = self.game_state.show_state_mismatch(expected_state);
+        emit_error(format!("Context retrieval failure: {}", state_mismatch));
+        GameplayError::OperationForbidden
+    }
 }
+
 
 macro_rules! get_ctx_ensuring_state {
     ($self:ident, $state_variant:ident) => {
@@ -228,8 +219,29 @@ macro_rules! get_ctx_ensuring_state {
     };
 }
 
-/// Game API
+/// Host API
 impl GameController {
+    // Setup API
+    pub fn set_game_pack(&mut self, pack: GamePack) {
+        self.game_pack = pack;
+    }
+
+    pub fn save_round_duration(&mut self, round_duration_minutes: i32) {
+        if let GameState::SetupAndLoading(game) = &mut self.game_state {
+            game.set_round_duration(round_duration_minutes)
+        } else {
+            let state_mismatch = self
+                .game_state
+                .show_state_mismatch("GameState::SetupAndLoading");
+            emit_error(format!("Can't setup round duration. {}", state_mismatch));
+        }
+    }
+
+    pub fn request_initial_game_state_emission(&self) {
+        self.emit_game_config_locking_hub();
+    }
+
+    // Gameplay host API
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
         let hub = self.hub_lock();
         let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
@@ -354,14 +366,6 @@ impl GameController {
     }
 }
 
-/// Helper methods
-impl GameController {
-    fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
-        let state_mismatch = self.game_state.show_state_mismatch(expected_state);
-        emit_error(format!("Context retrieval failure: {}", state_mismatch));
-        GameplayError::OperationForbidden
-    }
-}
 
 /// Debug API
 impl GameController {

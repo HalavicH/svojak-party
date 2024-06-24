@@ -13,7 +13,7 @@ pub fn init_window_handle(window: Window) {
 /// To get initial app context
 #[command]
 pub fn request_context_update() {
-    game().emit_game_config_locking_hub();
+    game().request_initial_game_state_emission();
 }
 
 /// Saves configuration to game context
