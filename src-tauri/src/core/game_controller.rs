@@ -13,6 +13,8 @@ use crate::core::game_pack::game_pack_entites::GamePack;
 use crate::host_api::events::{
     emit_error, emit_game_state, emit_players_by_game_data, emit_question, emit_round,
 };
+use crate::hub::hub_api::PlayerEvent;
+use crate::player_server::entities::PsPlayer;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTROLLER: Arc<RwLock<GameController >> = Arc::new(RwLock::new(GameController::default()));
@@ -38,33 +40,6 @@ pub struct GameController {
     pub game_state: GameState,
 }
 
-/// Internal API
-impl GameController {
-    /// This method should be used for every state change to ensure event emission
-    pub fn set_game_state(&mut self, state: GameState) {
-        self.game_state = state;
-        emit_game_state(&self.game_state);
-    }
-
-    fn emit_game_config_locking_hub(&self) {
-        // emit_hub_config(self.hub_mut().deref().into());
-        let game_ctx = self.game_state.game_ctx_ref();
-        emit_players_by_game_data(game_ctx);
-    }
-
-    fn emit_game_context(&self) {
-        emit_game_state(&self.game_state);
-        emit_round(self.game_state.game_ctx_ref().current_round_ref().into());
-        emit_question(self.game_state.game_ctx_ref().current_question_ref().into());
-    }
-
-    fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
-        let state_mismatch = self.game_state.show_state_mismatch(expected_state);
-        emit_error(format!("Context retrieval failure: {}", state_mismatch));
-        GameplayError::OperationForbidden
-    }
-}
-
 macro_rules! get_ctx_ensuring_state {
     ($self:ident, $state_variant:ident) => {
         match &mut $self.game_state {
@@ -74,6 +49,27 @@ macro_rules! get_ctx_ensuring_state {
         }
     };
 }
+
+/// Player server API
+impl GameController {
+    pub fn push_events(&self, events: Vec<PlayerEvent>) {
+        let data = self.game_state.game_ctx_ref();
+        let mut events_guard = data.events.write().expect("Expected to be able acquire write lock on events");
+        events_guard.extend(events);
+    }
+
+    pub fn push_new_players(&mut self, players: Vec<PsPlayer>) -> error_stack::Result<(), GameplayError>{
+        let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
+
+        let data = ctx.game_mut();
+        for player in players {
+            data.players.insert(player.id as u8, player.into());
+        }
+        emit_players_by_game_data(data);
+        Ok(())
+    }
+}
+
 
 /// Host API
 impl GameController {
@@ -99,10 +95,7 @@ impl GameController {
 
     // Gameplay host API
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
-        // let hub = self.hub_lock();
         let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
-
-        // start_event_listener(hub, ctx.game_ref().events_clone());
 
         let content = self.game_pack.content.clone();
         let ctx = ctx.start(content)?;
@@ -248,4 +241,32 @@ fn create_temp_directory() -> error_stack::Result<Arc<TempDir>, io::Error> {
     let temp_dir = Arc::new(tmp_dir);
 
     Ok(temp_dir)
+}
+
+
+/// Internal API
+impl GameController {
+    /// This method should be used for every state change to ensure event emission
+    pub fn set_game_state(&mut self, state: GameState) {
+        self.game_state = state;
+        emit_game_state(&self.game_state);
+    }
+
+    fn emit_game_config_locking_hub(&self) {
+        // emit_hub_config(self.hub_mut().deref().into());
+        let game_ctx = self.game_state.game_ctx_ref();
+        emit_players_by_game_data(game_ctx);
+    }
+
+    fn emit_game_context(&self) {
+        emit_game_state(&self.game_state);
+        emit_round(self.game_state.game_ctx_ref().current_round_ref().into());
+        emit_question(self.game_state.game_ctx_ref().current_question_ref().into());
+    }
+
+    fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
+        let state_mismatch = self.game_state.show_state_mismatch(expected_state);
+        emit_error(format!("Context retrieval failure: {}", state_mismatch));
+        GameplayError::OperationForbidden
+    }
 }

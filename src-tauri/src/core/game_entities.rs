@@ -3,6 +3,7 @@ use thiserror::Error;
 
 use crate::core::game_entities::HubStatus::Detected;
 use crate::core::game_pack::pack_content_entities::Question;
+use crate::player_server::entities::PsPlayer;
 
 pub const DEFAULT_ICON: &str = "default";
 
@@ -32,9 +33,22 @@ pub struct Player {
     pub name: String,
     pub icon: String,
     pub term_id: u8,
-    pub is_used: bool,
+    pub is_used: bool, // todo: remove
     pub state: PlayerState,
     pub stats: PlayerStats,
+}
+
+impl From<PsPlayer> for Player {
+    fn from(player: PsPlayer) -> Self {
+        Self {
+            name: player.name,
+            icon: player.icon,
+            term_id: player.id as u8,
+            is_used: true,
+            state: PlayerState::Idle,
+            stats: Default::default(),
+        }
+    }
 }
 
 impl Player {
