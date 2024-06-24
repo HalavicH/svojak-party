@@ -225,6 +225,7 @@ fn map_round(r: &RoundDto) -> Round {
         question_count: -1,
         normal_question_count: -1,
         pip_question_count: -1,
+        round_stats: Default::default(),
     };
     let vec = Vec::from_iter(round.topics.values());
     round.question_count = vec

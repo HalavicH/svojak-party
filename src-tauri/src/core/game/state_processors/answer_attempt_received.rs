@@ -30,21 +30,28 @@ impl GameCtx<AnswerAttemptReceived> {
     }
 
     fn process_stats(&mut self, answered_correctly: bool) -> Result<(), GameplayError> {
-        let player_id = self.data.active_player_id;
-        let player = self
-            .data
+        let data = &mut self.data;
+
+        let stats = data.current_round_stats_mut();
+        stats.total_tries += 1;
+        if answered_correctly {
+            stats.total_correct_answers += 1;
+        } else {
+            stats.total_wrong_answers += 1;
+        }
+
+        let player_id = data.active_player_id;
+        let player = data
             .players
             .get_mut(&player_id)
             .ok_or(GameplayError::PlayerNotPresent(player_id))?;
         if answered_correctly {
-            player.answered_correctly(&self.data.current_question);
-            self.data.round_stats.total_correct_answers += 1;
+            player.answered_correctly(&data.current_question);
         } else {
-            player.answered_wrong(&self.data.current_question);
-            self.data.round_stats.total_wrong_answers += 1;
+            player.answered_wrong(&data.current_question);
         }
+
         log::info!("Answered player stats: {:?}", player);
-        self.data.round_stats.total_tries += 1;
         Ok(())
     }
 

@@ -1,8 +1,7 @@
 use crate::api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
 use crate::api::events::{emit_players, emit_players_by_players_map, emit_question, emit_round};
-use crate::core::game::game_ctx::RoundStats;
 use crate::core::game_entities::{Player, PlayerState};
-use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
+use crate::game_pack::pack_content_entities::{PackContent, Question, Round, RoundStats};
 use crate::hub::hub_api::PlayerEvent;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
@@ -20,8 +19,6 @@ pub struct GameData {
     pub answer_allowed: bool,
     /// Current question
     pub current_question: Question,
-    /// Stats
-    pub round_stats: RoundStats,
     /// Event frame. Flushed every new question
     pub events: Arc<RwLock<Vec<PlayerEvent>>>,
     pub allow_answer_timestamp: u32,
@@ -67,7 +64,7 @@ impl GameData {
             current_round_index,
             self.pack_content.rounds.len()
         );
-        current_round_index < self.pack_content.rounds.len()
+        current_round_index < self.pack_content.rounds.len() - 1
     }
 
     pub fn events_clone(&self) -> Arc<RwLock<Vec<PlayerEvent>>> {
@@ -164,6 +161,10 @@ impl GameData {
         self.pack_content = pack_content;
     }
 
+    pub fn current_round_stats_mut(&mut self) -> &mut RoundStats {
+        &mut self.current_round_mut().round_stats
+    }
+
     pub fn remove_current_question(&mut self) {
         let topic = &self.current_question.topic.clone();
         let price = self.current_question.price;
@@ -176,7 +177,7 @@ impl GameData {
     }
 
     pub fn to_round_stats_dto(&self) -> RoundStatsDto {
-        let stats = &self.round_stats;
+        let stats = &self.current_round_ref().round_stats;
         RoundStatsDto {
             roundName: self.current_round_ref().name.clone(),
             questionsPlayed: self.current_round_ref().question_count,
