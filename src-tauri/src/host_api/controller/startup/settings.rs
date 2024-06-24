@@ -1,5 +1,5 @@
-use crate::api::dto::PlayerDto;
-use crate::api::events::*;
+use crate::host_api::dto::PlayerDto;
+use crate::host_api::events::*;
 use crate::core::app_context::{app, app_mut};
 use crate::core::game_entities::{Player, PlayerState};
 use tauri::{command, Window};

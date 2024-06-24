@@ -1,4 +1,4 @@
-pub mod api;
+pub mod host_api;
 
 pub mod core {
     pub mod app_context;

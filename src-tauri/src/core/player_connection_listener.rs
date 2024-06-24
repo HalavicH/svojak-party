@@ -1,4 +1,4 @@
-use crate::api::events::emit_message;
+use crate::host_api::events::emit_message;
 use crate::core::app_context::app_mut;
 use crate::core::game_entities::{Player, DEFAULT_ICON};
 use crate::hub::hub_api::HubManager;

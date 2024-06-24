@@ -7,7 +7,7 @@ use serde_xml_rs::from_str;
 use unic_normal::StrNormalForm;
 use urlencoding::encode;
 
-use crate::api::dto::QuestionType;
+use crate::host_api::dto::QuestionType;
 use crate::game_pack::game_pack_entites::PackLocationData;
 use crate::game_pack::game_pack_loader::GamePackLoadingError;
 use crate::game_pack::pack_content_dto::*;

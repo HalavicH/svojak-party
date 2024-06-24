@@ -1,4 +1,4 @@
-use crate::api::dto::HubRequestDto;
+use crate::host_api::dto::HubRequestDto;
 use crate::hub::hub_api::TermButtonState;
 use rgb::RGB8;
 use serde::Serialize;

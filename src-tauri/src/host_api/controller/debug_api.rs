@@ -1,4 +1,4 @@
-use crate::api::dto::{HubRequestDto, HubResponseDto};
+use crate::host_api::dto::{HubRequestDto, HubResponseDto};
 use crate::core::app_context::{app, app_mut};
 use crate::hub::hub_api::{HubManager, HubManagerError};
 use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest};

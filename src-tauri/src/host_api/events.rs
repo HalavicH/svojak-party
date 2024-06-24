@@ -1,6 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use crate::api::dto::{
+use crate::host_api::dto::{
     FinalResultsDto, HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto,
     RoundStatsDto,
 };

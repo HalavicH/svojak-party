@@ -1,4 +1,4 @@
-use crate::api::events::{
+use crate::host_api::events::{
     emit_error, emit_game_state, emit_hub_config, emit_players_by_game_data, emit_question,
     emit_round,
 };
