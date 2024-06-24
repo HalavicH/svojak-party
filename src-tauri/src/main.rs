@@ -3,12 +3,11 @@
 
 #[allow(unused_imports)]
 use rocket::futures::io::Window;
+use svojak_app::core::game_controller::game;
 use svojak_app::host_api::controller::debug_api::*;
 use svojak_app::host_api::controller::gameplay_api::*;
-use svojak_app::host_api::controller::startup::hub::*;
-use svojak_app::host_api::controller::startup::pack::*;
-use svojak_app::host_api::controller::startup::settings::*;
-use svojak_app::core::game_controller::game;
+use svojak_app::host_api::controller::startup::game_ctx::*;
+use svojak_app::host_api::controller::startup::player_server::*;
 
 fn main() {
     env_logger::init();

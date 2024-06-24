@@ -1,1 +1,1 @@
-mod player_server;
+pub mod player_server;

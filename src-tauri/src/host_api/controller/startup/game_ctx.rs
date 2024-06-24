@@ -1,9 +1,10 @@
+use crate::core::game_controller::{game, game_mut};
+use crate::core::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use crate::host_api::dto::PackErrorData;
 use crate::host_api::events::emit_pack_info;
-use crate::core::game_controller::game_mut;
-use crate::core::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
+use crate::host_api::events::*;
 use error_stack::Report;
-use tauri::command;
+use tauri::{command, Window};
 
 /// Load game pack into the game
 #[command]
@@ -45,4 +46,24 @@ fn handle_pack_info_error(
     };
 
     Err(data)
+}
+
+/// Dirty hack to capture window handle
+#[command]
+pub fn init_window_handle(window: Window) {
+    set_window(window);
+}
+
+/// To get initial app context
+#[command]
+pub fn request_context_update() {
+    game().request_initial_game_state_emission();
+}
+
+/// Store round duration
+#[command]
+pub fn save_round_duration(round_minutes: i32) {
+    log::info!("Round duration is {round_minutes}");
+    game_mut().save_round_duration(round_minutes)
+    // No emit required, as it's internal fields
 }

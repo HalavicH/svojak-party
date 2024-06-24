@@ -1,6 +1,6 @@
-use crate::host_api::events::emit_error;
 use crate::core::game_controller::game_mut;
 use crate::core::game_entities::GameplayError;
+use crate::host_api::events::emit_error;
 use error_stack::Report;
 use tauri::command;
 

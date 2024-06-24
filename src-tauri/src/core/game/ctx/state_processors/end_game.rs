@@ -1,9 +1,9 @@
-use crate::host_api::dto::{FinalResultsDto, PlayerFinalStatsDto};
-use crate::host_api::events::emit_final_results;
 use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::game_data::GameData;
 use crate::core::game::state_structs::{EndTheGame, SetupAndLoading};
 use crate::core::game_entities::{GameplayError, Player};
+use crate::host_api::dto::{FinalResultsDto, PlayerFinalStatsDto};
+use crate::host_api::events::emit_final_results;
 
 impl GameCtx<EndTheGame> {
     pub fn calculate_final_results(&self) {
