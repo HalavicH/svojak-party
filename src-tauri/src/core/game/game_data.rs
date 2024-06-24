@@ -14,8 +14,7 @@ pub struct GameData {
     pack_content: PackContent,
     pub players: HashMap<u8, Player>,
     /// Game State
-    current_round_index: usize,
-    current_round: Round,
+    current_round_index: Option<usize>,
     pub active_player_id: u8,
     // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
     pub answer_allowed: bool,
@@ -30,51 +29,45 @@ pub struct GameData {
 }
 
 impl GameData {
-    pub fn set_pack_content(&mut self, pack_content: PackContent) {
-        self.pack_content = pack_content;
+    fn current_round_mut(&mut self) -> &mut Round {
+        &mut self.pack_content.rounds[self.current_round_index.expect("Expected to have current round index")]
     }
 
-    pub fn remove_current_question(&mut self) {
-        let topic = &self.current_question.topic.clone();
-        let price = self.current_question.price;
-        log::debug!(
-            "Removing question from the pack: topic: {}, price: {}",
-            topic,
-            price
-        );
-        self.pop_question(topic, price);
-        emit_round((&self.current_round).into());
-    }
-
+    // TODO: Update by marking questions instead of removing them
     fn pop_question(&mut self, topic_name: &str, price: i32) -> Option<Question> {
-        let Some(topic) = self.current_round.topics.get_mut(topic_name) else {
+        let round = self.current_round_mut();
+        let round_name: &str = round.name.as_ref();
+        let Some(topic) = round.topics.get_mut(topic_name) else {
             log::error!(
                 "Topic with name: {} not found in round with name: {}",
                 topic_name,
-                self.current_round.name
+                round_name
             );
             return None;
         };
 
-        self.current_round.questions_left -= 1;
-        log::debug!("Questions left: {}", self.current_round.questions_left);
-        topic.questions.remove(&price)
+        round.questions_left -= 1;
+        log::debug!("Questions left: {}", round.questions_left);
+        let question = topic.questions.remove(&price);
+        emit_round((self.current_round_ref()).into());
+        question
     }
 
     pub fn get_question(&self, topic_name: &str, price: i32) -> Option<&Question> {
-        let topic = self.current_round.topics.get(topic_name)?;
+        let topic = self.current_round_ref().topics.get(topic_name)?;
         topic.questions.get(&price)
     }
 }
 
 impl GameData {
     pub fn has_next_round(&self) -> bool {
+        let current_round_index = self.current_round_index.expect("Expected to have current round index");
         log::debug!(
             "Current round index: {}, rounds len: {}",
-            self.current_round_index,
+            current_round_index,
             self.pack_content.rounds.len()
         );
-        self.current_round_index < self.pack_content.rounds.len()
+        current_round_index < self.pack_content.rounds.len()
     }
 
     pub fn events_clone(&self) -> Arc<RwLock<Vec<PlayerEvent>>> {
@@ -86,18 +79,16 @@ impl GameData {
     }
 
     pub fn set_next_round(&mut self) {
-        let index = self.current_round_index;
-        log::debug!("Incrementing round index to: {}", index);
-        let round: &Round = self
-            .pack_content
-            .rounds
-            .get(index)
-            .expect_lazy(|| format!("Expected to have round with index: {index}"));
-        self.current_round = round.clone();
-       self.round_stats = RoundStats::default();
-        let round_dto = round.into();
+        self.current_round_index = Some(
+            self.current_round_index.map(|i| {
+                let index = i + 1;
+                log::debug!("Incrementing round index to: {}", index);
+                index
+            }).unwrap_or(0)
+        );
+
+        let round_dto = self.current_round_ref().into();
         emit_round(round_dto);
-        self.current_round_index += 1;
     }
 
     pub fn current_player_clone(&self) -> Player {
@@ -123,7 +114,7 @@ impl GameData {
     }
 
     pub fn current_round_ref(&self) -> &Round {
-        &self.current_round
+        &self.pack_content.rounds[self.current_round_index.expect("Expected to have current round index")]
     }
 
     pub fn current_question_ref(&self) -> &Question {
@@ -169,11 +160,26 @@ impl GameData {
         events_batch
     }
 
+    pub fn set_pack_content(&mut self, pack_content: PackContent) {
+        self.pack_content = pack_content;
+    }
+
+    pub fn remove_current_question(&mut self) {
+        let topic = &self.current_question.topic.clone();
+        let price = self.current_question.price;
+        log::debug!(
+            "Removing question from the pack: topic: {}, price: {}",
+            topic,
+            price
+        );
+        self.pop_question(topic, price);
+    }
+
     pub fn to_round_stats_dto(&self) -> RoundStatsDto {
         let stats = &self.round_stats;
         RoundStatsDto {
-            roundName: self.current_round.name.clone(),
-            questionsPlayed: self.current_round.question_count,
+            roundName: self.current_round_ref().name.clone(),
+            questionsPlayed: self.current_round_ref().question_count,
             normalQuestionsPlayed: stats.normal_questions_played,
             pigInPokeQuestionPlayed: stats.pip_questions_played,
             totalCorrectAnswers: stats.total_correct_answers,
