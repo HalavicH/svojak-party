@@ -324,7 +324,10 @@ impl AppContext {
                 self.init_next_round()?;
                 self.pick_first_question_chooser()?;
             }
-            RoundStatsResult::EndTheGame(ctx) => self.set_game_state(GameState::EndTheGame(ctx)),
+            RoundStatsResult::EndTheGame(ctx) => {
+                ctx.calculate_final_results();
+                self.set_game_state(GameState::EndTheGame(ctx))
+            }
         }
         Ok(())
     }
@@ -334,6 +337,14 @@ impl AppContext {
 
         let ctx = ctx.init_next_round()?;
         self.set_game_state(GameState::PickFirstQuestionChooser(ctx));
+        Ok(())
+    }
+
+    fn end_game(&mut self) -> error_stack::Result<(), GameplayError> {
+        let ctx = get_ctx_ensuring_state!(self, EndTheGame);
+
+        let ctx = ctx.end_game()?;
+        self.set_game_state(GameState::SetupAndLoading(ctx));
         Ok(())
     }
 }

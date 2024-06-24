@@ -202,7 +202,6 @@ impl<State> GameCtx<State> {
 ///// LEGACY
 #[derive(Default, Debug, Clone)]
 pub struct RoundStats {
-    pub round_name: String,
     pub questions_played: i32,
     pub normal_questions_played: i32,
     pub pip_questions_played: i32,

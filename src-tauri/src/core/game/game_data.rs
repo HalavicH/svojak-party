@@ -94,6 +94,7 @@ impl GameData {
             .get(index)
             .expect_lazy(|| format!("Expected to have round with index: {index}"));
         self.current_round = round.clone();
+       self.round_stats = RoundStats::default();
         let round_dto = round.into();
         emit_round(round_dto);
         self.current_round_index += 1;
@@ -171,7 +172,7 @@ impl GameData {
     pub fn to_round_stats_dto(&self) -> RoundStatsDto {
         let stats = &self.round_stats;
         RoundStatsDto {
-            roundName: stats.round_name.clone(),
+            roundName: self.current_round.name.clone(),
             questionsPlayed: self.current_round.question_count,
             normalQuestionsPlayed: stats.normal_questions_played,
             pigInPokeQuestionPlayed: stats.pip_questions_played,

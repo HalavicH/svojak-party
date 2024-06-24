@@ -11,7 +11,7 @@ pub enum PlayerState {
     #[default]
     Idle,
     QuestionChooser,
-    Target,
+    Target, // for pig in poke mode
     Answering,
     Inactive,
     Dead,

@@ -13,6 +13,7 @@ impl GameCtx<CheckEndOfRound> {
         if self.data.current_round_ref().is_round_over() {
             log::info!("Round is over! Transitioning to CalcRoundStats");
             emit_round_stats(self.data.to_round_stats_dto());
+            self.kill_players_with_negative_scores();
             Ok(CheckEndOfRoundResult::ShowRoundStats(self.transition()))
         } else {
             let questions_left = self.data.current_round_ref().questions_left;
@@ -36,5 +37,15 @@ impl GameCtx<CheckEndOfRound> {
             }
         });
         emit_players_by_players_map(&game.players);
+    }
+    fn kill_players_with_negative_scores(&mut self) {
+        &self.data.players.iter_mut()
+            .for_each(|(_, p)| {
+                if p.stats.score < 0 {
+                    log::info!("Player {} has negative score of {}, killing", p.term_id, p.stats.score);
+                    p.state = PlayerState::Dead;
+                }
+            });
+        emit_players_by_players_map(&self.data.players);
     }
 }

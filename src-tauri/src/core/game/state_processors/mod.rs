@@ -8,3 +8,4 @@ pub mod pick_question_chooser;
 pub mod setup_and_loading;
 pub mod show_round_stats;
 pub mod waiting_for_answer_requests;
+mod end_game;
