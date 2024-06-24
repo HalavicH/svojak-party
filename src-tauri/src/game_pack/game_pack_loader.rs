@@ -1,18 +1,16 @@
 use crate::game_pack::game_pack_entites::*;
+use crate::game_pack::pack_content_entities::{PackContent, QuestionMediaType};
 use crate::game_pack::pack_content_loader::load_pack_content;
 use error_stack::{IntoReport, Report, Result, ResultExt};
 use serde::Serialize;
 use std::error::Error;
 use std::path::Path;
-use std::sync::Arc;
-use std::{fmt, fs, io};
-use tauri::api::path::{app_cache_dir, home_dir};
-use tempfile::TempDir;
+use std::{fmt, fs};
+use tauri::api::path::home_dir;
 use unic_normal::StrNormalForm;
 use urlencoding::decode;
+use uuid::Uuid;
 use zip::ZipArchive;
-use uuid::{Uuid};
-use crate::game_pack::pack_content_entities::{PackContent, QuestionMediaType};
 
 #[derive(Debug, Clone, Serialize)]
 pub enum GamePackLoadingError {
@@ -93,9 +91,19 @@ fn simplify_pack_assets_paths(locations: &PackLocationData, pack_content: &mut P
                     let media_dir = a.atom_type.get_media_dir(locations);
                     let Some(media_dir) = media_dir else { return };
 
-                    let file_name = Uuid::new_v4().to_string() + "." + Path::new(&a.content).extension().expect("Expected file extension").to_str().unwrap();
+                    let file_name = Uuid::new_v4().to_string()
+                        + "."
+                        + Path::new(&a.content)
+                            .extension()
+                            .expect("Expected file extension")
+                            .to_str()
+                            .unwrap();
                     let new_path = media_dir.join(file_name);
-                    log::debug!("Renaming file: {} -> {}", a.content, new_path.to_str().unwrap());
+                    log::debug!(
+                        "Renaming file: {} -> {}",
+                        a.content,
+                        new_path.to_str().unwrap()
+                    );
                     fs::rename(&a.content, &new_path).expect("Failed to rename file");
                     a.content = new_path.to_str().unwrap().to_owned();
                 });
@@ -206,13 +214,6 @@ fn validate_pack_path(game_archive_path: &str) -> Result<(), GamePackLoadingErro
     }
 
     Ok(())
-}
-
-fn create_temp_directory() -> Result<Arc<TempDir>, io::Error> {
-    let tmp_dir = TempDir::new()?;
-    let temp_dir = Arc::new(tmp_dir);
-
-    Ok(temp_dir)
 }
 
 fn unarchive_zip(archive_path: &str, directory_path: &str) -> Result<(), GamePackLoadingError> {

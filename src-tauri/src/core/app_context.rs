@@ -16,9 +16,11 @@ use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
 use crate::types::ArcRwBox;
 use error_stack::Report;
+use std::io;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread::JoinHandle;
+use tempfile::TempDir;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
@@ -382,4 +384,12 @@ impl AppContext {
         self.emit_game_config_locking_hub();
         self.emit_game_context();
     }
+}
+
+#[allow(dead_code)]
+fn create_temp_directory() -> error_stack::Result<Arc<TempDir>, io::Error> {
+    let tmp_dir = TempDir::new()?;
+    let temp_dir = Arc::new(tmp_dir);
+
+    Ok(temp_dir)
 }

@@ -1,7 +1,7 @@
 use crate::core::game_entities::{HubStatus, Player, PlayerState};
 use crate::game_pack::pack_content_entities::QuestionMediaType;
-use serde::{Deserialize, Serialize};
 use crate::types::Image;
+use serde::{Deserialize, Serialize};
 
 ////////// Hub Config ///////////
 #[derive(Debug, Default, Serialize, Clone)]
@@ -138,7 +138,7 @@ pub struct PlayerFinalStatsDto {
     name: String,
     icon: Option<Image>,
     score: i32,
-    state: PlayerState
+    state: PlayerState,
 }
 
 impl From<&Player> for PlayerFinalStatsDto {

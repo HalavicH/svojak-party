@@ -1,6 +1,9 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_variables, unused_imports))]
 
-use crate::api::dto::{FinalResultsDto, HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto, RoundStatsDto};
+use crate::api::dto::{
+    FinalResultsDto, HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto,
+    RoundStatsDto,
+};
 use crate::core::app_context::app;
 use crate::core::game::game_ctx::GameCtx;
 use crate::core::game::game_data::GameData;
@@ -26,7 +29,7 @@ pub enum Event {
     Question,
     GameState,
     RoundStats,
-    FinalResults
+    FinalResults,
 }
 
 /// Impl enum to &str conversion

@@ -4,13 +4,13 @@ use crate::hub::hub_api::calc_current_epoch_ms;
 use crate::hub::web::web_server::server::{
     Persistence, PlayerId, PlayerIdentityDto, PlayerWebEvent,
 };
+use crate::types::LazyExpect;
 use rocket::fairing::AdHoc;
 use rocket::http::Status;
 use rocket::serde::json::serde_json::json;
 use rocket::serde::json::{Json, Value};
 use rocket::{get, post, routes};
 use rocket_client_addr::ClientAddr;
-use crate::types::LazyExpect;
 
 #[get("/ip-loopback")]
 fn ip_loopback(addr: ClientAddr) -> Value {
@@ -43,9 +43,7 @@ fn register_player(
 fn process_event(event: Json<PlayerWebEvent>, state: Persistence) -> Result<Value, Status> {
     log::debug!("Received event {:?}", event);
 
-    let mut state_guard = state
-        .lock()
-        .expect("Expected to get state lock");
+    let mut state_guard = state.lock().expect("Expected to get state lock");
 
     if !state_guard.is_known_ip(&event.ip) {
         log::warn!("Not known IP: {}", event.ip);

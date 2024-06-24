@@ -5,7 +5,6 @@ use crate::game_pack::pack_content_entities::{PackContent, Question, Round, Roun
 use crate::hub::hub_api::PlayerEvent;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
-use crate::types::LazyExpect;
 
 #[derive(Debug, Default, Clone)]
 pub struct GameData {
@@ -34,7 +33,9 @@ impl GameData {
         }
     }
     fn current_round_mut(&mut self) -> &mut Round {
-        &mut self.pack_content.rounds[self.current_round_index.expect("Expected to have current round index")]
+        &mut self.pack_content.rounds[self
+            .current_round_index
+            .expect("Expected to have current round index")]
     }
 
     // TODO: Update by marking questions instead of removing them
@@ -65,7 +66,9 @@ impl GameData {
 
 impl GameData {
     pub fn has_next_round(&self) -> bool {
-        let current_round_index = self.current_round_index.expect("Expected to have current round index");
+        let current_round_index = self
+            .current_round_index
+            .expect("Expected to have current round index");
         log::debug!(
             "Current round index: {}, rounds len: {}",
             current_round_index,
@@ -84,11 +87,13 @@ impl GameData {
 
     pub fn set_next_round(&mut self) {
         self.current_round_index = Some(
-            self.current_round_index.map(|i| {
-                let index = i + 1;
-                log::debug!("Incrementing round index to: {}", index);
-                index
-            }).unwrap_or(0)
+            self.current_round_index
+                .map(|i| {
+                    let index = i + 1;
+                    log::debug!("Incrementing round index to: {}", index);
+                    index
+                })
+                .unwrap_or(0),
         );
 
         let round_dto = self.current_round_ref().into();
@@ -118,7 +123,9 @@ impl GameData {
     }
 
     pub fn current_round_ref(&self) -> &Round {
-        &self.pack_content.rounds[self.current_round_index.expect("Expected to have current round index")]
+        &self.pack_content.rounds[self
+            .current_round_index
+            .expect("Expected to have current round index")]
     }
 
     pub fn current_question_ref(&self) -> &Question {
