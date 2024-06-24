@@ -16,8 +16,8 @@ const FASTEST_CLICK_ITERATION_DUR: Duration = Duration::from_secs(1);
 
 #[derive(Debug, Clone)]
 pub struct GameCtx<State = SetupAndLoading> {
-    pub(super) state: PhantomData<State>,
-    pub(super) data: GameData,
+    pub(in crate::core::game) state: PhantomData<State>,
+    pub(in crate::core::game) data: GameData,
 }
 
 impl Default for GameCtx {
@@ -67,7 +67,7 @@ impl<State> GameCtx<State> {
             .replace(['"', '>'], "")
     }
 
-    pub(super) fn update_non_active_player_states(&mut self, state_name: &str) {
+    pub(in crate::core::game) fn update_non_active_player_states(&mut self, state_name: &str) {
         let game = &mut self.data;
         let active_id = game.active_player_id;
 

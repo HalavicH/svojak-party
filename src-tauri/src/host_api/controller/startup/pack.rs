@@ -1,6 +1,6 @@
 use crate::host_api::dto::PackErrorData;
 use crate::host_api::events::emit_pack_info;
-use crate::core::app_context::app_mut;
+use crate::core::game_controller::game_mut;
 use crate::core::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use error_stack::Report;
 use tauri::command;
@@ -15,7 +15,7 @@ pub fn init_game_pack(path: String) -> Result<(), PackErrorData> {
     match result {
         Ok(pack) => {
             emit_pack_info((&pack.content).into());
-            app_mut().set_game_pack(pack);
+            game_mut().set_game_pack(pack);
             Ok(())
         }
         Err(err) => handle_pack_info_error(path, err),

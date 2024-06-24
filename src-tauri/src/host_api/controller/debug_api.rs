@@ -1,5 +1,5 @@
 use crate::host_api::dto::{HubRequestDto, HubResponseDto};
-use crate::core::app_context::{app, app_mut};
+use crate::core::game_controller::{game, game_mut};
 use crate::hub::hub_api::{HubManager, HubManagerError};
 use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest};
 use std::sync::RwLockWriteGuard;
@@ -11,13 +11,13 @@ use tauri::command;
 /// May break the game completely
 #[command]
 pub fn dbg_set_game_state(name: String) {
-    let mut app = app_mut();
+    let mut app = game_mut();
     app._dbg_set_game_state(name);
 }
 
 #[command]
 pub fn dbg_reset_game() {
-    let mut app = app_mut();
+    let mut app = game_mut();
     app._dbg_reset_game();
 }
 
@@ -25,7 +25,7 @@ pub fn dbg_reset_game() {
 #[command]
 pub fn dbg_setup_hub_connection(port_name: String) -> Result<(), HubManagerError> {
     log::info!("Trying to open HUB connection");
-    let game_ctx = app();
+    let game_ctx = game();
     let mut hub = game_ctx.hub_mut();
     hub.setup_hub_connection(&port_name).map_err(|e| {
         log::error!("Operation failed: {:?}", e);
@@ -36,7 +36,7 @@ pub fn dbg_setup_hub_connection(port_name: String) -> Result<(), HubManagerError
 #[command]
 pub fn dbg_send_raw_request_frame(request_frame: Vec<u8>) -> Result<Vec<u8>, HwHubIoError> {
     log::info!("Sending raw frame request to HUB");
-    let guard = app();
+    let guard = game();
     let hub_guard = guard.hub_mut();
     let Ok(handler) = hub_guard.hub_io_handler() else {
         return Err(HwHubIoError::NotInitializedError);
@@ -51,7 +51,7 @@ pub fn dbg_send_raw_request_frame(request_frame: Vec<u8>) -> Result<Vec<u8>, HwH
 #[command]
 pub fn dbg_send_hub_command(request: HubRequestDto) -> Result<HubResponseDto, HubManagerError> {
     log::info!("Sending request to HUB.\n{:#?}", request);
-    let guard = app();
+    let guard = game();
     let mut hub_guard = guard.hub_mut();
 
     let request_enum = HwHubRequest::from_debug_request(request);

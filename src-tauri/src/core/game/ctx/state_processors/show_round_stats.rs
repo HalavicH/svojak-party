@@ -1,4 +1,4 @@
-use crate::core::game::game_ctx::GameCtx;
+use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::state_structs::{EndTheGame, ShowRoundStats, StartNextRound};
 use crate::core::game_entities::GameplayError;
 

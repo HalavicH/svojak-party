@@ -1,5 +1,5 @@
 use crate::host_api::events::emit_error;
-use crate::core::app_context::app_mut;
+use crate::core::game_controller::game_mut;
 use crate::core::game_entities::GameplayError;
 use error_stack::Report;
 use tauri::command;
@@ -14,7 +14,7 @@ fn map_game_error(e: Report<GameplayError>) -> GameplayError {
 #[command]
 pub async fn start_new_game() -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
-    let mut app = app_mut();
+    let mut app = game_mut();
     app.start_new_game().map_err(map_game_error)?;
     Ok(())
 }
@@ -22,7 +22,7 @@ pub async fn start_new_game() -> Result<(), GameplayError> {
 /// Select question to be played
 #[command]
 pub async fn select_question(topic: String, price: i32) -> Result<(), GameplayError> {
-    let mut app = app_mut();
+    let mut app = game_mut();
 
     app.select_question(&topic, price)?;
     Ok(())
@@ -31,7 +31,7 @@ pub async fn select_question(topic: String, price: i32) -> Result<(), GameplayEr
 /// Allows events from players to be processed
 #[command]
 pub async fn allow_answer() -> Result<(), GameplayError> {
-    let mut guard = app_mut();
+    let mut guard = game_mut();
     guard.allow_answer().map_err(map_game_error)?;
     guard
         .wait_for_quickest_player_to_click()
@@ -43,7 +43,7 @@ pub async fn allow_answer() -> Result<(), GameplayError> {
 pub async fn answer_question(answered_correctly: bool) -> Result<(), GameplayError> {
     log::debug!("Answered correctly: {answered_correctly}");
 
-    app_mut()
+    game_mut()
         .answer_question(answered_correctly)
         .map_err(map_game_error)
 }
@@ -51,7 +51,7 @@ pub async fn answer_question(answered_correctly: bool) -> Result<(), GameplayErr
 /// Finished current question and set's state to 'show answer'
 #[command]
 pub async fn stop_asking_and_show_answer() -> Result<(), GameplayError> {
-    app_mut()
+    game_mut()
         .stop_asking_and_show_answer()
         .map_err(map_game_error)
 }
@@ -59,13 +59,13 @@ pub async fn stop_asking_and_show_answer() -> Result<(), GameplayError> {
 /// Finished current question and set's state to 'show answer'
 #[command]
 pub async fn finish_question() -> Result<(), GameplayError> {
-    app_mut().finish_question().map_err(map_game_error)
+    game_mut().finish_question().map_err(map_game_error)
 }
 
 /// Initiate next round
 #[command]
 pub async fn init_next_round() -> Result<(), GameplayError> {
-    app_mut().process_end_of_round().map_err(map_game_error)
+    game_mut().process_end_of_round().map_err(map_game_error)
 }
 
 #[command]
@@ -75,5 +75,5 @@ pub async fn send_pip_victim(victim_id: i32) {
 
 #[command]
 pub async fn finish_game() -> Result<(), GameplayError> {
-    app_mut().finish_game().map_err(map_game_error)
+    game_mut().finish_game().map_err(map_game_error)
 }

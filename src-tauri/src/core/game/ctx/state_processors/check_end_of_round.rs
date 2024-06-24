@@ -1,5 +1,5 @@
 use crate::host_api::events::{emit_players_by_players_map, emit_round_stats};
-use crate::core::game::game_ctx::GameCtx;
+use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::state_structs::{CheckEndOfRound, ChooseQuestion, ShowRoundStats};
 use crate::core::game_entities::{GameplayError, PlayerState};
 

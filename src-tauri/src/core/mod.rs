@@ -1,4 +1,4 @@
-pub mod app_context;
+pub mod game_controller;
 pub mod game;
 pub mod game_entities;
 pub mod player_connection_listener;

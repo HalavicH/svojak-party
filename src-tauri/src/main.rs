@@ -8,7 +8,7 @@ use svojak_app::host_api::controller::gameplay_api::*;
 use svojak_app::host_api::controller::startup::hub::*;
 use svojak_app::host_api::controller::startup::pack::*;
 use svojak_app::host_api::controller::startup::settings::*;
-use svojak_app::core::app_context::app;
+use svojak_app::core::game_controller::game;
 
 fn main() {
     env_logger::init();
@@ -81,6 +81,6 @@ fn main() {
 }
 
 fn log_ctx_content() {
-    let context = app();
+    let context = game();
     log::info!("default context: {context:#?}");
 }

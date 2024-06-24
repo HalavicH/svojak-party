@@ -1,5 +1,5 @@
 use crate::host_api::events::emit_message;
-use crate::core::app_context::app_mut;
+use crate::core::game_controller::game_mut;
 use crate::core::game_entities::{Player, DEFAULT_ICON};
 use crate::hub::hub_api::HubManager;
 use std::collections::HashMap;
@@ -91,7 +91,7 @@ fn merge_players(detected_players: &[Player]) -> Vec<Player> {
         .collect();
 
     let players_v = players.values().cloned().collect();
-    let mut app = app_mut();
+    let mut app = game_mut();
     app.game_state.game_mut().set_players(players);
     players_v
 }

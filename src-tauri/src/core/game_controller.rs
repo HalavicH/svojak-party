@@ -2,11 +2,11 @@ use crate::host_api::events::{
     emit_error, emit_game_state, emit_hub_config, emit_players_by_game_data, emit_question,
     emit_round,
 };
-use crate::core::game::game_ctx::GameCtx;
+use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::game_state::GameState;
-use crate::core::game::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
-use crate::core::game::state_processors::check_end_of_round::CheckEndOfRoundResult;
-use crate::core::game::state_processors::show_round_stats::RoundStatsResult;
+use crate::core::game::ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
+use crate::core::game::ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
+use crate::core::game::ctx::state_processors::show_round_stats::RoundStatsResult;
 use crate::core::game_entities::{GameplayError, Player};
 use crate::core::player_connection_listener::start_listening_for_players_connection;
 use crate::core::player_event_listener::start_event_listener;
@@ -23,25 +23,25 @@ use std::thread::JoinHandle;
 use tempfile::TempDir;
 
 lazy_static::lazy_static! {
-    static ref GAME_CONTEXT: Arc<RwLock<AppContext>> = Arc::new(RwLock::new(AppContext::default()));
+    static ref GAME_CONTROLLER: Arc<RwLock<GameController >> = Arc::new(RwLock::new(GameController::default()));
 }
 
-pub fn app_mut() -> RwLockWriteGuard<'static, AppContext> {
-    GAME_CONTEXT
+pub fn game_mut() -> RwLockWriteGuard<'static, GameController> {
+    GAME_CONTROLLER
         .write()
         .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
         .expect("Mutex is poisoned")
 }
 
-pub fn app() -> RwLockReadGuard<'static, AppContext> {
-    GAME_CONTEXT
+pub fn game() -> RwLockReadGuard<'static, GameController> {
+    GAME_CONTROLLER
         .read()
         .map_err(|e| format!("Mutex is poisoned: {e:#?}"))
         .expect("Mutex is poisoned")
 }
 
 #[derive(Debug)]
-pub struct AppContext {
+pub struct GameController {
     // Comm entities
     pub hub_type: HubType,
     hub: ArcRwBox<dyn HubManager>,
@@ -53,7 +53,7 @@ pub struct AppContext {
     pub game_state: GameState,
 }
 
-impl Default for AppContext {
+impl Default for GameController {
     fn default() -> Self {
         Self {
             hub_type: HubType::default(),
@@ -67,7 +67,7 @@ impl Default for AppContext {
 }
 
 /// Field Access API
-impl AppContext {
+impl GameController {
     pub fn drop_hub(&mut self) {
         self.hub = Arc::new(RwLock::new(Box::<HwHubManager>::default()))
     }
@@ -108,7 +108,7 @@ impl AppContext {
 }
 
 /// Setup API
-impl AppContext {
+impl GameController {
     pub fn save_round_duration(&mut self, round_duration_minutes: i32) {
         if let GameState::SetupAndLoading(game) = &mut self.game_state {
             game.set_round_duration(round_duration_minutes)
@@ -229,7 +229,7 @@ macro_rules! get_ctx_ensuring_state {
 }
 
 /// Game API
-impl AppContext {
+impl GameController {
     pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
         let hub = self.hub_lock();
         let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
@@ -355,7 +355,7 @@ impl AppContext {
 }
 
 /// Helper methods
-impl AppContext {
+impl GameController {
     fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {
         let state_mismatch = self.game_state.show_state_mismatch(expected_state);
         emit_error(format!("Context retrieval failure: {}", state_mismatch));
@@ -364,9 +364,9 @@ impl AppContext {
 }
 
 /// Debug API
-impl AppContext {
+impl GameController {
     pub fn _dbg_reset_game(&mut self) {
-        let context = AppContext::default();
+        let context = GameController::default();
         self.hub_type = context.hub_type;
         self.hub = context.hub;
         self.player_poling_thread_handle = context.player_poling_thread_handle;

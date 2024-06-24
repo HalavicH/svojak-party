@@ -1,6 +1,6 @@
 use crate::host_api::dto::PlayerDto;
 use crate::host_api::events::*;
-use crate::core::app_context::{app, app_mut};
+use crate::core::game_controller::{game, game_mut};
 use crate::core::game_entities::{Player, PlayerState};
 use tauri::{command, Window};
 
@@ -13,7 +13,7 @@ pub fn init_window_handle(window: Window) {
 /// To get initial app context
 #[command]
 pub fn request_context_update() {
-    app().emit_game_config_locking_hub();
+    game().emit_game_config_locking_hub();
 }
 
 /// Saves configuration to game context
@@ -35,7 +35,7 @@ pub fn save_players(players: Vec<PlayerDto>) {
 
     log::info!("Converted players: {:#?}", player_entities);
 
-    let mut app = app_mut();
+    let mut app = game_mut();
     app.update_players(&player_entities);
     // No emit_players required, as we just set them, but I'll do it anyway to maintain consistency
     let vec = app.game_state.game_ctx_ref().players_ref_as_vec();
@@ -46,6 +46,6 @@ pub fn save_players(players: Vec<PlayerDto>) {
 #[command]
 pub fn save_round_duration(round_minutes: i32) {
     log::info!("Round duration is {round_minutes}");
-    app_mut().save_round_duration(round_minutes)
+    game_mut().save_round_duration(round_minutes)
     // No emit required, as it's internal fields
 }

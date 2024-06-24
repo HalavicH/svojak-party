@@ -4,8 +4,8 @@ use crate::host_api::dto::{
     FinalResultsDto, HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto,
     RoundStatsDto,
 };
-use crate::core::app_context::app;
-use crate::core::game::game_ctx::GameCtx;
+use crate::core::game_controller::game;
+use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::game_data::GameData;
 use crate::core::game::game_state::GameState;
 use crate::core::game_entities::{HubStatus, Player};
