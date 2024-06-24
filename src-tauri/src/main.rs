@@ -13,12 +13,6 @@ use svojak_app::core::app_context::app;
 fn main() {
     env_logger::init();
 
-    // let result = GameContext::new(PackContent::default(), HashMap::default())
-    //     .start()
-    //     .unwrap()
-    //     ;
-
-    // return;
     log_ctx_content();
 
     tauri::Builder::default()
@@ -49,7 +43,8 @@ fn main() {
             send_pip_victim,
             stop_asking_and_show_answer,
             finish_question,
-            init_next_round
+            init_next_round,
+            finish_game,
         ])
         .run(tauri::generate_context!())
         .expect("Can't start Tauri app");

@@ -1,4 +1,7 @@
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex, RwLock};
+use base64::Engine;
+use rocket::serde::Serialize;
 
 pub type ArcRwBox<T> = Arc<RwLock<Box<T>>>;
 
@@ -10,6 +13,33 @@ pub type ArcMutBox<T> = Arc<Mutex<Box<T>>>;
 
 pub fn new_arc_mut_box<T>(t: T) -> ArcMutBox<T> {
     Arc::new(Mutex::new(Box::new(t)))
+}
+
+/// Base64 encoded icon
+#[derive(Debug, Serialize, Clone)]
+pub struct Image {
+    content: String,
+    image_type: String,
+}
+
+impl TryFrom<PathBuf> for Image {
+    type Error = String;
+
+    fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
+        let image_type = path
+            .extension()
+            .ok_or_else(|| "No extension found".to_string())?
+            .to_str()
+            .ok_or_else(|| "Invalid extension".to_string())?
+            .to_string();
+        let content = std::fs::read(path)
+            .map_err(|e| format!("Failed to read file: {:?}", e))?;
+        let base64 = base64::encode(&content);
+        Ok(Self {
+            content: base64,
+            image_type,
+        })
+    }
 }
 
 pub trait LazyExpect<T> {

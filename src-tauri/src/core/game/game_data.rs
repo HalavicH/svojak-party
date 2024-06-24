@@ -26,6 +26,13 @@ pub struct GameData {
 }
 
 impl GameData {
+    pub fn new(players: Vec<Player>) -> Self {
+        let players_map = players.into_iter().map(|p| (p.term_id, p)).collect();
+        GameData {
+            players: players_map,
+            ..Default::default()
+        }
+    }
     fn current_round_mut(&mut self) -> &mut Round {
         &mut self.pack_content.rounds[self.current_round_index.expect("Expected to have current round index")]
     }

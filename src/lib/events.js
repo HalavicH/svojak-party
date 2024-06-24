@@ -4,7 +4,7 @@ import {callBackend, TauriApiCommand} from "./commands.js";
 import {isRunningInTauri} from "./misc.js";
 import {onDestroy, onMount} from "svelte";
 import {
-    currentGameStateStore,
+    currentGameStateStore, currentFinalResultsStore,
     currentHubConfigStore,
     currentPackInfoStore,
     currentPlayersStore,
@@ -20,6 +20,7 @@ export const TauriEvents = {
     Question: "Question",
     GameState: "GameState",
     RoundStats: "RoundStats",
+    FinalResults: "FinalResults",
 }
 
 export function initEventListeners() {
@@ -30,6 +31,7 @@ export function initEventListeners() {
     listenAndStoreEvent(TauriEvents.Question, currentQuestionStore);
     listenAndStoreEvent(TauriEvents.GameState, currentGameStateStore);
     listenAndStoreEvent(TauriEvents.RoundStats, currentRoundStatsStore);
+    listenAndStoreEvent(TauriEvents.FinalResults, currentFinalResultsStore);
 
     console.log("################################################");
     console.log("##### ALL EVENT LISTENERS HAS BEEN LOADED ######");

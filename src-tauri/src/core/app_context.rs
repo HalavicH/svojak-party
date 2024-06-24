@@ -340,10 +340,10 @@ impl AppContext {
         Ok(())
     }
 
-    fn end_game(&mut self) -> error_stack::Result<(), GameplayError> {
+    pub fn finish_game(&mut self) -> error_stack::Result<(), GameplayError> {
         let ctx = get_ctx_ensuring_state!(self, EndTheGame);
 
-        let ctx = ctx.end_game()?;
+        let ctx = ctx.finish_game()?;
         self.set_game_state(GameState::SetupAndLoading(ctx));
         Ok(())
     }

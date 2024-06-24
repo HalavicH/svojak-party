@@ -1,6 +1,7 @@
-use crate::core::game_entities::{HubStatus, PlayerState};
+use crate::core::game_entities::{HubStatus, Player, PlayerState};
 use crate::game_pack::pack_content_entities::QuestionMediaType;
 use serde::{Deserialize, Serialize};
+use crate::types::Image;
 
 ////////// Hub Config ///////////
 #[derive(Debug, Default, Serialize, Clone)]
@@ -122,6 +123,34 @@ pub struct PlayerEndRoundStatsDto {
     pub answeredWrong: i32,
 }
 
+#[allow(non_snake_case)]
+#[derive(Debug, Serialize, Clone)]
+pub struct FinalResultsDto {
+    pub first: PlayerFinalStatsDto,
+    pub second: PlayerFinalStatsDto,
+    pub third: Option<PlayerFinalStatsDto>,
+    pub theRest: Vec<PlayerFinalStatsDto>,
+}
+
+#[allow(non_snake_case)]
+#[derive(Debug, Serialize, Clone)]
+pub struct PlayerFinalStatsDto {
+    name: String,
+    icon: Option<Image>,
+    score: i32,
+    state: PlayerState
+}
+
+impl From<&Player> for PlayerFinalStatsDto {
+    fn from(p: &Player) -> Self {
+        Self {
+            name: p.name.clone(),
+            icon: None,
+            score: p.stats.score,
+            state: p.state.clone(),
+        }
+    }
+}
 ////////// HUB DEBUG ///////////
 #[derive(Debug, Deserialize)]
 #[allow(non_snake_case)]

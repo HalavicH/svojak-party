@@ -50,9 +50,7 @@ impl Player {
             | PlayerState::AnsweredWrong => false,
         }
     }
-}
-
-impl Player {
+    
     pub fn new(term_id: u8) -> Self {
         Self {
             term_id,

@@ -4082,6 +4082,7 @@ name = "svojak-app"
 version = "0.0.1"
 dependencies = [
  "ansi-to-html",
+ "base64 0.22.0",
  "env_logger 0.10.2",
  "error-stack",
  "lazy_static",

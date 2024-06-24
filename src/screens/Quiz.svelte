@@ -12,6 +12,8 @@
     import RoundStatsView from "./quiz/subcomponents/stats/RoundStatsView.svelte";
     import Button from "../components/generic/Button.svelte";
     import NextRoundButton from "./quiz/subcomponents/stats/NextRoundButton.svelte";
+    import GameFinishedScreen from "./quiz/subcomponents/eog/GameFinishedScreen.svelte";
+    import EndGameButton from "./quiz/subcomponents/eog/EndGameButton.svelte";
 
     $: gameState = $currentGameStateStore.gameState;
 </script>
@@ -37,6 +39,8 @@
             <EndQuestionScreen/>
         {:else if gameState === GameState.ShowRoundStats}
             <RoundStatsView/>
+        {:else if gameState === GameState.EndTheGame}
+            <GameFinishedScreen/>
         {:else}
             <Row>
                 <div>Unhandled state: {gameState}</div>
@@ -45,6 +49,8 @@
     </div>
     {#if gameState === GameState.ShowRoundStats}
         <NextRoundButton/>
+    {:else if gameState === GameState.EndTheGame}
+        <EndGameButton/>
     {:else}
         <PlayersView/>
     {/if}

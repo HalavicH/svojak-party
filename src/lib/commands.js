@@ -45,6 +45,7 @@ export const TauriApiCommand = {
     // Debug API
     DBG_SET_GAME_STATE: 'dbg_set_game_state',
     DBG_RESET_GAME: 'dbg_reset_game',
+    FINISH_GAME: 'finish_game',
 };
 
 export const HubType = {

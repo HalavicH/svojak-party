@@ -248,6 +248,52 @@ let roundStatsMock = {
     ]
 };
 
+// #[allow(non_snake_case)]
+// #[derive(Debug, Serialize, Clone)]
+// pub struct FinalResultsDto {
+//     pub first: PlayerFinalStatsDto,
+//     pub second: PlayerFinalStatsDto,
+//     pub third: Option<PlayerFinalStatsDto>,
+//     pub theRest: Vec<PlayerFinalStatsDto>,
+// }
+//
+// #[allow(non_snake_case)]
+// #[derive(Debug, Serialize, Clone)]
+// pub struct PlayerFinalStatsDto {
+//     name: String,
+//     icon: Option<Image>,
+//     score: i32,
+//     state: PlayerState
+// }
+let gameStatsMock = {
+    first: {
+        name: "HalavicH",
+        score: 500,
+        state: PlayerState.Idle,
+        icon: DFL_PLAYER_ICON,
+    },
+    second: {
+        name: "Valadis",
+        score: 400,
+        state: PlayerState.Idle,
+        icon: DFL_PLAYER_ICON,
+    },
+    third: {
+        name: "Baadtrip",
+        score: 200,
+        state: PlayerState.Idle,
+        icon: DFL_PLAYER_ICON,
+    },
+    theRest: [
+        {
+            name: "Button",
+            score: -100,
+            state: PlayerState.Dead,
+            icon: DFL_PLAYER_ICON,
+        }
+    ]
+}
+
 // Game stores
 export const currentHubConfigStore = writable(mockHubConfig);
 export const currentPlayersStore = writable(mockPlayers);
@@ -256,6 +302,7 @@ export const currentRoundStore = writable(mockRound);
 export const currentQuestionStore = writable(mockQuestion);
 export const currentGameStateStore = writable({gameState: GameState.SetupAndLoading});
 export const currentRoundStatsStore = writable(roundStatsMock);
+export const currentFinalResultsStore = writable(gameStatsMock);
 
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");

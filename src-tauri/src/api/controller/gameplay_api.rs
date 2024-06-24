@@ -72,3 +72,8 @@ pub async fn init_next_round() -> Result<(), GameplayError> {
 pub async fn send_pip_victim(victim_id: i32) {
     log::debug!("Victim id is: {}", victim_id);
 }
+
+#[command]
+pub async fn finish_game() -> Result<(), GameplayError> {
+    app_mut().finish_game().map_err(map_game_error)
+}
