@@ -20,7 +20,6 @@
 
     async function openWebClientsSettings() {
         await callBackend(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.WebHub});
-        await callBackend(TauriApiCommand.DISCOVER_HUB, {path: "dummy"});
         closeModal();
         openModal(WebClientsSettingsModal);
     }

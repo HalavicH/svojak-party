@@ -21,12 +21,14 @@ use crate::hub::web::web_server::internal_api::{
 };
 use crate::hub::web::web_server::server;
 use crate::hub::web::web_server::server::PlayerIdentityDto;
+use crate::types::LazyExpect;
 
 const RETRY_INTERVAL_MS: u64 = 100;
 
 #[derive(Debug)]
 pub struct WebHubManager {
     pub base_url: Url,
+    pub url_used: String,
     pub port: String,
     pub server_handle: Option<JoinHandle<()>>,
     pub client: reqwest::Client,
@@ -49,6 +51,7 @@ impl Default for WebHubManager {
             server_handle: None,
             client: Default::default(),
             rt: Runtime::new().expect("No runtime - no game :D"),
+            url_used: "".to_string(),
         }
     }
 }
@@ -63,6 +66,13 @@ impl WebHubManager {
 
     fn build_url(&self, endpoint: &str) -> Url {
         self.base_url.join(endpoint).expect("Bad URL join")
+    }
+
+    fn interface_info_to_url(preferred_url: &str) -> String {
+        "http://".to_string() + preferred_url.split("-->")
+            .last()
+            .expect_lazy(|| format!("Expected to have preferred url of format 'Interface: <name> --> <ip>:<port>'. Got: {}", preferred_url))
+            .trim()
     }
 }
 
@@ -94,13 +104,14 @@ impl Drop for WebHubManager {
     }
 }
 
-// #[allow(dead_code, unused_variables)]
 impl HubManager for WebHubManager {
     fn hub_address(&self) -> String {
-        get_ipv4_interfaces_ip(&self.port).join("\n")
+        self.url_used.clone()
     }
 
-    fn probe(&mut self, _port: &str) -> Result<(), HubManagerError> {
+    fn probe(&mut self, preferred_url: &str) -> Result<(), HubManagerError> {
+        self.url_used = Self::interface_info_to_url(preferred_url);
+
         if self.server_handle.is_some() {
             log::debug!("Web HUB already initialized. Nothing to do");
             self.calc_hub_timestamp()?;
@@ -256,6 +267,10 @@ impl HubManager for WebHubManager {
 
         log::debug!("Received events: {:?}", events);
         Ok(events)
+    }
+
+    fn available_ports(&self) -> Vec<String> {
+        get_ipv4_interfaces_ip(&self.port)
     }
 }
 

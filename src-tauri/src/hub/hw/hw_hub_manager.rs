@@ -263,6 +263,10 @@ impl HubManager for HwHubManager {
         Ok(events)
     }
 
+    fn available_ports(&self) -> Vec<String> {
+        discover_serial_ports()
+    }
+
     fn radio_channel(&self) -> i32 {
         log::debug!("Returing radio channel of {}", self.radio_channel);
         self.radio_channel

@@ -8,6 +8,9 @@
     import Table from "../../components/generic/Table.svelte";
     import {DFL_PLAYER_ICON} from "../../lib/misc.js"
     import {currentHubConfigStore, currentPlayersStore} from "../../lib/stores.js";
+    import QRCode from 'qrcode';
+    import DropDown from "../../components/generic/DropDown.svelte";
+    import {callBackend, TauriApiCommand} from "../../lib/commands.js";
 
     // Provided by 'modals'
     export let isOpen;
@@ -19,6 +22,24 @@
         return p;
     });
     let config = $currentHubConfigStore;
+    let joinQrCode;
+    let hubPort;
+    currentHubConfigStore.subscribe(async value => {
+            console.log(value);
+            joinQrCode = await QRCode.toDataURL(value.hubPort);
+            hubPort = value.hubPort;
+        }
+    )
+    $: portOptions = config.availablePorts.map((portName) => {
+        return {
+            value: portName,
+            title: portName
+        };
+    });
+
+    async function handleSetup(selected) {
+        await callBackend(TauriApiCommand.DISCOVER_HUB, {path: selected});
+    }
 </script>
 
 <BaseModal {isOpen}>
@@ -36,10 +57,18 @@
             </tr>
             <tr>
                 <td>
-                    <div>Hub address:</div>
+                    <div>Using network interface:</div>
                 </td>
                 <td>
-                    <div class="io-data-field">{config.hubPort}</div>
+                    <DropDown defaultValue={config.hubPort} options={portOptions} handleSelection={handleSetup}/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div>Scan to join the game</div>
+                </td>
+                <td>
+                    <img class="qr-code" src={joinQrCode} alt="">
                 </td>
             </tr>
             </tbody>
@@ -94,5 +123,14 @@
     .icon {
         width: 2em;
         height: 2em;
+    }
+
+    .qr-code {
+        display: block;
+        margin: 0 auto;
+        width: 7em;
+        height: 7em;
+        border-radius: 0.5em;
+        border: solid 0.1em var(--items-block-border-color);
     }
 </style>

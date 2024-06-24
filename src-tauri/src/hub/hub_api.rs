@@ -81,6 +81,7 @@ pub trait HubManager: Debug + Send + Sync {
         state: &TermButtonState,
     ) -> Result<(), HubManagerError>;
     fn read_event_queue(&self) -> Result<Vec<PlayerEvent>, HubManagerError>;
+    fn available_ports(&self) -> Vec<String>;
 
     // HW-specific
     fn radio_channel(&self) -> i32 {

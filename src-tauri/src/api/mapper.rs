@@ -7,14 +7,12 @@ use crate::core::game_entities::Player;
 use crate::game_pack::pack_content_entities::{Atom, PackContent, Question, Round, RoundStats};
 use crate::hub::hub_api::HubManager;
 
-use crate::hub::hw::hw_hub_manager::discover_serial_ports;
-
 /// Hub manager
 impl From<&Box<dyn HubManager>> for HubConfigDto {
     fn from(hub: &Box<dyn HubManager>) -> Self {
         Self {
             hubPort: hub.hub_address(),
-            availablePorts: discover_serial_ports(),
+            availablePorts: hub.available_ports(),
             radioChannel: hub.radio_channel(),
             hubStatus: hub.hub_status(),
         }
