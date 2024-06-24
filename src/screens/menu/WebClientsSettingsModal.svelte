@@ -6,68 +6,19 @@
     import HubStatus from "../../components/HubStatus.svelte";
     import ActionsBlock from "../../components/generic/ActionsBlock.svelte";
     import Table from "../../components/generic/Table.svelte";
-    import {invoke} from "@tauri-apps/api/tauri";
-    import {TauriApiCommand, HubStatusOptions} from "../../lib/commands"
-    import {onDestroy, onMount} from "svelte";
+    import {DFL_PLAYER_ICON} from "../../lib/misc.js"
+    import {currentHubConfigStore, currentPlayersStore} from "../../lib/stores.js";
 
     // Provided by 'modals'
     export let isOpen;
-    export let title;
-    export let message;
 
-    async function saveSettings() {
-        console.log("Saved!");
-        closeModal();
-        await invoke(TauriApiCommand.SAVE_PLAYERS, {players});
-    }
-
-    let players = [];
-    let config;
-    let hubPort;
-    let hubStatus = HubStatusOptions.NoDevice;
-
-    // Function to fetch configuration
-    async function fetchConfiguration() {
-        try {
-            config = await invoke(TauriApiCommand.FETCH_CONFIGURATION);
-            console.log(config);
-            hubPort = config.hub_port;
-        } catch (error) {
-            console.error('Error fetching configuration:', error);
+    $: players = $currentPlayersStore.map(p => {
+        if (p.iconPath === "default") {
+            p.iconPath = DFL_PLAYER_ICON;
         }
-    }
-
-    // Watch for changes in isOpen and trigger the API call if it becomes true
-    $: if (isOpen) {
-        fetchConfiguration().then(async () => {
-            console.log("Discovering hub: " + hubPort);
-            hubStatus = await invoke(TauriApiCommand.DISCOVER_HUB, {path: hubPort});
-            console.log(`Hub status: ${hubStatus}`)
-        });
-    }
-
-    $: console.log(`Modal WebClientsSettingsModal is ${isOpen}`);
-
-    let interval;
-    onMount(() => {
-        // Start the interval on mount
-        interval = setInterval(async () => {
-            if (hubStatus === HubStatusOptions.Detected && isOpen === true) {
-                console.log("Setup modal is opened. Polling for players");
-                try {
-                    players = await invoke(TauriApiCommand.DISCOVER_PLAYERS, { path: hubPort });
-                    console.log(players);
-                } catch (error) {
-                    console.error('Error fetching players:', error);
-                }
-            }
-        }, 1000);
+        return p;
     });
-
-    onDestroy(() => {
-        // Clean up by stopping the interval on destroy
-        clearInterval(interval);
-    });
+    let config = $currentHubConfigStore;
 </script>
 
 <BaseModal {isOpen}>
@@ -80,7 +31,7 @@
                     <div>Hub status:</div>
                 </td>
                 <td>
-                    <HubStatus {hubStatus}/>
+                    <HubStatus hubStatus={config.hubStatus}/>
                 </td>
             </tr>
             <tr>
@@ -88,7 +39,7 @@
                     <div>Hub address:</div>
                 </td>
                 <td>
-                    <div class="io-data-field">{hubPort}</div>
+                    <div class="io-data-field">{config.hubPort}</div>
                 </td>
             </tr>
             </tbody>
@@ -99,7 +50,7 @@
             {#each players as player}
                 <tr>
                     <td>
-                        <img class="icon" src="{player.icon}" alt="">
+                        <img class="icon" src="{player.iconPath}" alt="">
                     </td>
                     <td>
                         {player.name}
@@ -112,8 +63,7 @@
         </Table>
     </ItemsBlock>
     <ActionsBlock>
-        <Button text="Don't save & Close" onClick={closeModal}/>
-        <Button text="Save & Close" onClick={saveSettings}/>
+        <Button text="Ok" onClick={closeModal}/>
     </ActionsBlock>
 </BaseModal>
 

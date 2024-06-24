@@ -13,13 +13,14 @@
     export let isOpen;
 
     async function openPhysicalClientsSettings() {
-        callBackend(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.HwHub}).then();
+        await callBackend(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.HwHub});
         closeModal();
         openModal(HwClientsSettingsModal);
     }
 
-    function openWebClientsSettings() {
-        callBackend(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.WebHub}).then();
+    async function openWebClientsSettings() {
+        await callBackend(TauriApiCommand.SET_HUB_TYPE, {hubType: HubType.WebHub});
+        await callBackend(TauriApiCommand.DISCOVER_HUB, {path: "dummy"});
         closeModal();
         openModal(WebClientsSettingsModal);
     }

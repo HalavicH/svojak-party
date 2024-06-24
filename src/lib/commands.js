@@ -6,7 +6,7 @@ export async function callBackend(apiCommand, params) {
         console.warn(`No Tauri context!\nSkipping Tauri API call: '${apiCommand}' with payload: '${params}'`);
         return;
     }
-    console.log(`Calling: ${apiCommand} with params: ${params}`)
+    console.log(`Calling: ${apiCommand} with params`, params)
     return await invoke(apiCommand, params)
 }
 

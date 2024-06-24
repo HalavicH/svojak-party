@@ -6,6 +6,7 @@ use crate::game_pack::pack_content_entities::{PackContent, Question, Round};
 use crate::hub::hub_api::PlayerEvent;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
+use crate::types::LazyExpect;
 
 #[derive(Debug, Default, Clone)]
 pub struct GameData {
@@ -91,7 +92,7 @@ impl GameData {
             .pack_content
             .rounds
             .get(index)
-            .unwrap_or_else(|| panic!("Expected to have round with index: {index}"));
+            .expect_lazy(|| format!("Expected to have round with index: {index}"));
         self.current_round = round.clone();
         let round_dto = round.into();
         emit_round(round_dto);

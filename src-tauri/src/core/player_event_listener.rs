@@ -3,6 +3,7 @@ use std::sync::{Arc, RwLock};
 use std::thread;
 use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
+use crate::types::LazyExpect;
 
 const EVT_POLLING_INTERVAL_MS: u64 = 1000;
 
@@ -25,10 +26,8 @@ fn listen_hub_events(
         sleep(Duration::from_millis(EVT_POLLING_INTERVAL_MS));
         log::debug!("### New event listener iteration ###");
         let hub_guard = hub.read().expect("Mutex is poisoned");
-        let events = hub_guard.read_event_queue().unwrap_or_else(|error| {
-            log::error!("Can't get events. Err {:?}", error);
-            vec![]
-        });
+        let events = hub_guard.read_event_queue()
+            .expect("Expected to read event queue");
 
         if events.is_empty() {
             log::debug!("No player events occurred");
@@ -38,9 +37,7 @@ fn listen_hub_events(
         events.iter().for_each(|e| {
             hub_guard
                 .set_term_feedback_led(e.term_id, &e.state)
-                .unwrap_or_else(|error| {
-                    log::error!("Can't set term_feedback let. Err {:?}", error);
-                });
+                .expect("Expected to set term feedback led");
 
             log::debug!("New player event received: {:#?}. Pushing to the events", e);
         });

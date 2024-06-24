@@ -35,7 +35,9 @@ pub struct WebHubManager {
 
 impl Default for WebHubManager {
     fn default() -> Self {
-        let port = env::var("ROCKET_PORT").unwrap_or("8888".to_string());
+        let port_key = "ROCKET_PORT";
+        let string = "8888".to_string();
+        let port = env::var(port_key).unwrap_or(string);
         let endpoint = format!("http://127.0.0.1:{}/", port);
         log::info!("###################################");
         log::info!("Configuring manager to call port {}", port);

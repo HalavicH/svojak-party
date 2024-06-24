@@ -10,6 +10,7 @@ use rocket::serde::json::serde_json::json;
 use rocket::serde::json::{Json, Value};
 use rocket::{get, post, routes};
 use rocket_client_addr::ClientAddr;
+use crate::types::LazyExpect;
 
 #[get("/ip-loopback")]
 fn ip_loopback(addr: ClientAddr) -> Value {
@@ -44,7 +45,7 @@ fn process_event(event: Json<PlayerWebEvent>, state: Persistence) -> Result<Valu
 
     let mut state_guard = state
         .lock()
-        .unwrap_or_else(|err| panic!("Can't aquire state: {err}"));
+        .expect("Expected to get state lock");
 
     if !state_guard.is_known_ip(&event.ip) {
         log::warn!("Not known IP: {}", event.ip);
