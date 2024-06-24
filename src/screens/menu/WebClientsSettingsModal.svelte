@@ -26,6 +26,9 @@
     let hubPort;
     currentHubConfigStore.subscribe(async value => {
             console.log(value);
+            if (!value.hubPort) {
+                return;
+            }
             joinQrCode = await QRCode.toDataURL(value.hubPort);
             hubPort = value.hubPort;
         }

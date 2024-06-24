@@ -59,7 +59,15 @@ impl Default for WebHubManager {
 impl WebHubManager {
     fn start_hub_server(&mut self) {
         let handle = thread::spawn(move || {
-            server::main();
+            Runtime::new().expect("Expected to spin up server runtime successfully")
+                .block_on(async move {
+                let result = server::launch().launch().await;
+                match result {
+                    Ok(_) => log::info!("Server shut down"),
+                    Err(err) => log::error!("Server shut down with error: {:?}", err),
+                }
+            });
+            log::info!("Server thread started");
         });
         self.server_handle = Some(handle);
     }

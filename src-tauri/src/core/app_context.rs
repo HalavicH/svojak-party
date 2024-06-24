@@ -133,12 +133,14 @@ impl AppContext {
     }
 
     pub fn select_hub_type(&mut self, hub_type: HubType) {
+        log::info!("Strong count to hub: {}", Arc::strong_count(&self.hub));
+        log::info!("Weak count to hub: {}", Arc::weak_count(&self.hub));
+
         if self.hub_type == hub_type {
             log::info!("Hub is already set to: {:?}. Nothing to do", hub_type);
             return;
         }
 
-        self.hub_type = hub_type.clone();
         match hub_type {
             HubType::HwHub => {
                 log::info!("||| --> Selecting SERIAL hub <---");
@@ -149,6 +151,7 @@ impl AppContext {
                 self.hub = Arc::new(RwLock::new(Box::<WebHubManager>::default()))
             }
         }
+        self.hub_type = hub_type;
         emit_hub_config(self.hub().deref().into());
     }
 

@@ -91,7 +91,7 @@ pub fn setup() -> rocket::fairing::AdHoc {
     })
 }
 
-#[rocket::launch]
+// #[rocket::launch]
 pub fn launch() -> Rocket<Build> {
     rocket::build()
         .attach(setup())
