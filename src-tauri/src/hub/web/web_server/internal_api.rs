@@ -150,7 +150,7 @@ fn map_player_events_to_term_events(events: Vec<PlayerWebEvent>) -> Vec<PlayerEv
     events
         .iter()
         .map(|e| PlayerEvent {
-            term_id: e.id,
+            term_id: e.id as u8,
             timestamp: e.timestamp,
             state: TermButtonState::from(e.state),
         })

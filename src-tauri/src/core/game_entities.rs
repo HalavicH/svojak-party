@@ -41,7 +41,7 @@ pub struct Player {
 impl From<PsPlayer> for Player {
     fn from(player: PsPlayer) -> Self {
         Self {
-            name: player.name,
+            name: player.name.unwrap_or_else(||format!("Player {}", player.id)),
             icon: player.icon,
             term_id: player.id as u8,
             is_used: true,

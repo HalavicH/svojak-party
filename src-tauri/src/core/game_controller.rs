@@ -15,6 +15,7 @@ use crate::host_api::events::{
 };
 use crate::hub::hub_api::PlayerEvent;
 use crate::player_server::entities::PsPlayer;
+use crate::types::ArcRwBox;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTROLLER: Arc<RwLock<GameController >> = Arc::new(RwLock::new(GameController::default()));
@@ -52,11 +53,16 @@ macro_rules! get_ctx_ensuring_state {
 
 /// Player server API
 impl GameController {
-    pub fn push_events(&self, events: Vec<PlayerEvent>) {
+    pub fn get_events_handle(&self) -> Arc<RwLock<Vec<PlayerEvent>>> {
         let data = self.game_state.game_ctx_ref();
-        let mut events_guard = data.events.write().expect("Expected to be able acquire write lock on events");
-        events_guard.extend(events);
+        data.events.clone()
     }
+
+    // pub fn push_events(&self, events: Vec<PlayerEvent>) {
+    //     let data = self.game_state.game_ctx_ref();
+    //     let mut events_guard = data.events.write().expect("Expected to be able acquire write lock on events");
+    //     events_guard.extend(events);
+    // }
 
     pub fn push_new_players(&mut self, players: Vec<PsPlayer>) -> error_stack::Result<(), GameplayError>{
         let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
@@ -89,7 +95,7 @@ impl GameController {
         }
     }
 
-    pub fn request_initial_game_state_emission(&self) {
+    pub fn request_context_update(&self) {
         self.emit_game_config_locking_hub();
     }
 
@@ -253,7 +259,6 @@ impl GameController {
     }
 
     fn emit_game_config_locking_hub(&self) {
-        // emit_hub_config(self.hub_mut().deref().into());
         let game_ctx = self.game_state.game_ctx_ref();
         emit_players_by_game_data(game_ctx);
     }

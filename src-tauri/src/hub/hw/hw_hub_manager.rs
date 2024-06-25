@@ -12,6 +12,7 @@ use rgb::RGB8;
 use serialport::SerialPort;
 use std::default::Default;
 use std::time::Duration;
+use crate::player_server::entities::PsPlayer;
 
 const HUB_CMD_TIMEOUT: Duration = Duration::from_millis(100);
 const MAX_TERMINAL_CNT: u8 = 10;
@@ -128,7 +129,7 @@ impl HubManager for HwHubManager {
         self.hub_status
     }
 
-    fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
+    fn discover_players(&mut self) -> Result<Vec<PsPlayer>, HubManagerError> {
         if !self.hub_status.is_live() {
             bail!(HubManagerError::NotInitializedError)
         }
@@ -141,8 +142,8 @@ impl HubManager for HwHubManager {
             }
 
             log::debug!("Terminal #{} is alive", term_id);
-            let player = Player {
-                term_id,
+            let player = PsPlayer {
+                id: term_id as i32,
                 ..Default::default()
             };
             players.push(player);

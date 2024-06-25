@@ -132,12 +132,17 @@ impl<State> GameCtx<State> {
     ) -> error_stack::Result<u8, GameplayError> {
         let allow_answer_timestamp = self.data.allow_answer_timestamp;
         loop {
+            sleep(FASTEST_CLICK_ITERATION_DUR);
             let events = self.data.take_events();
+            if events.is_empty() {
+                log::debug!("No events. Waiting for the next iteration");
+                continue;
+            }
+
             let filtered =
                 Self::filter_irrelevant_events(allow_answer_timestamp, events, active_players);
             if filtered.is_empty() {
                 log::debug!("No events after filtering. Waiting for the next iteration");
-                sleep(FASTEST_CLICK_ITERATION_DUR);
                 continue;
             }
 

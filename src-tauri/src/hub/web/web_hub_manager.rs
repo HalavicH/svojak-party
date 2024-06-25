@@ -21,6 +21,7 @@ use crate::hub::web::web_server::internal_api::{
 };
 use crate::hub::web::web_server::server;
 use crate::hub::web::web_server::server::PlayerIdentityDto;
+use crate::player_server::entities::PsPlayer;
 use crate::types::LazyExpect;
 
 const RETRY_INTERVAL_MS: u64 = 100;
@@ -150,7 +151,7 @@ impl HubManager for WebHubManager {
         }
     }
 
-    fn discover_players(&mut self) -> Result<Vec<Player>, HubManagerError> {
+    fn discover_players(&mut self) -> Result<Vec<PsPlayer>, HubManagerError> {
         let players: Vec<PlayerIdentityDto> = self
             .rt
             .block_on(async {
@@ -166,9 +167,9 @@ impl HubManager for WebHubManager {
 
         let players = players
             .iter()
-            .map(|p| Player {
-                term_id: p.id,
-                name: p.name.clone(),
+            .map(|p| PsPlayer {
+                id: p.id,
+                name: Some(p.name.clone()),
                 ..Default::default()
             })
             .collect();
@@ -218,7 +219,7 @@ impl HubManager for WebHubManager {
         self.rt
             .block_on(async {
                 let dto = TermLightColorDto {
-                    id: term_id,
+                    id: term_id as i32,
                     color: color.into(),
                 };
                 self.client
@@ -242,7 +243,7 @@ impl HubManager for WebHubManager {
         self.rt
             .block_on(async {
                 let dto = TermFeedbackState {
-                    id: term_id,
+                    id: term_id as i32  ,
                     state: state.to_bool(),
                 };
                 self.client

@@ -1,32 +1,29 @@
 use crate::core::game_controller::game_mut;
-use crate::core::game_entities::{Player, DEFAULT_ICON};
+use crate::core::game_entities::{Player, DEFAULT_ICON, GameplayError};
 use crate::host_api::events::emit_message;
 use crate::hub::hub_api::HubManager;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use std::thread::{sleep, spawn, JoinHandle};
 use std::time::Duration;
+use error_stack::Report;
+use crate::player_server::entities::PsPlayer;
+use crate::types::{ArcRwBox, Swap};
 
-pub fn start_listening_for_players_connection(
-    hub: Arc<RwLock<Box<dyn HubManager>>>,
-) -> JoinHandle<()> {
-    log::info!("Initial setup of player polling thread");
-
-    spawn(move || discovery_loop(hub))
-}
-
-fn discovery_loop(hub: Arc<RwLock<Box<dyn HubManager>>>) {
+pub fn run_player_discovery_loop(hub: Arc<RwLock<Box<dyn HubManager>>>, players_arc: Arc<RwLock<Box<Vec<PsPlayer>>>>) {
     let mut players = vec![];
     loop {
         players = discover_and_save_players(players, &hub);
+
+        players_arc.swap(Box::new(players.clone()));
         sleep(Duration::from_secs(2));
     }
 }
 
 pub fn discover_and_save_players(
-    old_players: Vec<Player>,
+    old_players: Vec<PsPlayer>,
     hub: &Arc<RwLock<Box<dyn HubManager>>>,
-) -> Vec<Player> {
+) -> Vec<PsPlayer> {
     log::debug!("||| Player polling: new iteration |||");
     let result = {
         let mut guard = hub.write().expect("Expected to get write handle");
@@ -43,7 +40,7 @@ pub fn discover_and_save_players(
     old_players
 }
 
-fn compare_and_merge_players(old_players: Vec<Player>, detected_players: &[Player]) -> Vec<Player> {
+fn compare_and_merge_players(old_players: Vec<PsPlayer>, detected_players: &[PsPlayer]) -> Vec<PsPlayer> {
     let det_pl_cnt = detected_players.len();
     log::debug!("Detected {} players", det_pl_cnt);
     if is_change_in_players_detected(&old_players, detected_players) {
@@ -57,18 +54,18 @@ fn compare_and_merge_players(old_players: Vec<Player>, detected_players: &[Playe
     old_players
 }
 
-fn is_change_in_players_detected(players: &[Player], detected_players: &[Player]) -> bool {
+fn is_change_in_players_detected(players: &[PsPlayer], detected_players: &[PsPlayer]) -> bool {
     if detected_players.len() > players.len() {
         return true;
     }
 
-    let current_players_ids: Vec<u8> = players.iter().map(|p| p.term_id).collect();
+    let current_players_ids: Vec<i32> = players.iter().map(|p| p.id).collect();
     // emit_message(format!("Current player ids: {current_players_ids:?}"));
     // let vec: Vec<u8> = detected_players.iter().map(|p| p.term_id).collect();
     // emit_message(format!("Detected player ids: {:?}", vec));
 
     for detected_player in detected_players {
-        if !current_players_ids.contains(&detected_player.term_id) {
+        if !current_players_ids.contains(&detected_player.id) {
             return true;
         }
     }
@@ -76,22 +73,25 @@ fn is_change_in_players_detected(players: &[Player], detected_players: &[Player]
     false
 }
 
-fn merge_players(detected_players: &[Player]) -> Vec<Player> {
+fn merge_players(detected_players: &[PsPlayer]) -> Vec<PsPlayer> {
     // TODO: make actual merge instead of simple re-assign
-    let players: HashMap<u8, Player> = detected_players
+    let players: Vec<PsPlayer> = detected_players
         .iter()
         .map(|p| {
-            let player = Player {
-                name: format!("Player {}", p.term_id),
+            PsPlayer {
+                id: p.id,
+                name: p.name.clone(),
                 icon: DEFAULT_ICON.to_string(),
-                ..p.to_owned()
-            };
-            (p.term_id, player)
+            }
         })
         .collect();
 
-    let players_v = players.values().cloned().collect();
-    let mut app = game_mut();
-    app.game_state.game_mut().set_players(players);
-    players_v
+    let result = game_mut().push_new_players(players.clone());
+    if let Err(err) = result {
+        match err.current_context() {
+            GameplayError::OperationForbidden => log::debug!("Inappropriate time to push new players"),
+            _ => log::error!("Can't push new players: {:?}", err),
+        }
+    }
+    players
 }

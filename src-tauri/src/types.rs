@@ -40,6 +40,7 @@ impl TryFrom<PathBuf> for Image {
     }
 }
 
+/// Enchants `Option` and `Result` with `expect_lazy` method to avoid using .unwrap_or_else(|| panic!())
 pub trait LazyExpect<T> {
     fn expect_lazy(self, fun: impl FnOnce() -> String) -> T;
 }
@@ -62,5 +63,17 @@ impl<T> LazyExpect<T> for Option<T> {
             Some(v) => v,
             None => panic!("{}", msg()),
         }
+    }
+}
+
+/// Adds `swap` method to `RwLock` to simplify value replacement
+pub trait Swap<T> {
+    fn swap(&self, new_value: T);
+}
+
+impl<T> Swap<T> for RwLock<T> {
+    fn swap(&self, new_value: T) {
+        let mut write_guard = self.write().unwrap();
+        *write_guard = new_value;
     }
 }

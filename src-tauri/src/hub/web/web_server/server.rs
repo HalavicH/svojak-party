@@ -9,7 +9,7 @@ use rocket::{Build, Rocket};
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-pub type PlayerId = u8;
+pub type PlayerId = i32;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]

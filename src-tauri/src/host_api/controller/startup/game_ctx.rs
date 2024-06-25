@@ -5,6 +5,7 @@ use crate::host_api::events::emit_pack_info;
 use crate::host_api::events::*;
 use error_stack::Report;
 use tauri::{command, Window};
+use crate::player_server::player_server::ps;
 
 /// Load game pack into the game
 #[command]
@@ -52,12 +53,6 @@ fn handle_pack_info_error(
 #[command]
 pub fn init_window_handle(window: Window) {
     set_window(window);
-}
-
-/// To get initial app context
-#[command]
-pub fn request_context_update() {
-    game().request_initial_game_state_emission();
 }
 
 /// Store round duration
