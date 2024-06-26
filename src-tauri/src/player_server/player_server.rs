@@ -209,7 +209,7 @@ fn listen_hub_events(
         let hub_guard = hub.read().expect("Mutex is poisoned");
         let Ok(events) = hub_guard.read_event_queue() else {
             log::error!("Can't read event queue. Skipping iteration");
-            return;
+            continue;
         };
 
         if events.is_empty() {

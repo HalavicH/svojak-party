@@ -12,7 +12,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 pub const INVALID_PLAYER_ID: u8 = 0; // TODO: Consider using Option<u8> instead
-const FASTEST_CLICK_ITERATION_DUR: Duration = Duration::from_secs(1);
+const FASTEST_CLICK_ITERATION_DUR: Duration = Duration::from_millis(200);
 
 #[derive(Debug, Clone)]
 pub struct GameCtx<State = SetupAndLoading> {

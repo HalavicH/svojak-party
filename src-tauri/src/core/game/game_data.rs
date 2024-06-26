@@ -27,6 +27,12 @@ pub struct GameData {
 }
 
 impl GameData {
+    pub(crate) fn alive_players_left(&self) -> usize {
+        self.players
+            .values()
+            .filter(|p| p.state != PlayerState::Dead)
+            .count()
+    }
     pub fn new(players: Vec<Player>) -> Self {
         let players_map = players.into_iter().map(|p| (p.term_id, p)).collect();
         GameData {

@@ -2,6 +2,8 @@ use rocket::serde::Serialize;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, RwLock};
 
+const GAME_SPEED_FACTOR: f64 = 1.0;
+
 pub type ArcRwBox<T> = Arc<RwLock<Box<T>>>;
 
 pub fn new_arc_rw_box<T>(t: T) -> ArcRwBox<T> {

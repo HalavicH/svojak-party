@@ -16,6 +16,8 @@ use crate::hub::hw::internal::hw_hub_device::{format_bytes_hex, stuff_bytes};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
+const EVENTS_GENERATION_INTERVAL_MS: u64 = 10;
+
 pub fn run_hub_mock() -> Result<(Box<dyn SerialPort>, JoinHandle<()>), String> {
     let (host_handle, device_tty) = TTYPort::pair().expect("Unable to create ptty pair");
     let string = device_tty.name().expect("Mock HUB. Not for prod");
@@ -180,7 +182,7 @@ impl HubMock {
                 let len = { events.lock().expect("Mutex is poisoned").len() };
 
                 if len > 5 {
-                    sleep(Duration::from_millis(100));
+                    sleep(Duration::from_millis(EVENTS_GENERATION_INTERVAL_MS));
                     continue;
                 }
 

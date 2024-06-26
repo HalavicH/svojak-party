@@ -11,8 +11,14 @@ impl GameCtx<ShowRoundStats> {
     pub(crate) fn get_end_round_path(&self) -> Result<RoundStatsResult, GameplayError> {
         let game = &self.data;
         if game.has_next_round() {
-            log::info!("There's another round to play. Starting next round");
-            Ok(RoundStatsResult::StartNextRound(self.transition()))
+            log::info!("There's another round to play");
+            return if self.data.alive_players_left() < 2 {
+                log::info!("Less than 2 players left. Ending the game.");
+                Ok(RoundStatsResult::EndTheGame(self.transition()))
+            } else {
+                log::info!("More than 2 players left. Starting the next round.");
+                Ok(RoundStatsResult::StartNextRound(self.transition()))
+            }
         } else {
             log::info!("No more rounds to play. Ending the game");
             Ok(RoundStatsResult::EndTheGame(self.transition()))
