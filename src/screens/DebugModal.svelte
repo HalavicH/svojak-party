@@ -154,6 +154,10 @@
         }
         notify.info(`Finished round: ${round.roundName}`);
     }
+
+    async function requestStoreRefresh() {
+        await callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
+    }
 </script>
 
 <BaseModal {isOpen}>
@@ -220,6 +224,12 @@
             <tr>
                 <td>
                     <SecondaryButton text="Reset Game" onClick={resetGame}/>
+                </td>
+                <td><p>Set's state to SetupAndLoading. Clears players and hub</p></td>
+            </tr>
+            <tr>
+                <td>
+                    <SecondaryButton text="Refresh stores request" onClick={requestStoreRefresh}/>
                 </td>
                 <td><p>Set's state to SetupAndLoading. Clears players and hub</p></td>
             </tr>

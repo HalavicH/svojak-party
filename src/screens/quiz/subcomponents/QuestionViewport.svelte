@@ -17,7 +17,7 @@
 
 <script>
     // import Swiper core and required modules
-    import {A11y, Navigation, Pagination, Scrollbar} from 'swiper';
+    import {A11y, Keyboard, Navigation, Pagination, Scrollbar} from 'swiper';
     import {currentQuestionStore} from "../../../lib/stores.js";
 
     import {Swiper, SwiperSlide} from 'swiper/svelte';
@@ -27,6 +27,7 @@
     import 'swiper/css/navigation';
     import 'swiper/css/pagination';
     import 'swiper/css/scrollbar';
+    import 'swiper/css/keyboard';
     import Scenario from "./Scenario.svelte";
 
     $: question = $currentQuestionStore;
@@ -34,11 +35,12 @@
 
 <div class="viewport">
     <Swiper
-            modules={[Navigation, Pagination, Scrollbar, A11y]}
+            modules={[Navigation, Pagination, Scrollbar, A11y, Keyboard]}
             slidesPerView={1}
             navigation={{enabled: true}}
             pagination={{ clickable: true }}
             scrollbar={{ draggable: true }}
+            keyboard={{ enabled: true, pageUpDown: true}}
             on:slideChange={() => console.log('slide change')}
             on:swiper={(e) => console.log(e.detail[0])}
     >

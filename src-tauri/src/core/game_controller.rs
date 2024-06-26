@@ -10,9 +10,7 @@ use crate::core::game::ctx::state_processors::show_round_stats::RoundStatsResult
 use crate::core::game::game_state::GameState;
 use crate::core::game_entities::GameplayError;
 use crate::core::game_pack::game_pack_entites::GamePack;
-use crate::host_api::events::{
-    emit_error, emit_game_state, emit_players_by_game_data, emit_question, emit_round,
-};
+use crate::host_api::events::{emit_error, emit_final_results, emit_game_state, emit_players_by_game_data, emit_question, emit_round};
 use crate::hub::hub_api::PlayerEvent;
 use crate::player_server::entities::PsPlayer;
 use crate::types::ArcRwBox;
@@ -261,6 +259,11 @@ impl GameController {
     fn emit_game_config_locking_hub(&self) {
         let game_ctx = self.game_state.game_ctx_ref();
         emit_players_by_game_data(game_ctx);
+        emit_question(game_ctx.current_question_ref().into());
+
+        game_ctx.current_round_opt_ref()
+            .map(|r| emit_round(r.into()));
+        emit_game_state(&self.game_state);
     }
 
     fn emit_game_context(&self) {

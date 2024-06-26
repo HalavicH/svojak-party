@@ -137,6 +137,10 @@ impl GameData {
             .expect("Expected to have current round index")]
     }
 
+    pub fn current_round_opt_ref(&self) -> Option<&Round> {
+        self.current_round_index.map(|i| &self.pack_content.rounds[i])
+    }
+
     pub fn current_question_ref(&self) -> &Question {
         &self.current_question
     }
