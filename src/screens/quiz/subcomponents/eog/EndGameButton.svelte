@@ -10,7 +10,7 @@
 </script>
 
 <div class="next">
-    <Button text="Go to main menu" onClick={processGameEnd} style="background-color: #8c4823"/>
+    <Button text="Go to main menu" onClick={processGameEnd} style="background-color: #15828e"/>
 </div>
 
 <style>
@@ -22,7 +22,6 @@
         border-radius: 10px;
         background-color: var(--modal-table-background-color);
 
-        height: 30vh;
         margin: 0.5em;
     }
 

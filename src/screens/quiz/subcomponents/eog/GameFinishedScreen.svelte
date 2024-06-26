@@ -2,6 +2,7 @@
     import {currentFinalResultsStore, EndGameReason} from "../../../../lib/stores.js";
     import Table from "../../../../components/generic/Table.svelte";
     import {toPlayerImage} from "../../../../lib/misc.js";
+    import EndGameButton from "./EndGameButton.svelte";
 
     currentFinalResultsStore.subscribe(value => {
         console.log(value);
@@ -23,9 +24,9 @@
 
 </script>
 
-<div>
+<div class="full-screen">
     <h2>{endGameText}</h2>
-    <p>Top places:</p>
+    <h3>Top places:</h3>
     <div class="common-stats">
         <Table headers={["Place", "Icon", "Name", "Score"]}>
             <tr>
@@ -58,7 +59,7 @@
     </div>
 
     {#if stats.theRest.length > 0}
-        <p>Other players:</p>
+        <h4>Other players:</h4>
         <div class="common-stats">
             <Table headers={["Icon", "Name", "Score"]}>
                 {#each stats.theRest as player}
@@ -73,9 +74,42 @@
             </Table>
         </div>
     {/if}
+    <EndGameButton/>
 </div>
 
 <style>
+    .full-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    h2, h3, h4 {
+        margin-bottom: 0.2em;
+    }
+
+    h2 {
+        filter: drop-shadow(0 0 1em #00ffff);
+    }
+
+    h3 {
+        font-size: large;
+        font-style: italic;
+        font-weight: bold;
+    /*  Box shadow  */
+        filter: drop-shadow(0 0 1em #0081ff);
+    }
+
+
+    h4 {
+        font-size: large;
+        font-style: italic;
+        font-weight: bold;
+        filter: drop-shadow(0 0 1em #ffc400);
+    }
+
     .icon {
         width: 2em;
         height: 2em;

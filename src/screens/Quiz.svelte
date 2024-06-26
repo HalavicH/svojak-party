@@ -10,10 +10,7 @@
     import Centered from "../components/generic/Centered.svelte";
     import EndQuestionScreen from "./quiz/subcomponents/EndQuestionScreen.svelte";
     import RoundStatsView from "./quiz/subcomponents/stats/RoundStatsView.svelte";
-    import Button from "../components/generic/Button.svelte";
-    import NextRoundButton from "./quiz/subcomponents/stats/NextRoundButton.svelte";
     import GameFinishedScreen from "./quiz/subcomponents/eog/GameFinishedScreen.svelte";
-    import EndGameButton from "./quiz/subcomponents/eog/EndGameButton.svelte";
 
     $: gameState = $currentGameStateStore.gameState;
 </script>
@@ -21,37 +18,33 @@
 <div class="container">
     <ModalPlaceholder/>
     <MenuButton/>
-    <div class="main-view">
-        {#if gameState === GameState.SetupAndLoading}
-            <Centered greedy={true}>
-                <div>Loading...</div>
-            </Centered>
-        {:else if gameState === GameState.PickFirstQuestionChooser}
-            <PickFirstQuestionChooser/>
-        {:else if gameState === GameState.ChooseQuestion}
-            <RoundView/>
-        {:else if gameState === GameState.DisplayQuestion
-        || gameState === GameState.WaitingForAnswerRequests
-        || gameState === GameState.AnswerAttemptReceived
-        }
-            <QuestionView/>
-        {:else if gameState === GameState.EndQuestion}
-            <EndQuestionScreen/>
-        {:else if gameState === GameState.ShowRoundStats}
-            <RoundStatsView/>
-        {:else if gameState === GameState.EndTheGame}
-            <GameFinishedScreen/>
-        {:else}
-            <Row>
-                <div>Unhandled state: {gameState}</div>
-            </Row>
-        {/if}
-    </div>
     {#if gameState === GameState.ShowRoundStats}
-        <NextRoundButton/>
+        <RoundStatsView/>
     {:else if gameState === GameState.EndTheGame}
-        <EndGameButton/>
-    {:else}
+        <GameFinishedScreen/>
+    {:else }
+        <div class="main-view">
+            {#if gameState === GameState.SetupAndLoading}
+                <Centered greedy={true}>
+                    <div>Loading...</div>
+                </Centered>
+            {:else if gameState === GameState.PickFirstQuestionChooser}
+                <PickFirstQuestionChooser/>
+            {:else if gameState === GameState.ChooseQuestion}
+                <RoundView/>
+            {:else if gameState === GameState.DisplayQuestion
+            || gameState === GameState.WaitingForAnswerRequests
+            || gameState === GameState.AnswerAttemptReceived
+            }
+                <QuestionView/>
+            {:else if gameState === GameState.EndQuestion}
+                <EndQuestionScreen/>
+            {:else}
+                <Row>
+                    <div>Unhandled state: {gameState}</div>
+                </Row>
+            {/if}
+        </div>
         <PlayersView/>
     {/if}
 </div>

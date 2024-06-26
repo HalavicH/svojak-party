@@ -8,7 +8,7 @@
 </script>
 
 <div class="next">
-    <Button text="Next round" onClick={nextRound} style="background-color: #8c4823"/>
+    <Button text="Next round" onClick={nextRound} style="background-color: #69238c"/>
 </div>
 
 <style>
@@ -20,8 +20,8 @@
         border-radius: 10px;
         background-color: var(--modal-table-background-color);
 
-        height: 30vh;
-        margin: 0.5em;
+        /*height: 30vh;*/
+        /*margin: 0.5em;*/
     }
 
 </style>

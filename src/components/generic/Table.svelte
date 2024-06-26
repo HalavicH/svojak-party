@@ -39,4 +39,8 @@
         border-radius: 10px;
         align-items: center;
     }
+
+    .header {
+        padding: 0 0.3em;
+    }
 </style>

@@ -2,6 +2,7 @@
     import {currentRoundStatsStore} from "../../../../lib/stores.js";
     import Table from "../../../../components/generic/Table.svelte";
     import {DFL_PLAYER_ICON} from "../../../../lib/misc.js"
+    import NextRoundButton from "./NextRoundButton.svelte";
 
     currentRoundStatsStore.subscribe(value => {
         console.log(value);
@@ -39,7 +40,7 @@ pub struct RoundStatsDto {
     pub players: Vec<PlayerEndRoundStatsDto>,
 }
 -->
-<div>
+<div class="full-screen">
     <h2>Round '{stats.roundName}' finished!</h2>
     <div class="common-stats">
         <Table headers={[]}>
@@ -85,9 +86,17 @@ pub struct RoundStatsDto {
         {/each}
     </Table>
     </div>
+    <NextRoundButton/>
 </div>
 
 <style>
+    .full-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
     .icon {
         width: 2em;
         height: 2em;
