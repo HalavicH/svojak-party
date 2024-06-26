@@ -1,6 +1,6 @@
 use crate::core::game_entities::{Player, PlayerState};
 use crate::core::game_pack::pack_content_entities::{PackContent, Question, Round, RoundStats};
-use crate::host_api::dto::{PlayerEndRoundStatsDto, RoundStatsDto};
+use crate::host_api::dto::{PlayerEndRoundStatsDto, QuestionDto, RoundStatsDto};
 use crate::host_api::events::{
     emit_players, emit_players_by_players_map, emit_question, emit_round,
 };
@@ -16,8 +16,8 @@ pub struct GameData {
     /// Game State
     current_round_index: Option<usize>,
     pub active_player_id: u8,
-    // active_player: &Player, // TODO add reference from the players: HashMap<u8, Player>. Invokes lifetime usage
     pub answer_allowed: bool,
+    pub question_number: i32,
     /// Current question
     pub current_question: Question,
     /// Event frame. Flushed every new question
@@ -173,8 +173,11 @@ impl GameData {
     }
 
     pub fn set_current_question(&mut self, question: Question) {
+        self.question_number += 1;
         self.current_question = question;
-        emit_question((&self.current_question).into());
+        let mut dto: QuestionDto = (&self.current_question).into();
+        dto.number = self.question_number;
+        emit_question(dto);
     }
 
     pub fn take_events(&self) -> Vec<PlayerEvent> {

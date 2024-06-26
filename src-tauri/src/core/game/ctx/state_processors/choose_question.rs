@@ -13,6 +13,7 @@ impl GameCtx<ChooseQuestion> {
         let question = data
             .get_question(topic, price)
             .ok_or(GameplayError::PackElementNotPresent)?;
+
         data.set_current_question(question.clone());
 
         data.set_active_player_state(PlayerState::Idle);
