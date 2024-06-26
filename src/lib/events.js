@@ -66,6 +66,8 @@ function listenAndStoreEvent(eventType, storage) {
         return;
     }
 
+    console.log(`Setting up event listener for: ${eventType}`)
+
     listen(eventType, event => {
         logEvent(eventType, event);
         const payload = event.payload;

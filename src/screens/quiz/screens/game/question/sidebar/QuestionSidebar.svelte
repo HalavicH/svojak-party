@@ -94,7 +94,7 @@
         display: flex;
         flex-direction: column;
         padding: 0.5em;
-        background-color: rgba(100, 100, 100, 0.5);
+        background-color: var(--items-block-color);
         border: 1px solid var(--items-block-border-color);
         border-radius: inherit;
     }

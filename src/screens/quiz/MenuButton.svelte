@@ -7,6 +7,8 @@ import {goToMainMenu} from "../views.js";
 
 <style>
     button {
+        background-color: var(--primary-button-color);
+        color: var(--primary-button-text-color);
         position: absolute;
         top: 0;
         left: 50%;
@@ -22,7 +24,7 @@ import {goToMainMenu} from "../views.js";
 
     button:hover {
         transform: scale(150%) translateX(-30%) translateY(15%);
-        border-color: #472e00;
+        border-color: var(--primary-button-border-color);
         filter: drop-shadow(0 0 0.2em #dbd824);
     }
 </style>

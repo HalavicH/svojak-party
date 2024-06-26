@@ -1,6 +1,8 @@
 :root {
     /* SET LIGHT THEME */
     --text-color: #0f0f0f;
+    --secondary-text-color: #1a1532;
+
     --title-text-color: #410060;
     --background-color: #f6f6f6;
     --items-block-color: #e2f0fd;
@@ -8,6 +10,7 @@
 
     --primary-button-color: #ffffff;
     --primary-button-active-color: #e8e8e8;
+    --primary-button-border-color: #a7ffe9;
     --secondary-button-color: #cbeaee;
     --secondary-button-border-color: #bddce0;
 
@@ -39,6 +42,8 @@
     :root {
         /* SET DARK THEME */
         --text-color: #f6f6f6;
+        --secondary-text-color: #8799aa;
+
         --title-text-color: #9cb7b9;
         --background-color: #2f2f2f;
         --items-block-color: #2f2f2f;
@@ -46,6 +51,7 @@
 
         --primary-button-color: #0f0f0f98;
         --primary-button-active-color: #0f0f0f69;
+        --primary-button-border-color: #353a4c;
         --secondary-button-color: #499885;
         --secondary-button-border-color: #368270;
 
@@ -57,4 +63,38 @@
 
         --accent-color: rgba(40, 114, 124, 0.281);
     }
+}
+
+[data-theme='dark'] {
+    --text-color: #f6f6f6;
+    --secondary-text-color: #8799aa;
+
+    --title-text-color: #9cb7b9;
+    --background-color: #2f2f2f;
+    --items-block-color: #2f2f2f;
+    --items-block-border-color: #000000;
+
+    --primary-button-color: #0f0f0f98;
+    --primary-button-active-color: #0f0f0f69;
+    --primary-button-border-color: #353a4c;
+    --secondary-button-color: #499885;
+    --secondary-button-border-color: #368270;
+
+    --modal-background-color: #383838;
+    --modal-table-background-color: #262626;
+    --modal-table-border-color: rgba(189, 220, 224, 0);
+    --modal-table-labels-color: #3d4643;
+    --modal-select-color: #262828;
+
+    --accent-color: rgba(40, 114, 124, 0.281);
+
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+html, body {
+    margin: 0;
+    background-color: var(--background-color);
+    height: 100%;
+    width: 100%;
 }

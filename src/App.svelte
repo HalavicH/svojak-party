@@ -10,6 +10,7 @@
     import {convertFileSrc} from "@tauri-apps/api/tauri";
     import {appCacheDir, appDataDir, homeDir, resolve} from "@tauri-apps/api/path";
     import {tempdir} from "@tauri-apps/api/os";
+    import ThemeSwitcher from "./screens/ThemeSwitcher.svelte";
 
     setupEventListener('message', (event) => {
         const message = event.payload;
@@ -50,6 +51,7 @@
 </script>
 
 <main class="container">
+    <ThemeSwitcher/>
 <!--    <img src="file:///Users/oleksandrkholiavko/RustroverProjects/svojak-hw/public/bc-logo.png" alt="">-->
 <!--    <img src={src} alt="">-->
     {#if $currentView === Views.MENU}

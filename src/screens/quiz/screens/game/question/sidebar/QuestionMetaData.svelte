@@ -24,7 +24,7 @@
 
         border: solid 1px var(--items-block-border-color);
         border-radius: inherit;
-        background-color: rgba(100, 100, 100, 0.5);
+        background-color: var(--items-block-color);
     }
 
     .metadata {
@@ -35,7 +35,7 @@
 
         /*max-height: 1.8em;*/
         font-size: 1em;
-        background-color: #484848;
+        background-color: var(--accent-color);
         /*background-color: #4d4d4d;*/
     }
 </style>

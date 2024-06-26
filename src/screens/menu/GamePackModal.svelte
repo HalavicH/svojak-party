@@ -98,7 +98,7 @@
     }
 
     .sub-title {
-        color: #adadad;
+        color: var(--secondary-text-color);
         font-style: italic;
     }
 </style>

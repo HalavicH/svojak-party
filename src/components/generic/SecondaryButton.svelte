@@ -22,7 +22,7 @@
         font-weight: 500;
         font-family: inherit;
         color: #000000;
-        background-color: rgba(134, 134, 134, 0.6);
+        background-color: var(--secondary-button-color);
         transition: border-color 0.25s;
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
         cursor: pointer;

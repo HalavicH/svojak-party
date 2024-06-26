@@ -30,7 +30,6 @@
 
 <style>
     select {
-        --modal-select-color: #262828;
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;

@@ -36,9 +36,9 @@
 {/if}
 
 <style>
-    body {
-        overflow: hidden; /* Disable scrolling on the main page */
-    }
+    /*body {*/
+    /*    overflow: hidden; !* Disable scrolling on the main page *!*/
+    /*}*/
 
     .modal {
         z-index: 99999;
@@ -55,13 +55,12 @@
     }
 
     .contents {
-        --modal-background-color: #383838;
         min-width: 30%;
         max-width: 90%;
         max-height: 90%; /* Ensure the modal content doesn't exceed the viewport height */
         border-radius: 6px;
         padding: 16px;
-        background: var(--modal-background-color);
+        background-color: var(--modal-background-color);
         display: flex;
         flex-direction: column;
         pointer-events: auto;

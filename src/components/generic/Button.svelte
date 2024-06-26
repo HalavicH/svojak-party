@@ -21,8 +21,8 @@
         font-size: 1em;
         font-weight: 500;
         font-family: inherit;
-        color: #e8e8e8;
-        background-color: #0f0f0f98;
+        color: var(--text-color);
+        background-color: var(--primary-button-color);
         transition: border-color 0.25s;
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
         cursor: pointer;
