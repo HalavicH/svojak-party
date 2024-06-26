@@ -1,12 +1,13 @@
 use crate::core::game::ctx::game_ctx::GameCtx;
+use crate::core::game::ctx::state_processors::show_round_stats::EndGameReason;
 use crate::core::game::game_data::GameData;
 use crate::core::game::state_structs::{EndTheGame, SetupAndLoading};
 use crate::core::game_entities::{GameplayError, Player};
-use crate::host_api::dto::{FinalResultsDto, PlayerFinalStatsDto};
+use crate::host_api::dto::{EndGameStatsDto, PlayerFinalStatsDto};
 use crate::host_api::events::emit_final_results;
 
 impl GameCtx<EndTheGame> {
-    pub fn calculate_final_results(&self) {
+    pub fn calculate_final_results(&self, reason: EndGameReason) {
         let mut players = self
             .data
             .players_map_ref()
@@ -23,7 +24,8 @@ impl GameCtx<EndTheGame> {
             .map(Into::into)
             .collect::<Vec<PlayerFinalStatsDto>>();
 
-        let final_stats = FinalResultsDto {
+        let final_stats = EndGameStatsDto {
+            endGameReason: reason,
             first: first.into(),
             second: second.into(),
             third: third_opt.map(Into::into),

@@ -4,7 +4,14 @@ use crate::core::game_entities::GameplayError;
 
 pub enum RoundStatsResult {
     StartNextRound(GameCtx<StartNextRound>),
-    EndTheGame(GameCtx<EndTheGame>),
+    EndTheGame(GameCtx<EndTheGame>, EndGameReason),
+}
+
+#[derive(Clone, Debug)]
+pub enum EndGameReason {
+    OnePlayerLeft,
+    NoPlayersLeft,
+    AllRoundsPlayed,
 }
 
 impl GameCtx<ShowRoundStats> {
@@ -12,16 +19,20 @@ impl GameCtx<ShowRoundStats> {
         let game = &self.data;
         if game.has_next_round() {
             log::info!("There's another round to play");
-            return if self.data.alive_players_left() < 2 {
-                log::info!("Less than 2 players left. Ending the game.");
-                Ok(RoundStatsResult::EndTheGame(self.transition()))
+            let players_left = self.data.alive_players_left();
+            return if players_left == 1 {
+                log::info!("Only one players left. Ending the game.");
+                Ok(RoundStatsResult::EndTheGame(self.transition(), EndGameReason::OnePlayerLeft))
+            } else if players_left == 0 {
+                log::info!("No players left. Ending the game.");
+                Ok(RoundStatsResult::EndTheGame(self.transition(), EndGameReason::NoPlayersLeft))
             } else {
                 log::info!("More than 2 players left. Starting the next round.");
                 Ok(RoundStatsResult::StartNextRound(self.transition()))
             }
         } else {
             log::info!("No more rounds to play. Ending the game");
-            Ok(RoundStatsResult::EndTheGame(self.transition()))
+            Ok(RoundStatsResult::EndTheGame(self.transition(), EndGameReason::AllRoundsPlayed))
         }
     }
 }

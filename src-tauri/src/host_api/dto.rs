@@ -2,6 +2,7 @@ use crate::core::game_entities::{HubStatus, Player, PlayerState};
 use crate::core::game_pack::pack_content_entities::QuestionMediaType;
 use crate::types::Image;
 use serde::{Deserialize, Serialize};
+use crate::core::game::ctx::state_processors::show_round_stats::EndGameReason;
 
 ////////// Hub Config ///////////
 #[derive(Debug, Default, Serialize, Clone)]
@@ -125,7 +126,8 @@ pub struct PlayerEndRoundStatsDto {
 
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Clone)]
-pub struct FinalResultsDto {
+pub struct EndGameStatsDto {
+    pub endGameReason: EndGameReason,
     pub first: PlayerFinalStatsDto,
     pub second: PlayerFinalStatsDto,
     pub third: Option<PlayerFinalStatsDto>,

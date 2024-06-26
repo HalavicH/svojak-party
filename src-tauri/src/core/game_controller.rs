@@ -196,8 +196,8 @@ impl GameController {
                 self.init_next_round()?;
                 self.pick_first_question_chooser()?;
             }
-            RoundStatsResult::EndTheGame(ctx) => {
-                ctx.calculate_final_results();
+            RoundStatsResult::EndTheGame(ctx, reason) => {
+                ctx.calculate_final_results(reason);
                 self.set_game_state(GameState::EndTheGame(ctx))
             }
         }

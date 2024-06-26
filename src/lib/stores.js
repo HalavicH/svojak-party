@@ -248,24 +248,20 @@ let roundStatsMock = {
     ]
 };
 
-// #[allow(non_snake_case)]
-// #[derive(Debug, Serialize, Clone)]
-// pub struct FinalResultsDto {
-//     pub first: PlayerFinalStatsDto,
-//     pub second: PlayerFinalStatsDto,
-//     pub third: Option<PlayerFinalStatsDto>,
-//     pub theRest: Vec<PlayerFinalStatsDto>,
+// #[derive(Clone, Debug)]
+// pub enum EndGameReason {
+//     OnePlayerLeft,
+//     NoPlayersLeft,
+//     AllRoundsPlayed,
 // }
-//
-// #[allow(non_snake_case)]
-// #[derive(Debug, Serialize, Clone)]
-// pub struct PlayerFinalStatsDto {
-//     name: String,
-//     icon: Option<Image>,
-//     score: i32,
-//     state: PlayerState
-// }
-let gameStatsMock = {
+export const EndGameReason = {
+    OnePlayerLeft: 'OnePlayerLeft',
+    NoPlayersLeft: 'NoPlayersLeft',
+    AllRoundsPlayed: 'AllRoundsPlayed',
+}
+
+let endGameStatsMock = {
+    gameEndReason: EndGameReason.AllRoundsPlayed,
     first: {
         name: "HalavicH",
         score: 500,
@@ -302,7 +298,7 @@ export const currentRoundStore = writable(mockRound);
 export const currentQuestionStore = writable(mockQuestion);
 export const currentGameStateStore = writable({gameState: GameState.SetupAndLoading});
 export const currentRoundStatsStore = writable(roundStatsMock);
-export const currentFinalResultsStore = writable(gameStatsMock);
+export const currentFinalResultsStore = writable(endGameStatsMock);
 
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");

@@ -7,7 +7,7 @@ use crate::core::game_controller::game;
 use crate::core::game_entities::{HubStatus, Player};
 use crate::core::game_pack::pack_content_entities::Round;
 use crate::host_api::dto::{
-    FinalResultsDto, HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto,
+    EndGameStatsDto, HubConfigDto, PackInfoDto, PlayerDto, PlayersDto, QuestionDto, RoundDto,
     RoundStatsDto,
 };
 use serde::{Deserialize, Serialize};
@@ -131,7 +131,7 @@ pub fn emit_round_stats(round: RoundStatsDto) {
     emit(Event::RoundStats, round);
 }
 
-pub fn emit_final_results(final_results: FinalResultsDto) {
+pub fn emit_final_results(final_results: EndGameStatsDto) {
     emit(Event::RoundStats, final_results);
 }
 #[allow(non_snake_case)]

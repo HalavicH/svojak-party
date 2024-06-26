@@ -1,5 +1,5 @@
 <script>
-    import {currentFinalResultsStore} from "../../../../lib/stores.js";
+    import {currentFinalResultsStore, EndGameReason} from "../../../../lib/stores.js";
     import Table from "../../../../components/generic/Table.svelte";
 
     currentFinalResultsStore.subscribe(value => {
@@ -7,42 +7,23 @@
     });
 
     let stats = $currentFinalResultsStore;
-
+    let endGameText;
+    switch (stats.gameEndReason) {
+        case EndGameReason.NoPlayersLeft:
+            endGameText = "It seems no one survived! Well game pack author will be happy 😈";
+            break;
+        case EndGameReason.AllRoundsPlayed:
+            endGameText = "All rounds played! Finally you're not obligated to play anymore! 🤝";
+            break;
+        case EndGameReason.OnePlayerLeft:
+            endGameText = "Only one survived! Congratulations.. I guess ??";
+            break;
+    }
 
 </script>
 
-<!--
-let gameStatsMock = {
-    first: {
-        name: "HalavicH",
-        score: 500,
-        state: PlayerState.Idle,
-        icon: DFL_PLAYER_ICON,
-    },
-    second: {
-        name: "Valadis",
-        score: 400,
-        state: PlayerState.Idle,
-        icon: DFL_PLAYER_ICON,
-    },
-    third: {
-        name: "Baadtrip",
-        score: 200,
-        state: PlayerState.Idle,
-        icon: DFL_PLAYER_ICON,
-    },
-    theRest: [
-        {
-            name: "Button",
-            score: -100,
-            state: PlayerState.Dead,
-            icon: DFL_PLAYER_ICON,
-        }
-    ]
-}
--->
 <div>
-    <h2>You finally done that :D</h2>
+    <h2>{endGameText}</h2>
     <p>Top places:</p>
     <div class="common-stats">
         <Table headers={["Place", "Icon", "Name", "Score"]}>
