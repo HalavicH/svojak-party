@@ -1,5 +1,5 @@
 <script>
-    import {TauriApiCommand, callBackend} from "../../../lib/commands.js";
+    import {TauriApiCommand, callBackend} from "../../../../../lib/commands.js";
 
     export let topicName;
     export let question;

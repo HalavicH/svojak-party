@@ -1,13 +1,11 @@
 <script>
-    import {currentGameStateStore, currentRoundStore, GameState} from "../../../lib/stores.js";
-    import Button from "../../../components/generic/Button.svelte";
-    import {TauriApiCommand, callBackend} from "../../../lib/commands.js";
+    import {currentGameStateStore, currentRoundStore, GameState} from "../../../../../../lib/stores.js";
+    import {TauriApiCommand, callBackend} from "../../../../../../lib/commands.js";
+    import Button from "../../../../../../components/generic/Button.svelte";
+    import VSpacing from "../../../../../../components/generic/VSpacing.svelte";
     import AllowAnswerButton from "./AllowAnswerButton.svelte";
     import CorrectAnswerButton from "./CorrectAnswerButton.svelte";
     import WrongAnswerButton from "./WrongAnswerButton.svelte";
-    import {goToMainMenu} from "../../views.js";
-    import VSpacing from "../../../components/generic/VSpacing.svelte";
-    import MenuButton from "./MenuButton.svelte";
     import QuestionMetaData from "./QuestionMetaData.svelte";
 
     $: currentRound = $currentRoundStore;

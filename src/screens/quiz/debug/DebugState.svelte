@@ -1,5 +1,5 @@
 <script>
-    import {currentGameStateStore} from "../lib/stores.js";
+    import {currentGameStateStore} from "../../../lib/stores.js";
 </script>
 
 <div class="debug-button">

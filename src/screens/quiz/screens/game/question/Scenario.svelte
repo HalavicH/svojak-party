@@ -1,5 +1,5 @@
 <script>
-    import {QuestionMediaType} from "../../../lib/stores.js";
+    import {QuestionMediaType} from "../../../../../lib/stores.js";
     import {convertFileSrc} from "@tauri-apps/api/tauri";
     import {onMount} from "svelte";
 

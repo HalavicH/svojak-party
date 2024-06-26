@@ -1,7 +1,7 @@
 <script>
-    import {currentPlayersStore} from "../../lib/stores.js";
-    import Player from "./subcomponents/Player.svelte";
-    import {DFL_PLAYER_ICON} from "../../lib/misc.js";
+    import {currentPlayersStore} from "../../../../../lib/stores.js";
+    import Player from "./Player.svelte";
+    import {DFL_PLAYER_ICON} from "../../../../../lib/misc.js";
 
     $: players = $currentPlayersStore.map(p => {
         if (p.iconPath === "default") {

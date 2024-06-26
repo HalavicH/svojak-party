@@ -1,9 +1,9 @@
 <script>
-    import Button from "../../../components/generic/Button.svelte";
-    import Centered from "../../../components/generic/Centered.svelte";
-    import {callBackend, TauriApiCommand} from "../../../lib/commands.js";
-    import {currentQuestionStore} from "../../../lib/stores.js";
-    import VSpacing from "../../../components/generic/VSpacing.svelte";
+    import Button from "../../../../components/generic/Button.svelte";
+    import Centered from "../../../../components/generic/Centered.svelte";
+    import {callBackend, TauriApiCommand} from "../../../../lib/commands.js";
+    import {currentQuestionStore} from "../../../../lib/stores.js";
+    import VSpacing from "../../../../components/generic/VSpacing.svelte";
 
     $: answer = $currentQuestionStore.answer;
 

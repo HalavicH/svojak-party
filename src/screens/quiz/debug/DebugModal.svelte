@@ -1,9 +1,9 @@
 <script>
-    import BaseModal from "../components/abstract/BaseModal.svelte";
-    import ItemsBlock from "../components/generic/ItemsBlock.svelte";
-    import Row from "../components/generic/Row.svelte";
-    import {callBackend, TauriApiCommand} from "../lib/commands.js";
-    import {notify} from "../lib/notifications.js";
+    import BaseModal from "../../../components/abstract/BaseModal.svelte";
+    import ItemsBlock from "../../../components/generic/ItemsBlock.svelte";
+    import Row from "../../../components/generic/Row.svelte";
+    import {callBackend, TauriApiCommand} from "../../../lib/commands.js";
+    import {notify} from "../../../lib/notifications.js";
     import {
         currentGameStateStore,
         currentHubConfigStore,
@@ -13,11 +13,11 @@
         currentRoundStore,
         GameState,
         navTo
-    } from "../lib/stores.js";
-    import {Views} from "./views.js";
-    import SecondaryButton from "../components/generic/SecondaryButton.svelte";
-    import {isRunningInTauri} from "../lib/misc.js";
-    import HSpacing from "../components/generic/HSpacing.svelte";
+    } from "../../../lib/stores.js";
+    import {Views} from "../../views.js";
+    import SecondaryButton from "../../../components/generic/SecondaryButton.svelte";
+    import {isRunningInTauri} from "../../../lib/misc.js";
+    import HSpacing from "../../../components/generic/HSpacing.svelte";
 
     // Provided by 'modals'
     export let isOpen;

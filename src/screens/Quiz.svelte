@@ -1,16 +1,16 @@
 <script>
-    import PlayersView from "./quiz/PlayersView.svelte";
-    import RoundView from "./quiz/RoundView.svelte";
+    import PlayersView from "./quiz/screens/game/players/PlayersView.svelte";
+    import RoundView from "./quiz/screens/game/round/RoundView.svelte";
     import {currentGameStateStore, GameState} from "../lib/stores.js";
-    import QuestionView from "./quiz/QuestionView.svelte";
+    import QuestionView from "./quiz/screens/game/question/QuestionView.svelte";
     import Row from "../components/generic/Row.svelte";
     import ModalPlaceholder from "../components/abstract/ModalPlaceholder.svelte";
-    import MenuButton from "./quiz/subcomponents/MenuButton.svelte";
-    import PickFirstQuestionChooser from "./quiz/PickFirstQuestionChooser.svelte";
+    import MenuButton from "./quiz/MenuButton.svelte";
+    import PickFirstQuestionChooserView from "./quiz/screens/game/PickFirstQuestionChooserView.svelte";
     import Centered from "../components/generic/Centered.svelte";
-    import EndQuestionScreen from "./quiz/subcomponents/EndQuestionScreen.svelte";
-    import RoundStatsView from "./quiz/subcomponents/stats/RoundStatsView.svelte";
-    import GameFinishedScreen from "./quiz/subcomponents/eog/GameFinishedScreen.svelte";
+    import EndQuestionView from "./quiz/screens/game/EndQuestionView.svelte";
+    import RoundStatsScreen from "./quiz/screens/stats/RoundStatsView.svelte";
+    import GameFinishedScreen from "./quiz/screens/eog/GameFinishedScreen.svelte";
 
     $: gameState = $currentGameStateStore.gameState;
 </script>
@@ -19,7 +19,7 @@
     <ModalPlaceholder/>
     <MenuButton/>
     {#if gameState === GameState.ShowRoundStats}
-        <RoundStatsView/>
+        <RoundStatsScreen/>
     {:else if gameState === GameState.EndTheGame}
         <GameFinishedScreen/>
     {:else }
@@ -29,7 +29,7 @@
                     <div>Loading...</div>
                 </Centered>
             {:else if gameState === GameState.PickFirstQuestionChooser}
-                <PickFirstQuestionChooser/>
+                <PickFirstQuestionChooserView/>
             {:else if gameState === GameState.ChooseQuestion}
                 <RoundView/>
             {:else if gameState === GameState.DisplayQuestion
@@ -38,7 +38,7 @@
             }
                 <QuestionView/>
             {:else if gameState === GameState.EndQuestion}
-                <EndQuestionScreen/>
+                <EndQuestionView/>
             {:else}
                 <Row>
                     <div>Unhandled state: {gameState}</div>

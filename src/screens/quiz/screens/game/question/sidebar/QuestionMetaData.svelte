@@ -1,5 +1,5 @@
 <script>
-    import {currentQuestionStore} from "../../../lib/stores.js";
+    import {currentQuestionStore} from "../../../../../../lib/stores.js";
 
     $: question = $currentQuestionStore;
 </script>

@@ -1,5 +1,5 @@
 <script>
-import {goToMainMenu} from "../../views.js";
+import {goToMainMenu} from "../views.js";
 </script>
 
 

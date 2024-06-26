@@ -5,8 +5,8 @@
     import Quiz from "./screens/Quiz.svelte";
     import {currentView} from "./lib/stores"
     import {initEventListeners, setupEventListener} from "./lib/events.js";
-    import DebugButton from "./screens/DebugButton.svelte";
-    import DebugState from "./screens/DebugState.svelte";
+    import DebugButton from "./screens/quiz/debug/DebugButton.svelte";
+    import DebugState from "./screens/quiz/debug/DebugState.svelte";
     import {convertFileSrc} from "@tauri-apps/api/tauri";
     import {appCacheDir, appDataDir, homeDir, resolve} from "@tauri-apps/api/path";
     import {tempdir} from "@tauri-apps/api/os";

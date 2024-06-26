@@ -1,5 +1,5 @@
 <script>
-    import {doWithSound, getAllowAnswerSound} from "../../../lib/sound.js";
+    import {doWithSound, getAllowAnswerSound} from "../../../../../../lib/sound.js";
     export let onClick = () => {};
 
     function handleClick() {

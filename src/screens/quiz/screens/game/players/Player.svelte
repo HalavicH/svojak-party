@@ -1,5 +1,5 @@
 <script>
-    import {PlayerState} from '../../../lib/stores.js'
+    import {PlayerState} from '../../../../../lib/stores.js'
 
     export let player
 

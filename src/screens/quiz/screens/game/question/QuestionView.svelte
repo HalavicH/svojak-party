@@ -1,8 +1,8 @@
 <script>
 
-    import QuestionViewport from "./subcomponents/QuestionViewport.svelte";
-    import QuestionSidebar from "./subcomponents/QuestionSidebar.svelte";
-    import Row from "../../components/generic/Row.svelte";
+    import QuestionViewport from "./QuestionViewport.svelte";
+    import QuestionSidebar from "./sidebar/QuestionSidebar.svelte";
+    import Row from "../../../../../components/generic/Row.svelte";
 </script>
 
 <div class="row">

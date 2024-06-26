@@ -1,5 +1,5 @@
 <script>
-    import {doWithSound, getClickSound} from "../lib/sound.js";
+    import {doWithSound, getClickSound} from "../../../lib/sound.js";
     import {closeModal, openModal} from "svelte-modals";
     import DebugModal from "./DebugModal.svelte";
 

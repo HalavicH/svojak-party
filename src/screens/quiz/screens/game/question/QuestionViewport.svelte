@@ -18,7 +18,7 @@
 <script>
     // import Swiper core and required modules
     import {A11y, Keyboard, Navigation, Pagination, Scrollbar} from 'swiper';
-    import {currentQuestionStore} from "../../../lib/stores.js";
+    import {currentQuestionStore} from "../../../../../lib/stores.js";
 
     import {Swiper, SwiperSlide} from 'swiper/svelte';
 

@@ -1,5 +1,5 @@
 <script>
-    import Centered from "../../components/generic/Centered.svelte";
+    import Centered from "../../../../components/generic/Centered.svelte";
 </script>
 
 <Centered greedy={true}>
