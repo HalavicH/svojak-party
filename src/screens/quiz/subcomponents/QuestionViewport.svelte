@@ -18,7 +18,7 @@
 <script>
     // import Swiper core and required modules
     import {A11y, Navigation, Pagination, Scrollbar} from 'swiper';
-    import {currentQuestionStore, QuestionMediaType} from "../../../lib/stores.js";
+    import {currentQuestionStore} from "../../../lib/stores.js";
 
     import {Swiper, SwiperSlide} from 'swiper/svelte';
 
@@ -27,7 +27,6 @@
     import 'swiper/css/navigation';
     import 'swiper/css/pagination';
     import 'swiper/css/scrollbar';
-    import {convertFileSrc} from "@tauri-apps/api/tauri";
     import Scenario from "./Scenario.svelte";
 
     $: question = $currentQuestionStore;

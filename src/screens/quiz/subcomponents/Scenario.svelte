@@ -1,6 +1,7 @@
 <script>
     import {QuestionMediaType} from "../../../lib/stores.js";
     import {convertFileSrc} from "@tauri-apps/api/tauri";
+    import {onMount} from "svelte";
 
     export let scenario;
     let content;
@@ -14,11 +15,30 @@
             content = scenario.content;
     }
     console.log("Scenario content: ", content);
+
+    onMount(() => {
+        const image = document.querySelector('.image');
+        if (image) {
+            const naturalWidth = image.naturalWidth;
+            const naturalHeight = image.naturalHeight;
+            const maxWidth = window.innerWidth;
+            const maxHeight = window.innerHeight;
+
+            let scale = 1;
+            if (naturalWidth > 0 && naturalHeight > 0) {
+                const widthScale = maxWidth / naturalWidth;
+                const heightScale = maxHeight / naturalHeight;
+                scale = Math.min(widthScale, heightScale, 2); // Ensure scale is at most 2x
+            }
+
+            image.style.setProperty('--scale', scale);
+        }
+    });
 </script>
 
 <div class="slide">
     {#if scenario.mediaType === QuestionMediaType.Image}
-        <img src={content} alt="Image"/>
+        <img class="image" src={content} alt="Image"/>
     {:else if scenario.mediaType === QuestionMediaType.Video}
         <video controls>
             <source src={content} type="video/mp4"/>
@@ -47,9 +67,19 @@
         justify-content: center;
         align-items: center;
         height: 100%;
+        width: 100%;
+    }
+    .image {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        transform: scale(var(--scale, 1));
+        transform-origin: center;
     }
     .question-text {
         font-size: 1.5em;
         text-align: center;
     }
 </style>
+
