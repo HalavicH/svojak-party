@@ -72,3 +72,33 @@
         </div>
     </div>
 </div>
+
+<style>
+
+    .logo {
+        height: 6em;
+        padding: 1.5em;
+        will-change: filter;
+        transition: 0.75s;
+    }
+
+    .row {
+        display: flex;
+        justify-content: center;
+    }
+
+    a {
+        font-weight: 500;
+        color: #646cff;
+        text-decoration: inherit;
+    }
+
+    a:hover {
+        color: #535bf2;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+</style>
