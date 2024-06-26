@@ -1,6 +1,7 @@
 <script>
     import {currentFinalResultsStore, EndGameReason} from "../../../../lib/stores.js";
     import Table from "../../../../components/generic/Table.svelte";
+    import {toPlayerImage} from "../../../../lib/misc.js";
 
     currentFinalResultsStore.subscribe(value => {
         console.log(value);
@@ -8,9 +9,9 @@
 
     let stats = $currentFinalResultsStore;
     let endGameText;
-    switch (stats.gameEndReason) {
+    switch (stats.endGameReason) {
         case EndGameReason.NoPlayersLeft:
-            endGameText = "It seems no one survived! Well game pack author will be happy 😈";
+            endGameText = "It seems no one survived! Well, game pack author will be happy 😈";
             break;
         case EndGameReason.AllRoundsPlayed:
             endGameText = "All rounds played! Finally you're not obligated to play anymore! 🤝";
@@ -30,7 +31,7 @@
             <tr>
                 <td>1</td>
                 <td>
-                    <img class="icon" src={stats.first.icon} alt="">
+                    <img class="icon" src={toPlayerImage(stats.first.icon)} alt="">
                 </td>
                 <td>{stats.first.name}</td>
                 <td>{stats.first.score}</td>
@@ -38,36 +39,40 @@
             <tr>
                 <td>2</td>
                 <td>
-                    <img class="icon" src={stats.second.icon} alt="">
+                    <img class="icon" src={toPlayerImage(stats.second.icon)} alt="">
                 </td>
                 <td>{stats.second.name}</td>
                 <td>{stats.second.score}</td>
             </tr>
-            <tr>
-                <td>3</td>
-                <td>
-                    <img class="icon" src={stats.third.icon} alt="">
-                </td>
-                <td>{stats.third.name}</td>
-                <td>{stats.third.score}</td>
-            </tr>
-            </Table>
-    </div>
-
-    <p>Other players:</p>
-    <div class="common-stats">
-        <Table headers={["Icon", "Name", "Score"]}>
-            {#each stats.theRest as player}
+            {#if stats.third !== undefined && stats.third !== null}
                 <tr>
+                    <td>3</td>
                     <td>
-                        <img class="icon" src={player.icon} alt="">
+                        <img class="icon" src={toPlayerImage(stats.third.icon)} alt="">
                     </td>
-                    <td>{player.name}</td>
-                    <td>{player.score}</td>
+                    <td>{stats.third.name}</td>
+                    <td>{stats.third.score}</td>
                 </tr>
-            {/each}
+            {/if}
         </Table>
     </div>
+
+    {#if stats.theRest.length > 0}
+        <p>Other players:</p>
+        <div class="common-stats">
+            <Table headers={["Icon", "Name", "Score"]}>
+                {#each stats.theRest as player}
+                    <tr>
+                        <td>
+                            <img class="icon" src={toPlayerImage(player.icon)} alt="">
+                        </td>
+                        <td>{player.name}</td>
+                        <td>{player.score}</td>
+                    </tr>
+                {/each}
+            </Table>
+        </div>
+    {/if}
 </div>
 
 <style>

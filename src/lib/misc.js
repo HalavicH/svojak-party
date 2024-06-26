@@ -29,3 +29,6 @@ export async function getPackFilePath() {
     });
 }
 
+export function toPlayerImage(playerIconPath) {
+    return playerIconPath ? playerIconPath : DFL_PLAYER_ICON;
+}

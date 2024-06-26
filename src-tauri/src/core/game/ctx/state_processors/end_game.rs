@@ -2,7 +2,7 @@ use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::ctx::state_processors::show_round_stats::EndGameReason;
 use crate::core::game::game_data::GameData;
 use crate::core::game::state_structs::{EndTheGame, SetupAndLoading};
-use crate::core::game_entities::{GameplayError, Player};
+use crate::core::game_entities::{GameplayError, Player, PlayerState, PlayerStats};
 use crate::host_api::dto::{EndGameStatsDto, PlayerFinalStatsDto};
 use crate::host_api::events::emit_final_results;
 
@@ -40,8 +40,15 @@ impl GameCtx<EndTheGame> {
             ctx.data
                 .players_ref_as_vec()
                 .iter()
-                .map(|&p| (p.clone()))
+                .map(|&p| {
+                    Player {
+                        state: PlayerState::default(),
+                        stats: PlayerStats::default(),
+                        ..p.clone()
+                    }
+                })
                 .collect(),
+            ctx.data.events.clone(),
         );
         Ok(ctx)
     }

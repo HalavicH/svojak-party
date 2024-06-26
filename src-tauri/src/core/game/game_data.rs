@@ -33,10 +33,11 @@ impl GameData {
             .filter(|p| p.state != PlayerState::Dead)
             .count()
     }
-    pub fn new(players: Vec<Player>) -> Self {
+    pub fn new(players: Vec<Player>, events: Arc<RwLock<Vec<PlayerEvent>>>) -> Self {
         let players_map = players.into_iter().map(|p| (p.term_id, p)).collect();
         GameData {
             players: players_map,
+            events,
             ..Default::default()
         }
     }

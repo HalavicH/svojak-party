@@ -261,7 +261,7 @@ export const EndGameReason = {
 }
 
 let endGameStatsMock = {
-    gameEndReason: EndGameReason.AllRoundsPlayed,
+    endGameReason: EndGameReason.AllRoundsPlayed,
     first: {
         name: "HalavicH",
         score: 500,

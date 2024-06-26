@@ -132,8 +132,9 @@ pub fn emit_round_stats(round: RoundStatsDto) {
 }
 
 pub fn emit_final_results(final_results: EndGameStatsDto) {
-    emit(Event::RoundStats, final_results);
+    emit(Event::FinalResults, final_results);
 }
+
 #[allow(non_snake_case)]
 #[derive(Debug, Clone, Serialize)]
 struct GameStateDto {
