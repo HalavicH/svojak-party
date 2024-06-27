@@ -14,6 +14,7 @@ export const TauriApiCommand = {
     // Window setup api
     INIT_WINDOW_HANDLE: 'init_window_handle',
     REQUEST_CONTEXT_UPDATE: 'request_context_update',
+    IS_DEBUG_MODE: 'is_debug_mode',
 
     // Startup API
     SET_HUB_TYPE: 'set_hub_type',

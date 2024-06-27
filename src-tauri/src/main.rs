@@ -18,6 +18,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             // Window setup api
+            is_debug_mode,
             init_window_handle,
             // Event requests
             request_context_update,

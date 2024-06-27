@@ -10,6 +10,7 @@
     import {onMount} from "svelte";
     import VSpacing from "../components/generic/VSpacing.svelte"
     import {getPackFilePath} from "../lib/misc.js"
+    import {isDebugMode} from "../lib/stores.js";
 
     onMount(async () => {
         await callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
@@ -66,9 +67,11 @@
         <div>
             <Button text="Check setup (HW & Players)" onClick={openSetup}/>
             <p>then</p>
-            <Button text="Open game pack" onClick={openGamePack}/>
-            <p></p>
-            <Button text="Debug menu" onClick={openSetup}/>
+            <Button text="Start new game" onClick={openGamePack}/>
+            {#if $isDebugMode}
+                <p></p>
+                <Button text="Debug menu" onClick={openSetup}/>
+            {/if}
         </div>
     </div>
 </div>

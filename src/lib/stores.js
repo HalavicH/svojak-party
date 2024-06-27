@@ -299,6 +299,7 @@ export const currentQuestionStore = writable(mockQuestion);
 export const currentGameStateStore = writable({gameState: GameState.SetupAndLoading});
 export const currentRoundStatsStore = writable(roundStatsMock);
 export const currentFinalResultsStore = writable(endGameStatsMock);
+export const isDebugMode = writable(false);
 
 console.log("################################################");
 console.log("########## ALL STORES HAS BEEN LOADED ##########");

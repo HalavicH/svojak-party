@@ -11,3 +11,10 @@ pub fn request_context_update() {
     game().request_context_update();
     ps().request_context_update();
 }
+
+#[command]
+pub fn is_debug_mode() -> bool {
+    std::env::var("SVOJAK_DEBUG_MODE")
+        .map(|v| v.to_lowercase().eq("true"))
+        .unwrap_or(false)
+}
