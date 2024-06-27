@@ -1,5 +1,6 @@
-use crate::core::game_entities::{HubStatus, Player};
+use crate::core::game_entities::HubStatus;
 use crate::hub::hw::internal::hw_hub_device::HwHubCommunicationHandler;
+use crate::player_server::entities::PsPlayer;
 use error_stack::{IntoReport, Report, Result, ResultExt};
 use rgb::RGB8;
 use rocket::serde::Serialize;
@@ -8,7 +9,6 @@ use std::default::Default;
 use std::fmt::Debug;
 use std::time::{SystemTime, UNIX_EPOCH};
 use thiserror::Error;
-use crate::player_server::entities::PsPlayer;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Deserialize)]
 pub enum HubType {

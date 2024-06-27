@@ -3,7 +3,6 @@ use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use tempfile::TempDir;
 
-use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
 use crate::core::game::ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
 use crate::core::game::ctx::state_processors::show_round_stats::RoundStatsResult;
@@ -11,10 +10,11 @@ use crate::core::game::game_state::GameState;
 use crate::core::game_entities::GameplayError;
 use crate::core::game_pack::game_pack_entites::GamePack;
 use crate::core::game_pack::pack_content_entities::Round;
-use crate::host_api::events::{emit_error, emit_final_results, emit_game_state, emit_players_by_game_data, emit_question, emit_round};
+use crate::host_api::events::{
+    emit_error, emit_game_state, emit_players_by_game_data, emit_question, emit_round,
+};
 use crate::hub::hub_api::PlayerEvent;
 use crate::player_server::entities::PsPlayer;
-use crate::types::ArcRwBox;
 
 lazy_static::lazy_static! {
     static ref GAME_CONTROLLER: Arc<RwLock<GameController >> = Arc::new(RwLock::new(GameController::default()));
@@ -63,7 +63,10 @@ impl GameController {
     //     events_guard.extend(events);
     // }
 
-    pub fn push_new_players(&mut self, players: Vec<PsPlayer>) -> error_stack::Result<(), GameplayError>{
+    pub fn push_new_players(
+        &mut self,
+        players: Vec<PsPlayer>,
+    ) -> error_stack::Result<(), GameplayError> {
         let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
 
         let data = ctx.game_mut();
@@ -74,7 +77,6 @@ impl GameController {
         Ok(())
     }
 }
-
 
 /// Host API
 impl GameController {
@@ -246,7 +248,6 @@ fn create_temp_directory() -> error_stack::Result<Arc<TempDir>, io::Error> {
     Ok(temp_dir)
 }
 
-
 /// Internal API
 impl GameController {
     /// This method should be used for every state change to ensure event emission
@@ -259,7 +260,12 @@ impl GameController {
         let game_ctx = self.game_state.game_ctx_ref();
         emit_players_by_game_data(game_ctx);
         emit_question(game_ctx.current_question_ref().into());
-        emit_round(game_ctx.current_round_opt_ref().unwrap_or(&Round::default()).into());
+        emit_round(
+            game_ctx
+                .current_round_opt_ref()
+                .unwrap_or(&Round::default())
+                .into(),
+        );
         emit_game_state(&self.game_state);
     }
 

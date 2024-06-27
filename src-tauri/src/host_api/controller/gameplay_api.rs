@@ -83,4 +83,3 @@ pub async fn reset_game() {
     let mut app = game_mut();
     app.reset_the_game();
 }
-

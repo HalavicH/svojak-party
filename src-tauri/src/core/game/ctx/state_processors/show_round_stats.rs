@@ -1,7 +1,7 @@
-use serde::Serialize;
 use crate::core::game::ctx::game_ctx::GameCtx;
 use crate::core::game::state_structs::{EndTheGame, ShowRoundStats, StartNextRound};
 use crate::core::game_entities::GameplayError;
+use serde::Serialize;
 
 pub enum RoundStatsResult {
     StartNextRound(GameCtx<StartNextRound>),
@@ -21,19 +21,28 @@ impl GameCtx<ShowRoundStats> {
         if game.has_next_round() {
             log::info!("There's another round to play");
             let players_left = self.data.alive_players_left();
-            return if players_left == 1 {
+            if players_left == 1 {
                 log::info!("Only one players left. Ending the game.");
-                Ok(RoundStatsResult::EndTheGame(self.transition(), EndGameReason::OnePlayerLeft))
+                Ok(RoundStatsResult::EndTheGame(
+                    self.transition(),
+                    EndGameReason::OnePlayerLeft,
+                ))
             } else if players_left == 0 {
                 log::info!("No players left. Ending the game.");
-                Ok(RoundStatsResult::EndTheGame(self.transition(), EndGameReason::NoPlayersLeft))
+                Ok(RoundStatsResult::EndTheGame(
+                    self.transition(),
+                    EndGameReason::NoPlayersLeft,
+                ))
             } else {
                 log::info!("More than 2 players left. Starting the next round.");
                 Ok(RoundStatsResult::StartNextRound(self.transition()))
             }
         } else {
             log::info!("No more rounds to play. Ending the game");
-            Ok(RoundStatsResult::EndTheGame(self.transition(), EndGameReason::AllRoundsPlayed))
+            Ok(RoundStatsResult::EndTheGame(
+                self.transition(),
+                EndGameReason::AllRoundsPlayed,
+            ))
         }
     }
 }

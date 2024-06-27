@@ -1,18 +1,18 @@
 #![allow(dead_code)]
 
-use crate::core::game_entities::{HubStatus, Player};
+use crate::core::game_entities::HubStatus;
 use crate::hub::hub_api::{
     calc_current_epoch_ms, HubManager, HubManagerError, PlayerEvent, TermButtonState,
 };
 use crate::hub::hw::internal::api_types::{HwHubIoError, HwHubRequest, ResponseStatus};
 use crate::hub::hw::internal::hw_hub_device::HwHubCommunicationHandler;
 use crate::hub::hw::virtual_hw_hub::{setup_virtual_hub_connection, VIRTUAL_HUB_PORT};
+use crate::player_server::entities::PsPlayer;
 use error_stack::{bail, IntoReport, Report, Result, ResultExt};
 use rgb::RGB8;
 use serialport::SerialPort;
 use std::default::Default;
 use std::time::Duration;
-use crate::player_server::entities::PsPlayer;
 
 const HUB_CMD_TIMEOUT: Duration = Duration::from_millis(100);
 const MAX_TERMINAL_CNT: u8 = 10;

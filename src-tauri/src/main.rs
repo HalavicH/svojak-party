@@ -1,15 +1,15 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 // #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::env;
 #[allow(unused_imports)]
 use rocket::futures::io::Window;
+use std::env;
 use svojak_app::core::game_controller::game;
 use svojak_app::host_api::controller::debug_api::*;
 use svojak_app::host_api::controller::gameplay_api::*;
-use svojak_app::host_api::controller::startup::*;
 use svojak_app::host_api::controller::startup::game_ctx::*;
 use svojak_app::host_api::controller::startup::player_server::*;
+use svojak_app::host_api::controller::startup::*;
 
 fn main() {
     if env::var("RUST_LOG").is_err() {

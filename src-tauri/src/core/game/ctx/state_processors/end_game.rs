@@ -40,12 +40,10 @@ impl GameCtx<EndTheGame> {
             ctx.data
                 .players_ref_as_vec()
                 .iter()
-                .map(|&p| {
-                    Player {
-                        state: PlayerState::default(),
-                        stats: PlayerStats::default(),
-                        ..p.clone()
-                    }
+                .map(|&p| Player {
+                    state: PlayerState::default(),
+                    stats: PlayerStats::default(),
+                    ..p.clone()
                 })
                 .collect(),
             ctx.data.events.clone(),

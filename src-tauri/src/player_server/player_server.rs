@@ -1,20 +1,19 @@
+use crate::core::game_controller::game;
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
 use crate::host_api::dto::PlayerDto;
 use crate::host_api::events::{emit_error, emit_hub_config};
 use crate::hub::hub_api::{HubManager, HubType, PlayerEvent};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
+use crate::player_server::entities::PsPlayer;
+use crate::player_server::player_connection_listener::run_player_discovery_loop;
 use crate::types::{ArcRwBox, Swap};
 use error_stack::Report;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread;
-use std::thread::{JoinHandle, sleep};
+use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
-use log::log;
-use crate::core::game_controller::{game, game_mut};
-use crate::player_server::entities::PsPlayer;
-use crate::player_server::player_connection_listener::{run_player_discovery_loop};
 
 lazy_static::lazy_static! {
     static ref PLAYER_SERVER: Arc<RwLock<PlayerServer >> = Arc::new(RwLock::new(PlayerServer::default()));
@@ -218,10 +217,12 @@ fn listen_hub_events(
         }
 
         events.iter().for_each(|e| {
-            if let Err(err) = hub_guard
-                .set_term_feedback_led(e.term_id, &e.state) {
-                log::error!("Can't set term feedback led for term_id: {}. Error: {:#?}",
-                    e.term_id, err);
+            if let Err(err) = hub_guard.set_term_feedback_led(e.term_id, &e.state) {
+                log::error!(
+                    "Can't set term feedback led for term_id: {}. Error: {:#?}",
+                    e.term_id,
+                    err
+                );
             };
 
             log::debug!("New player event received: {:#?}. Pushing to the events", e);
@@ -229,7 +230,9 @@ fn listen_hub_events(
 
         log::debug!("Pushing events to the game");
         // game().push_events(events);
-        events_arc.write().expect("Expected to be able acquire write lock on events")
+        events_arc
+            .write()
+            .expect("Expected to be able acquire write lock on events")
             .extend(events);
     }
     log::error!("Event listener thread is finished unexpectedly");

@@ -1,16 +1,17 @@
 use crate::core::game_controller::game_mut;
-use crate::core::game_entities::{Player, DEFAULT_ICON, GameplayError};
+use crate::core::game_entities::{GameplayError, DEFAULT_ICON};
 use crate::host_api::events::emit_message;
 use crate::hub::hub_api::HubManager;
-use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
-use std::thread::{sleep, spawn, JoinHandle};
-use std::time::Duration;
-use error_stack::Report;
 use crate::player_server::entities::PsPlayer;
-use crate::types::{ArcRwBox, Swap};
+use crate::types::Swap;
+use std::sync::{Arc, RwLock};
+use std::thread::sleep;
+use std::time::Duration;
 
-pub fn run_player_discovery_loop(hub: Arc<RwLock<Box<dyn HubManager>>>, players_arc: Arc<RwLock<Box<Vec<PsPlayer>>>>) {
+pub fn run_player_discovery_loop(
+    hub: Arc<RwLock<Box<dyn HubManager>>>,
+    players_arc: Arc<RwLock<Box<Vec<PsPlayer>>>>,
+) {
     let mut players = vec![];
     loop {
         players = discover_and_save_players(players, &hub);
@@ -40,7 +41,10 @@ pub fn discover_and_save_players(
     old_players
 }
 
-fn compare_and_merge_players(old_players: Vec<PsPlayer>, detected_players: &[PsPlayer]) -> Vec<PsPlayer> {
+fn compare_and_merge_players(
+    old_players: Vec<PsPlayer>,
+    detected_players: &[PsPlayer],
+) -> Vec<PsPlayer> {
     let det_pl_cnt = detected_players.len();
     log::debug!("Detected {} players", det_pl_cnt);
     if is_change_in_players_detected(&old_players, detected_players) {
@@ -77,19 +81,19 @@ fn merge_players(detected_players: &[PsPlayer]) -> Vec<PsPlayer> {
     // TODO: make actual merge instead of simple re-assign
     let players: Vec<PsPlayer> = detected_players
         .iter()
-        .map(|p| {
-            PsPlayer {
-                id: p.id,
-                name: p.name.clone(),
-                icon: DEFAULT_ICON.to_string(),
-            }
+        .map(|p| PsPlayer {
+            id: p.id,
+            name: p.name.clone(),
+            icon: DEFAULT_ICON.to_string(),
         })
         .collect();
 
     let result = game_mut().push_new_players(players.clone());
     if let Err(err) = result {
         match err.current_context() {
-            GameplayError::OperationForbidden => log::debug!("Inappropriate time to push new players"),
+            GameplayError::OperationForbidden => {
+                log::debug!("Inappropriate time to push new players")
+            }
             _ => log::error!("Can't push new players: {:?}", err),
         }
     }

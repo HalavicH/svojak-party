@@ -11,7 +11,7 @@ use reqwest::Url;
 use std::net::Ipv4Addr;
 use tokio::runtime::Runtime;
 
-use crate::core::game_entities::{HubStatus, Player};
+use crate::core::game_entities::HubStatus;
 use crate::hub::hub_api::HubManager;
 use crate::hub::hub_api::{HubManagerError, PlayerEvent, TermButtonState};
 use crate::hub::web::web_server::internal_api::INTERNAL_API::TAKE_EVENT_QUEUE;
@@ -243,7 +243,7 @@ impl HubManager for WebHubManager {
         self.rt
             .block_on(async {
                 let dto = TermFeedbackState {
-                    id: term_id as i32  ,
+                    id: term_id as i32,
                     state: state.to_bool(),
                 };
                 self.client

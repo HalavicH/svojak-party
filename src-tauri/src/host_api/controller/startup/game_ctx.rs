@@ -1,11 +1,10 @@
-use crate::core::game_controller::{game, game_mut};
+use crate::core::game_controller::game_mut;
 use crate::core::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
 use crate::host_api::dto::PackErrorData;
 use crate::host_api::events::emit_pack_info;
 use crate::host_api::events::*;
 use error_stack::Report;
 use tauri::{command, Window};
-use crate::player_server::player_server::ps;
 
 /// Load game pack into the game
 #[command]
