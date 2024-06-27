@@ -244,7 +244,7 @@
     </ItemsBlock>
     <ItemsBlock title="Set state:">
         <Row>
-            <div class="container">
+            <div class="app-container">
                 {#each gameStates as state}
                     <div class="item">
                         <SecondaryButton text="{state}" onClick={()=>{setState(state)}}/>
@@ -255,6 +255,10 @@
     </ItemsBlock>
     <ItemsBlock title="Stores content">
         <!-- JSON view -->
+        <p>HUB config store</p>
+        <div class="json-view">
+            <pre>{renderStoreContent($currentHubConfigStore)}</pre>
+        </div>
         <p>Game state store</p>
         <div class="json-view">
             <pre>{renderStoreContent($currentGameStateStore)}</pre>
@@ -270,11 +274,6 @@
             <pre>{renderStoreContent($currentPlayersStore)}</pre>
         </div>
 
-        <p>Hub config store</p>
-        <div class="json-view">
-            <pre>{renderStoreContent($currentHubConfigStore)}</pre>
-        </div>
-
         <p>Pack info store</p>
         <div class="json-view">
             <pre>{renderStoreContent($currentPackInfoStore)}</pre>
@@ -288,7 +287,7 @@
 </BaseModal>
 
 <style>
-    .container {
+    .app-container {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;

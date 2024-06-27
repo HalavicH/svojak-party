@@ -15,6 +15,8 @@
     import {onMount} from "svelte";
     import Navigator from "./screens/Navigator.svelte";
 
+    initEventListeners();
+
     callBackend(TauriApiCommand.IS_DEBUG_MODE).then(isDebug => {
         console.log(isDebug ? "Debug mode is ON" : "Debug mode is OFF");
         isDebugMode.set(isDebug);
@@ -87,11 +89,9 @@
 
     tempdir().then(path => console.log("Tmp:", path));
     appDataDir().then(path => console.log("Cache:", path));
-
-    initEventListeners();
 </script>
 
-<main class="container">
+<main class="app-container">
     <Navigator/>
     <ThemeSwitcher/>
     {#if $currentScreen === Views.MENU}
@@ -106,13 +106,14 @@
 </main>
 
 <style>
-    .container {
+    .app-container {
         margin: 0;
         /*padding-top: 10vh;*/
         display: flex;
         flex-direction: column;
         justify-content: center;
         text-align: center;
+        height: 100%;
     }
 
     :global(body.no-select) {

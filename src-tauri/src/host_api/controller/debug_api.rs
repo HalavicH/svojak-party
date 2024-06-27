@@ -19,7 +19,7 @@ pub fn dbg_set_game_state(name: String) {
 #[command]
 pub fn dbg_reset_game() {
     let mut app = game_mut();
-    app._dbg_reset_game();
+    app.reset_the_game();
 }
 
 /// HUB Debug API

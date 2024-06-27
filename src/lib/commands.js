@@ -31,22 +31,21 @@ export const TauriApiCommand = {
     ANSWER_QUESTION: 'answer_question',
     STOP_ASKING_AND_SHOW_ANSWER: 'stop_asking_and_show_answer',
     FINISH_QUESTION: 'finish_question',
-    /////////// LEGACY API ////////////
-    // Debug API
-    SETUP_HUB_CONNECTION: 'setup_hub_connection',
-    SEND_RAW_REQUEST_FRAME: 'send_raw_request_frame',
-    SEND_HUB_COMMAND: 'send_hub_command',
-
     INIT_NEXT_ROUND: 'init_next_round',
     SEND_PIP_VICTIM: 'send_pip_victim',
     GET_ACTIVE_PLAYER_ID: 'get_active_player_id',
     IS_ALLOW_ANSWER_REQUIRED: 'is_allow_answer_required',
     FETCH_ROUND_STATS: 'fetch_round_stats',
-    END_GAME: 'END_GAME',
+    FINISH_GAME: 'finish_game',
+    RESET_GAME: 'reset_game',
+
     // Debug API
     DBG_SET_GAME_STATE: 'dbg_set_game_state',
-    DBG_RESET_GAME: 'dbg_reset_game',
-    FINISH_GAME: 'finish_game',
+
+    /////////// LEGACY API ////////////
+    SETUP_HUB_CONNECTION: 'setup_hub_connection',
+    SEND_RAW_REQUEST_FRAME: 'send_raw_request_frame',
+    SEND_HUB_COMMAND: 'send_hub_command',
 };
 
 export const HubType = {

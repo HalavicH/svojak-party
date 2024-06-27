@@ -10,6 +10,7 @@ use crate::core::game::ctx::state_processors::show_round_stats::RoundStatsResult
 use crate::core::game::game_state::GameState;
 use crate::core::game_entities::GameplayError;
 use crate::core::game_pack::game_pack_entites::GamePack;
+use crate::core::game_pack::pack_content_entities::Round;
 use crate::host_api::events::{emit_error, emit_final_results, emit_game_state, emit_players_by_game_data, emit_question, emit_round};
 use crate::hub::hub_api::PlayerEvent;
 use crate::player_server::entities::PsPlayer;
@@ -94,7 +95,7 @@ impl GameController {
     }
 
     pub fn request_context_update(&self) {
-        self.emit_game_config_locking_hub();
+        self.emit_game_context();
     }
 
     // Gameplay host API
@@ -217,23 +218,23 @@ impl GameController {
         self.set_game_state(GameState::SetupAndLoading(ctx));
         Ok(())
     }
+
+    /// Used to reset everything
+    pub fn reset_the_game(&mut self) {
+        self.game_pack = GamePack::default();
+        self.game_state = GameState::default();
+        self.emit_game_context();
+    }
 }
 
 /// Debug API
 impl GameController {
-    pub fn _dbg_reset_game(&mut self) {
-        let context = GameController::default();
-        self.game_pack = context.game_pack;
-        self.set_game_state(GameState::SetupAndLoading(GameCtx::default()));
-        self.emit_game_config_locking_hub();
-    }
-
     pub fn _dbg_set_game_state(&mut self, name: String) {
         self.set_game_state(GameState::from_name_and_game(
             &name,
             self.game_state.game_ctx_ref().clone(),
         ));
-        self.emit_game_config_locking_hub();
+        self.emit_game_context();
     }
 }
 
@@ -254,13 +255,11 @@ impl GameController {
         emit_game_state(&self.game_state);
     }
 
-    fn emit_game_config_locking_hub(&self) {
+    fn emit_game_context(&self) {
         let game_ctx = self.game_state.game_ctx_ref();
         emit_players_by_game_data(game_ctx);
         emit_question(game_ctx.current_question_ref().into());
-
-        game_ctx.current_round_opt_ref()
-            .map(|r| emit_round(r.into()));
+        emit_round(game_ctx.current_round_opt_ref().unwrap_or(&Round::default()).into());
         emit_game_state(&self.game_state);
     }
 

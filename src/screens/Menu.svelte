@@ -7,10 +7,9 @@
     import {notify} from "../lib/notifications.js";
     import {callBackend, TauriApiCommand} from "../lib/commands.js";
     import PackErrorModal from "./menu/PackErrorModal.svelte";
-    import {onMount} from "svelte";
-    import VSpacing from "../components/generic/VSpacing.svelte"
     import {getPackFilePath} from "../lib/misc.js"
-    import {isDebugMode} from "../lib/stores.js";
+    import {currentGameStateStore, GameState, isDebugMode} from "../lib/stores.js";
+    import {navTo, Views} from "./views.js";
 
     function openSetup() {
         openModal(SettingsModal)
@@ -43,37 +42,43 @@
         initGamePack(filePath);
     }
 
+    $: state = $currentGameStateStore.gameState;
+
+    async function endGame() {
+        await callBackend(TauriApiCommand.RESET_GAME);
+    }
 </script>
 
 
-<div>
+<div class="menu-container">
     <ModalPlaceholder/>
-    <VSpacing size="10vh"/>
     <h1>Welcome to Svojak!</h1>
     <p>Powered by BronuCon commuity</p>
-    <div class="row">
-        <img
-                src="public/bc-logo.png"
-                class="logo bronucon"
-                alt="BronuCon logo"
-        />
-    </div>
+    <img
+            src="public/bc-logo.png"
+            class="logo bronucon"
+            alt="BronuCon logo"
+    />
 
-    <div class="row">
-        <div>
+    <div>
+        {#if state === GameState.SetupAndLoading}
             <Button text="Check setup (HW & Players)" onClick={openSetup}/>
             <p>then</p>
             <Button text="Start new game" onClick={openGamePack}/>
-            {#if $isDebugMode}
-                <p></p>
-                <Button text="Debug menu" onClick={openSetup}/>
-            {/if}
-        </div>
+        {:else}
+            <p>Game in progress. Do you have fun?</p>
+            <Button text="Return to game" onClick={() => navTo(Views.QUIZ)}/>
+            <p>or</p>
+            <Button text="End game and return to main menu" onClick={endGame}/>
+        {/if}
+        {#if $isDebugMode}
+            <p>For staff</p>
+            <Button text="Debug menu" onClick={openSetup}/>
+        {/if}
     </div>
 </div>
 
 <style>
-
     .logo {
         height: 6em;
         padding: 1.5em;
@@ -81,23 +86,15 @@
         transition: 0.75s;
     }
 
-    .row {
-        display: flex;
-        justify-content: center;
-    }
-
-    a {
-        font-weight: 500;
-        color: #646cff;
-        text-decoration: inherit;
-    }
-
-    a:hover {
-        color: #535bf2;
-    }
-
     h1 {
         text-align: center;
     }
 
+    .menu-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
 </style>

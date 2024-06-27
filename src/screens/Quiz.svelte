@@ -15,7 +15,7 @@
     $: gameState = $currentGameStateStore.gameState;
 </script>
 
-<div class="container">
+<div class="quiz-container">
     <ModalPlaceholder/>
     {#if gameState === GameState.ShowRoundStats}
         <RoundStatsScreen/>
@@ -57,7 +57,7 @@
         height: 66vh;
     }
 
-    .container {
+    .quiz-container {
         height: 98vh;
         display: flex;
         flex-direction: column;

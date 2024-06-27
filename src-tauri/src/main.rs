@@ -31,12 +31,6 @@ fn main() {
             save_round_duration,
             init_game_pack,
             start_new_game,
-            // Debug API
-            dbg_setup_hub_connection,
-            dbg_send_raw_request_frame,
-            dbg_send_hub_command,
-            dbg_set_game_state,
-            dbg_reset_game,
             // Gameplay API
             select_question,
             allow_answer,
@@ -46,6 +40,13 @@ fn main() {
             finish_question,
             init_next_round,
             finish_game,
+            reset_game,
+            // Debug API
+            dbg_setup_hub_connection,
+            dbg_send_raw_request_frame,
+            dbg_send_hub_command,
+            dbg_set_game_state,
+            dbg_reset_game,
         ])
         .run(tauri::generate_context!())
         .expect("Can't start Tauri app");

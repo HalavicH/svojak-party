@@ -77,3 +77,10 @@ pub async fn send_pip_victim(victim_id: i32) {
 pub async fn finish_game() -> Result<(), GameplayError> {
     game_mut().finish_game().map_err(map_game_error)
 }
+
+#[command]
+pub async fn reset_game() {
+    let mut app = game_mut();
+    app.reset_the_game();
+}
+
