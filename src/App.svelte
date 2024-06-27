@@ -13,7 +13,7 @@
     import Navigator from "./screens/Navigator.svelte";
     import BlurAnimation from "./screens/StartupAnimation.svelte";
 
-    let devMode;
+    let devMode = true;
 
     const handleContextMenu = (event) => {
         if (!devMode) {
@@ -28,6 +28,7 @@
     };
 
     callBackend(TauriApiCommand.IS_DEBUG_MODE).then(isDebug => {
+        isDebug = true;
         console.log(isDebug ? "Debug mode is ON" : "Debug mode is OFF");
         isDebugMode.set(isDebug);
         setAllowNotifications(isDebug);
@@ -51,7 +52,7 @@
         callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE).then();
 
         const unsubscribe = isDebugMode.subscribe((value) => {
-            devMode = value;
+            devMode = true;
             document.body.classList.toggle('no-select', !value);
             document.body.classList.toggle('no-caret', !value)
         });
