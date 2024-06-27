@@ -94,6 +94,7 @@ pub fn setup() -> rocket::fairing::AdHoc {
 // #[rocket::launch]
 pub fn launch() -> Rocket<Build> {
     rocket::build()
+        .configure(rocket::Config::figment().merge(("port", 8888)).merge(("address", "0.0.0.0")))
         .attach(setup())
         .attach(player_api::setup())
         .attach(internal_api::setup())

@@ -1,7 +1,0 @@
-# Except for the secret key, none of these are actually needed; Rocket has sane
-# defaults. We show all of them here explicitly for demonstrative purposes.
-
-
-[global]
-address = "0.0.0.0"
-port = 8888
