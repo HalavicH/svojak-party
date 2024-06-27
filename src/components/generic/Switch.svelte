@@ -9,9 +9,9 @@
     export let design = 'inner label'
     export let options = [];
     export let fontSize = 16;
-    export let value = 'on';
+    export let value;
 
-    let checked = true;
+    let checked;
 
 
     const uniqueID = Math.floor(Math.random() * 100)

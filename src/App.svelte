@@ -11,6 +11,7 @@
     import {callBackend, TauriApiCommand} from "./lib/commands.js";
     import {onMount} from "svelte";
     import Navigator from "./screens/Navigator.svelte";
+    import BlurAnimation from "./screens/StartupAnimation.svelte";
 
     let devMode;
 
@@ -52,7 +53,7 @@
         const unsubscribe = isDebugMode.subscribe((value) => {
             devMode = value;
             document.body.classList.toggle('no-select', !value);
-            document.body.classList.toggle('no-caret', !value);
+            document.body.classList.toggle('no-caret', !value)
         });
 
         document.addEventListener('contextmenu', handleContextMenu);
@@ -66,6 +67,7 @@
     });
 </script>
 
+<BlurAnimation/>
 <main class="app-container">
     <Navigator/>
     <ThemeSwitcher/>

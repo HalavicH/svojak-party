@@ -1,8 +1,7 @@
 <script>
-    import { onMount } from 'svelte';
-    import { writable } from 'svelte/store';
     import Switch from "../components/generic/Switch.svelte";
 
+    // TODO: detect system theme and propose to invert it
     let theme = 'default';
     $: {
         console.log('Toggling theme')
@@ -15,7 +14,7 @@
         }
     }
 
-    let isDarkMode;
+    let isDarkMode = 'off';
 
     $: {
         console.log(`isDarkMode: ${isDarkMode}`)
