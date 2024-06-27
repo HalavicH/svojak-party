@@ -2,18 +2,19 @@ use crate::core::game_controller::game;
 use crate::core::game_entities::{GameplayError, Player, PlayerState};
 use crate::host_api::dto::PlayerDto;
 use crate::host_api::events::{emit_error, emit_hub_config};
-use crate::hub::hub_api::{HubManager, HubType, PlayerEvent};
+use crate::hub::hub_api::{HubManager, HubManagerError, HubType, PlayerEvent};
 use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
 use crate::player_server::entities::PsPlayer;
 use crate::player_server::player_connection_listener::run_player_discovery_loop;
-use crate::types::{ArcRwBox, Swap};
+use crate::types::{ArcRwBox, GAME_SPEED_FACTOR, Swap};
 use error_stack::Report;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread;
 use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
+use crate::to_factored_ms;
 
 lazy_static::lazy_static! {
     static ref PLAYER_SERVER: Arc<RwLock<PlayerServer >> = Arc::new(RwLock::new(PlayerServer::default()));
@@ -196,7 +197,8 @@ impl PlayerServer {
     }
 }
 
-const EVT_POLLING_INTERVAL_MS: u64 = 200;
+
+const EVT_POLLING_INTERVAL_MS: u64 = to_factored_ms!(200);
 
 fn listen_hub_events(
     hub: Arc<RwLock<Box<dyn HubManager>>>,
@@ -206,9 +208,16 @@ fn listen_hub_events(
         sleep(Duration::from_millis(EVT_POLLING_INTERVAL_MS));
         log::debug!("### New event listener iteration ###");
         let hub_guard = hub.read().expect("Mutex is poisoned");
-        let Ok(events) = hub_guard.read_event_queue() else {
-            log::error!("Can't read event queue. Skipping iteration");
-            continue;
+        let result = hub_guard.read_event_queue();
+        let events = match result {
+            Ok(events) => events,
+            Err(error) => {
+                match error.current_context() {
+                    HubManagerError::NoResponseFromHub => log::debug!("No response from hub"),
+                    _ => log::error!("Can't read event queue. Error: {:#?}", error)
+                }
+                continue;
+            }
         };
 
         if events.is_empty() {
@@ -235,7 +244,6 @@ fn listen_hub_events(
             .expect("Expected to be able acquire write lock on events")
             .extend(events);
     }
-    log::error!("Event listener thread is finished unexpectedly");
 }
 // self.hub_type = context.hub_type;
 // self.hub = context.hub;

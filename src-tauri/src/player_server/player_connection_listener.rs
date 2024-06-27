@@ -7,6 +7,7 @@ use crate::types::Swap;
 use std::sync::{Arc, RwLock};
 use std::thread::sleep;
 use std::time::Duration;
+use crate::to_factored_ms;
 
 pub fn run_player_discovery_loop(
     hub: Arc<RwLock<Box<dyn HubManager>>>,
@@ -17,7 +18,7 @@ pub fn run_player_discovery_loop(
         players = discover_and_save_players(players, &hub);
 
         players_arc.swap(Box::new(players.clone()));
-        sleep(Duration::from_secs(2));
+        sleep(Duration::from_millis(to_factored_ms!(1000)));
     }
 }
 
