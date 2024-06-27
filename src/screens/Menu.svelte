@@ -12,10 +12,6 @@
     import {getPackFilePath} from "../lib/misc.js"
     import {isDebugMode} from "../lib/stores.js";
 
-    onMount(async () => {
-        await callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
-    })
-
     function openSetup() {
         openModal(SettingsModal)
     }

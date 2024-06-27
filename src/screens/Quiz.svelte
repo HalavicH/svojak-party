@@ -17,7 +17,6 @@
 
 <div class="container">
     <ModalPlaceholder/>
-    <MenuButton/>
     {#if gameState === GameState.ShowRoundStats}
         <RoundStatsScreen/>
     {:else if gameState === GameState.EndTheGame}

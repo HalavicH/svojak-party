@@ -3,7 +3,7 @@
     import {notify} from "./lib/notifications"
     import {Views} from "./screens/views.js";
     import Quiz from "./screens/Quiz.svelte";
-    import {currentView, isDebugMode} from "./lib/stores"
+    import {currentScreen, isDebugMode} from "./lib/stores"
     import {initEventListeners, setupEventListener} from "./lib/events.js";
     import DebugButton from "./screens/quiz/debug/DebugButton.svelte";
     import DebugState from "./screens/quiz/debug/DebugState.svelte";
@@ -13,6 +13,7 @@
     import ThemeSwitcher from "./screens/ThemeSwitcher.svelte";
     import {callBackend, TauriApiCommand} from "./lib/commands.js";
     import {onMount} from "svelte";
+    import Navigator from "./screens/Navigator.svelte";
 
     callBackend(TauriApiCommand.IS_DEBUG_MODE).then(isDebug => {
         console.log(isDebug ? "Debug mode is ON" : "Debug mode is OFF");
@@ -34,6 +35,8 @@
     };
 
     onMount(() => {
+        callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE).then();
+
         const unsubscribe = isDebugMode.subscribe((value) => {
             devMode = value;
             document.body.classList.toggle('no-select', !value);
@@ -89,10 +92,11 @@
 </script>
 
 <main class="container">
+    <Navigator/>
     <ThemeSwitcher/>
-    {#if $currentView === Views.MENU}
+    {#if $currentScreen === Views.MENU}
         <Menu/>
-    {:else if $currentView === Views.QUIZ}
+    {:else if $currentScreen === Views.QUIZ}
         <Quiz/>
     {/if}
     {#if $isDebugMode}

@@ -226,7 +226,6 @@ impl GameController {
         self.game_pack = context.game_pack;
         self.set_game_state(GameState::SetupAndLoading(GameCtx::default()));
         self.emit_game_config_locking_hub();
-        self.emit_game_context();
     }
 
     pub fn _dbg_set_game_state(&mut self, name: String) {
@@ -235,7 +234,6 @@ impl GameController {
             self.game_state.game_ctx_ref().clone(),
         ));
         self.emit_game_config_locking_hub();
-        self.emit_game_context();
     }
 }
 
@@ -264,12 +262,6 @@ impl GameController {
         game_ctx.current_round_opt_ref()
             .map(|r| emit_round(r.into()));
         emit_game_state(&self.game_state);
-    }
-
-    fn emit_game_context(&self) {
-        emit_game_state(&self.game_state);
-        emit_round(self.game_state.game_ctx_ref().current_round_ref().into());
-        emit_question(self.game_state.game_ctx_ref().current_question_ref().into());
     }
 
     fn handle_state_mismatch_error(&mut self, expected_state: &str) -> GameplayError {

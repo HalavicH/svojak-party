@@ -11,10 +11,9 @@
         currentPlayersStore,
         currentQuestionStore,
         currentRoundStore,
-        GameState,
-        navTo
+        GameState
     } from "../../../lib/stores.js";
-    import {Views} from "../../views.js";
+    import {Views, navTo} from "../../views.js";
     import SecondaryButton from "../../../components/generic/SecondaryButton.svelte";
     import {isRunningInTauri} from "../../../lib/misc.js";
     import HSpacing from "../../../components/generic/HSpacing.svelte";

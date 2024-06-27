@@ -5,12 +5,8 @@ import {notify} from "./notifications.js";
 import {HubStatusOptions} from "./commands.js";
 
 // Views
-export const currentView = writable(Views.MENU);
+export const currentScreen = writable(Views.MENU);
 
-export function navTo(view) {
-    currentView.set(view);
-    notify.info(`Transitioned to: ${view}`);
-}
 
 // Players involved in game
 export const PlayerState = {

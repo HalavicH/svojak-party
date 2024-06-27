@@ -10,8 +10,8 @@
     import {closeModal, openModal} from 'svelte-modals'
     import SettingsModal from "./SettingsModal.svelte";
     import WarningBar from "../../components/generic/WarningBar.svelte";
-    import {currentPackInfoStore, currentPlayersStore, navTo} from "../../lib/stores.js";
-    import {Views} from "../views.js";
+    import {currentPackInfoStore, currentPlayersStore} from "../../lib/stores.js";
+    import {navTo, Views} from "../views.js";
     import {callBackend, TauriApiCommand} from "../../lib/commands.js";
 
     export let isOpen;
@@ -36,9 +36,7 @@
         console.log("Start pressed");
         closeModal();
         navTo(Views.QUIZ);
-        callBackend(TauriApiCommand.START_NEW_GAME).then(() => {
-            // navTo(Views.MENU);
-        })
+        callBackend(TauriApiCommand.START_NEW_GAME).then()
     }
 
     async function setRoundDuration(selected) {

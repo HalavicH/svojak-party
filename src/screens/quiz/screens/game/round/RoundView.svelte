@@ -1,5 +1,5 @@
 <script>
-    import {currentRoundStore, navTo} from "../../../../../lib/stores.js";
+    import {currentRoundStore} from "../../../../../lib/stores.js";
     import Button from "../../../../../components/generic/Button.svelte";
     import {goToMainMenu} from "../../../../views.js";
     import QuestionTile from "./QuestionTile.svelte";
