@@ -13,9 +13,10 @@ export const notify = {
         }
     },
     failure: (i) => {
-        if (allowNotifications) {
-            Notiflix.Notify.failure(i)
-        }
+        Notiflix.Notify.failure(i)
+        // if (allowNotifications) {
+        //     Notiflix.Notify.failure(i)
+        // }
     }
 };
 
