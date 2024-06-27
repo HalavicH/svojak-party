@@ -3,10 +3,12 @@
     import Table from "../../../../components/generic/Table.svelte";
     import {DFL_PLAYER_ICON} from "../../../../lib/misc.js"
     import NextRoundButton from "./NextRoundButton.svelte";
+    import {getNewLevelSound} from "../../../../lib/sound.js";
 
     currentRoundStatsStore.subscribe(value => {
         console.log(value);
     });
+    getNewLevelSound().play().then();
 
     let stats = $currentRoundStatsStore;
 

@@ -1,10 +1,39 @@
 <script>
-    import {doWithSound, getAllowAnswerSound} from "../../../../../../lib/sound.js";
-    export let onClick = () => {};
+    import {getAllowAnswerSound} from "../../../../../../lib/sound.js";
+    import {currentGameStateStore, GameState} from "../../../../../../lib/stores.js";
+    import {get} from "svelte/store";
+
+    export let onClick = async () => {
+    };
     export let active;
 
+    async function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function playWithSoundUntilState() {
+        const sound = getAllowAnswerSound();
+        sound.play().then();
+        let counter = 10;
+        while (get(currentGameStateStore).gameState !== GameState.AnswerAttemptReceived && counter > 0) {
+            await sleep(1000);
+            counter--;
+        }
+
+        let startVolume = sound.volume;
+        let step = sound.volume / 10;
+        for (let i = 0; i < 10; i++) {
+            sound.volume -= step;
+            await sleep(100);
+        }
+        sound.pause();
+        sound.currentTime = 0;
+        sound.volume = startVolume;
+    }
+
     function handleClick() {
-        doWithSound(onClick, getAllowAnswerSound());
+        onClick().then();
+        playWithSoundUntilState().then();
     }
 </script>
 

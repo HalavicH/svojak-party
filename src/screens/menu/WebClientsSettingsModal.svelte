@@ -131,8 +131,8 @@
     .qr-code {
         display: block;
         margin: 0 auto;
-        width: 7em;
-        height: 7em;
+        width: 10em;
+        height: 10em;
         border-radius: 0.5em;
         border: solid 0.1em var(--items-block-border-color);
     }
