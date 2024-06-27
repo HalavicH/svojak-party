@@ -55,7 +55,7 @@
     <h1>Welcome to Svojak!</h1>
     <p>Powered by BronuCon commuity</p>
     <img
-            src="public/bc-logo.png"
+            src="/bc-logo.png"
             class="logo bronucon"
             alt="BronuCon logo"
     />

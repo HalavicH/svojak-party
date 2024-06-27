@@ -51,15 +51,7 @@ export function setupEventListener(eventType, callback) {
         return;
     }
 
-    let unlisten;
-
-    onMount(async () => {
-        unlisten = await listen(eventType, callback);
-    });
-
-    onDestroy(() => {
-        unlisten();
-    });
+    listen(eventType, callback).then();
 }
 
 function listenAndStoreEvent(eventType, storage) {
