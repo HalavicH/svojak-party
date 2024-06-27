@@ -120,7 +120,7 @@ pub fn map_players_to_player_dto(players: Vec<&Player>) -> Vec<PlayerDto> {
 
 impl From<&Round> for RoundDto {
     fn from(round: &Round) -> Self {
-        let round_topics: Vec<TopicDto> = round
+        let mut round_topics: Vec<TopicDto> = round
             .topics
             .values()
             .map(|theme| {
@@ -128,20 +128,24 @@ impl From<&Round> for RoundDto {
 
                 game_questions.sort_by(|q1, q2| q1.price.cmp(&q2.price));
 
+                let mut questions: Vec<QuestionBriefDto> = game_questions
+                    .iter()
+                    .enumerate()
+                    .map(|(i, q)| QuestionBriefDto {
+                        index: i,
+                        price: q.price,
+                    })
+                    .collect();
+                questions.sort_by(|a, b| a.price.cmp(&b.price));
+
                 TopicDto {
                     topicName: theme.name.clone(),
-                    questions: game_questions
-                        .iter()
-                        .enumerate()
-                        .map(|(i, q)| QuestionBriefDto {
-                            index: i,
-                            price: q.price,
-                        })
-                        .collect(),
+                    questions,
                 }
             })
             .collect();
 
+        round_topics.sort_by(|a, b| a.topicName.cmp(&b.topicName));
         RoundDto {
             roundName: round.name.clone(),
             roundType: round.round_type.clone(),
