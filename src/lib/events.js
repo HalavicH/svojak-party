@@ -4,11 +4,13 @@ import {callBackend, TauriApiCommand} from "./commands.js";
 import {isRunningInTauri} from "./misc.js";
 import {onDestroy, onMount} from "svelte";
 import {
-    currentGameStateStore, currentFinalResultsStore,
+    currentFinalResultsStore,
+    currentGameStateStore,
     currentHubConfigStore,
     currentPackInfoStore,
     currentPlayersStore,
-    currentQuestionStore, currentRoundStatsStore,
+    currentQuestionStore,
+    currentRoundStatsStore,
     currentRoundStore
 } from "./stores.js";
 

@@ -1,6 +1,6 @@
 <script>
     import Menu from "./screens/Menu.svelte";
-    import {notify} from "./lib/notifications"
+    import {notify, setAllowNotifications} from "./lib/notifications"
     import {Views} from "./screens/views.js";
     import Quiz from "./screens/Quiz.svelte";
     import {currentScreen, isDebugMode} from "./lib/stores"
@@ -20,6 +20,7 @@
     callBackend(TauriApiCommand.IS_DEBUG_MODE).then(isDebug => {
         console.log(isDebug ? "Debug mode is ON" : "Debug mode is OFF");
         isDebugMode.set(isDebug);
+        setAllowNotifications(isDebug);
     });
 
     let devMode;

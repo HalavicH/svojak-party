@@ -1,14 +1,25 @@
 <script>
-    import {currentQuestionStore} from "../../../../../../lib/stores.js";
+    import {currentGameStateStore, currentQuestionStore, GameState} from "../../../../../../lib/stores.js";
 
     $: question = $currentQuestionStore;
+
+    function calcAnswerStatus(gameState) {
+        switch (gameState) {
+            case GameState.AnswerAttemptReceived:
+                return "in progress";
+            case GameState.WaitingForAnswerRequests:
+                return "allowed";
+            default:
+                return "forbidden";
+        }
+    }
 </script>
 
 <div class="metadata-box">
     <div class="metadata">Question: {question.number}</div>
     <div class="metadata">Category: {question.category}</div>
     <div class="metadata">Price: {question.price}</div>
-    <div class="metadata">Answer forbidden</div>
+    <div class="metadata">Answer {calcAnswerStatus($currentGameStateStore.gameState)}</div>
 </div>
 
 <style>

@@ -1,13 +1,14 @@
 <script>
     import {doWithSound, getAllowAnswerSound} from "../../../../../../lib/sound.js";
     export let onClick = () => {};
+    export let active;
 
     function handleClick() {
         doWithSound(onClick, getAllowAnswerSound());
     }
 </script>
 
-<button type="button" on:click={handleClick}>Allow answer</button>
+<button type="button" on:click={handleClick} class:inactive={!active}>Allow answer</button>
 
 <style>
     button {
@@ -27,5 +28,10 @@
     button:hover {
         border-color: #2b0047;
         filter: drop-shadow(0 0 0.2em #6724db);
+    }
+
+    .inactive {
+        filter: grayscale(100%);
+        pointer-events: none;
     }
 </style>

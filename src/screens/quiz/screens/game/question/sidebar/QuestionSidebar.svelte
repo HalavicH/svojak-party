@@ -42,7 +42,7 @@
     <QuestionMetaData/>
     <VSpacing size="0.5em"/>
     <div class="controls">
-        <AllowAnswerButton onClick={allowAnswer}/>
+        <AllowAnswerButton onClick={allowAnswer} active={!clickAllowed}/>
         <VSpacing size="0.5em"/>
         <CorrectAnswerButton onClick={correctAnswer} active={clickAllowed}/>
         <VSpacing size="0.5em"/>

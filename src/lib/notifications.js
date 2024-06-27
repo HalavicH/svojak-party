@@ -5,4 +5,20 @@ Notiflix.Notify.init({
     position: 'left-top',
 });
 
-export const notify = Notiflix.Notify;
+let allowNotifications = false;
+export const notify = {
+    info: (i) => {
+        if (allowNotifications) {
+            Notiflix.Notify.info(i)
+        }
+    },
+    failure: (i) => {
+        if (allowNotifications) {
+            Notiflix.Notify.failure(i)
+        }
+    }
+};
+
+export function setAllowNotifications(b) {
+    allowNotifications = b;
+}
