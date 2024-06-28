@@ -297,18 +297,6 @@
         /*width: 60%;*/
     }
 
-    .json-view {
-        display: flex;
-        flex-direction: column;
-        flex-wrap: wrap;
-        font-family: monospace;
-        font-size: 1em;
-        text-align: left;
-        padding-left: 5px;
-        border: 1px solid gray;
-        border-radius: 5px;
-    }
-
     .item {
         flex: 0 0 auto;
         margin: 5px;
