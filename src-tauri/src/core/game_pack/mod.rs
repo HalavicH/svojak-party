@@ -3,3 +3,5 @@ pub mod game_pack_loader;
 mod pack_content_dto;
 pub mod pack_content_entities;
 pub mod pack_content_loader;
+mod pack_content_dto_v5;
+mod pack_content_dto_v4;

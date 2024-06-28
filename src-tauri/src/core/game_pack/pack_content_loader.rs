@@ -13,6 +13,7 @@ use urlencoding::encode;
 use crate::core::game_pack::game_pack_entites::PackLocationData;
 use crate::core::game_pack::game_pack_loader::GamePackLoadingError;
 use crate::core::game_pack::pack_content_dto::*;
+use crate::core::game_pack::pack_content_dto_v4::{AtomDtoV4, AtomTypeDtoV4, PackageDtoV4, QuestionDtoV4, RoundDtoV4, ThemeDtoV4};
 use crate::core::game_pack::pack_content_entities::*;
 use crate::host_api::dto::QuestionType;
 
@@ -144,7 +145,7 @@ fn to_url_filename(a: &mut Atom) -> String {
 pub struct PackageDtoV5 {}
 
 enum PackageByVersion {
-    V4(PackageDto),
+    V4(PackageDtoV4),
     V5(PackageDtoV5),
 }
 
@@ -176,7 +177,7 @@ fn parse_package(file_path: &str) -> Result<PackageByVersion, GamePackLoadingErr
 
     match version {
         PackageVersion::V4 => {
-            let package_dto: PackageDto = from_str(&package_xml)
+            let package_dto = from_str(&package_xml)
                 .into_report()
                 .attach_printable_lazy(|| format!("Can't parse pack content XML file: '{file_path}'"))
                 .change_context(GamePackLoadingError::CorruptedPack("Can't parse pack content XML file".to_string()))?;
@@ -194,7 +195,7 @@ fn parse_package(file_path: &str) -> Result<PackageByVersion, GamePackLoadingErr
     }
 }
 
-fn map_package(dto: PackageDto) -> PackContent {
+fn map_package(dto: PackageDtoV4) -> PackContent {
     PackContent {
         name: dto.name,
         version: dto.version,
@@ -223,22 +224,22 @@ fn map_package(dto: PackageDto) -> PackContent {
     }
 }
 
-fn map_atoms(a: &AtomDto) -> Atom {
+fn map_atoms(a: &AtomDtoV4) -> Atom {
     Atom {
         atom_type: {
             match a.r#type {
-                AtomTypeDto::say => QuestionMediaType::Text,
-                AtomTypeDto::voice => QuestionMediaType::Voice,
-                AtomTypeDto::video => QuestionMediaType::Video,
-                AtomTypeDto::marker => QuestionMediaType::Marker,
-                AtomTypeDto::image => QuestionMediaType::Image,
+                AtomTypeDtoV4::say => QuestionMediaType::Text,
+                AtomTypeDtoV4::voice => QuestionMediaType::Voice,
+                AtomTypeDtoV4::video => QuestionMediaType::Video,
+                AtomTypeDtoV4::marker => QuestionMediaType::Marker,
+                AtomTypeDtoV4::image => QuestionMediaType::Image,
             }
         },
         content: a.content.clone(),
     }
 }
 
-fn map_question(q: &QuestionDto, topic: String) -> Question {
+fn map_question(q: &QuestionDtoV4, topic: String) -> Question {
     Question {
         topic,
         price: q.price,
@@ -256,7 +257,7 @@ fn map_question(q: &QuestionDto, topic: String) -> Question {
     }
 }
 
-fn map_theme(t: &ThemeDto) -> (String, Topic) {
+fn map_theme(t: &ThemeDtoV4) -> (String, Topic) {
     (
         t.name.clone(),
         Topic {
@@ -272,7 +273,7 @@ fn map_theme(t: &ThemeDto) -> (String, Topic) {
     )
 }
 
-fn map_round(r: &RoundDto) -> Round {
+fn map_round(r: &RoundDtoV4) -> Round {
     let mut round = Round {
         name: r.name.clone(),
         round_type: r.r#type.clone(),
