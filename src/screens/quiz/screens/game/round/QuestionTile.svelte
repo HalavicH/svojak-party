@@ -28,7 +28,9 @@
         padding: 0.3em;
         background-color: var(--items-block-color);
         border-radius: 15px;
-        width: 10%;
+        min-width: 8%;
+        width: auto;
+        max-width: 15%;
         text-align: center;
         font-weight: bold;
         font-size: xx-large;

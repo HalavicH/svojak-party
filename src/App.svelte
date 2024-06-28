@@ -71,8 +71,8 @@
 <BlurAnimation/>
 <main class="app-container">
     <Navigator/>
-    <ThemeSwitcher/>
     {#if $currentScreen === Views.MENU}
+        <ThemeSwitcher/>
         <Menu/>
     {:else if $currentScreen === Views.QUIZ}
         <Quiz/>
