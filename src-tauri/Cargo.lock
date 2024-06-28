@@ -4088,6 +4088,7 @@ dependencies = [
  "lazy_static",
  "log",
  "network-interface",
+ "quick-xml",
  "rand 0.8.5",
  "reqwest",
  "rgb",

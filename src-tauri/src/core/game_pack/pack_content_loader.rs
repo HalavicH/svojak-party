@@ -1,8 +1,11 @@
 use std::path::Path;
 #[allow(dead_code, unused, unused_imports)]
 use std::{collections::HashMap, error::Error, fmt, fs, io};
-
+use std::io::BufRead;
 use error_stack::{IntoReport, Result, ResultExt};
+use quick_xml::events::Event;
+use quick_xml::Reader;
+use serde::Deserialize;
 use serde_xml_rs::from_str;
 use unic_normal::StrNormalForm;
 use urlencoding::encode;
@@ -12,17 +15,6 @@ use crate::core::game_pack::game_pack_loader::GamePackLoadingError;
 use crate::core::game_pack::pack_content_dto::*;
 use crate::core::game_pack::pack_content_entities::*;
 use crate::host_api::dto::QuestionType;
-
-#[derive(Debug)]
-pub struct ParsePackContentError;
-
-impl fmt::Display for ParsePackContentError {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.write_str("Failed to parse content: invalid pack content")
-    }
-}
-
-impl Error for ParsePackContentError {}
 
 pub fn load_pack_content(
     pack_location_data: &PackLocationData,
@@ -36,15 +28,44 @@ pub fn load_pack_content(
         .into_report()
         .attach_printable("Can't get content file path. Check pack location data validity")?;
 
-    let package: PackageDto = parse_package(package_content_file_str)
-        .change_context(GamePackLoadingError::CorruptedPack(
-            "Can't parse package".to_string(),
-        ))
-        .attach_printable_lazy(|| "Can't load pack content: parsing failed".to_string())?;
+    let package_by_version = parse_package(package_content_file_str)?;
+    match package_by_version {
+        PackageByVersion::V4(package) => {
+            let mut mapped_content = map_package(package);
+            expand_and_validate_package_paths(&mut mapped_content, pack_location_data)?;
+            Ok(mapped_content)
+        }
+        PackageByVersion::V5(package) => todo!("V5 package version is not supported yet")
+    }
+}
 
-    let mut mapped_content = map_package(package);
-    expand_and_validate_package_paths(&mut mapped_content, pack_location_data)?;
-    Ok(mapped_content)
+fn parse_package_version<R: BufRead>(reader: R) -> Option<String> {
+    let mut reader = Reader::from_reader(reader);
+    reader.trim_text(true);
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(ref e)) if e.name() == quick_xml::name::QName(b"package") => {
+                for attribute in e.attributes() {
+                    match attribute {
+                        Ok(attr) if attr.key == quick_xml::name::QName(b"version") => {
+                            return attr.unescape_value().ok().map(|v| v.to_string());
+                        }
+                        _ => (),
+                    }
+                }
+            }
+            Ok(Event::Eof) => break,
+            Err(e) => {
+                eprintln!("Error at position {}: {:?}", reader.buffer_position(), e);
+                break;
+            }
+            _ => (),
+        }
+        buf.clear();
+    }
+    None
 }
 
 fn expand_and_validate_package_paths(
@@ -119,18 +140,58 @@ fn to_url_filename(a: &mut Atom) -> String {
     encode(&normalized_filename).to_string()
 }
 
-fn parse_package(file_path: &str) -> Result<PackageDto, ParsePackContentError> {
+#[derive(Debug, Deserialize)]
+pub struct PackageDtoV5 {}
+
+enum PackageByVersion {
+    V4(PackageDto),
+    V5(PackageDtoV5),
+}
+
+enum PackageVersion {
+    V4,
+    V5,
+}
+
+fn get_package_version(package_xml: &str) -> Result<PackageVersion, GamePackLoadingError> {
+    let reader = package_xml.as_bytes();
+    let version = parse_package_version(reader)
+        .ok_or(GamePackLoadingError::CorruptedPack("Can't parse package version".to_string()))
+        .into_report()
+        .attach_printable("Can't parse package version. Check package content file")?;
+    match version.as_str() {
+        "4" => Ok(PackageVersion::V4),
+        "5" => Ok(PackageVersion::V5),
+        _ => Err(GamePackLoadingError::UnknownVersion(version)).into_report(),
+    }
+}
+
+fn parse_package(file_path: &str) -> Result<PackageByVersion, GamePackLoadingError> {
     let package_xml = fs::read_to_string(file_path)
         .into_report()
         .attach_printable_lazy(|| format!("Can't open package content file: '{file_path}'"))
-        .change_context(ParsePackContentError)?;
+        .change_context(GamePackLoadingError::CorruptedPack("Can't open package content file".to_string()))?;
 
-    let package_dto = from_str(&package_xml)
-        .into_report()
-        .attach_printable_lazy(|| format!("Can't parse pack content XML file: '{file_path}'"))
-        .change_context(ParsePackContentError)?;
+    let version = get_package_version(&package_xml)?;
 
-    Ok(package_dto)
+    match version {
+        PackageVersion::V4 => {
+            let package_dto: PackageDto = from_str(&package_xml)
+                .into_report()
+                .attach_printable_lazy(|| format!("Can't parse pack content XML file: '{file_path}'"))
+                .change_context(GamePackLoadingError::CorruptedPack("Can't parse pack content XML file".to_string()))?;
+
+            Ok(PackageByVersion::V4(package_dto))
+        }
+        PackageVersion::V5 => {
+            let package_dto: PackageDtoV5 = from_str(&package_xml)
+                .into_report()
+                .attach_printable_lazy(|| format!("Can't parse pack content XML file: '{file_path}'"))
+                .change_context(GamePackLoadingError::CorruptedPack("Can't parse pack content XML file".to_string()))?;
+
+            Ok(PackageByVersion::V5(package_dto))
+        }
+    }
 }
 
 fn map_package(dto: PackageDto) -> PackContent {

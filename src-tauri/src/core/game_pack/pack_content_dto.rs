@@ -3,7 +3,7 @@ use serde::*;
 // Game entities
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 #[allow(non_camel_case_types)]
-pub enum AtomTypeDto {
+pub(super) enum AtomTypeDto {
     say,
     voice,
     video,
@@ -12,7 +12,7 @@ pub enum AtomTypeDto {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct AtomDto {
+pub(super) struct AtomDto {
     #[serde(default = "default_atom_type")]
     pub r#type: AtomTypeDto,
     #[serde(default = "default_atom_content")]
@@ -21,43 +21,43 @@ pub struct AtomDto {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct ScenarioDto {
+pub(super) struct ScenarioDto {
     #[serde(rename = "$value")]
     pub atoms_list: Vec<AtomDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct RightDto {
+pub(super) struct RightDto {
     pub answer: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct QuestionDto {
+pub(super) struct QuestionDto {
     pub scenario: ScenarioDto,
     pub right: RightDto,
     pub price: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct QuestionsDto {
+pub(super) struct QuestionsDto {
     #[serde(rename = "$value")]
     pub questions_list: Vec<QuestionDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct ThemeDto {
+pub(super) struct ThemeDto {
     pub name: String,
     pub questions: QuestionsDto,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct ThemesDto {
+pub(super) struct ThemesDto {
     #[serde(rename = "$value")]
     pub themes_list: Vec<ThemeDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct RoundDto {
+pub(super) struct RoundDto {
     pub name: String,
     #[serde(default = "String::default")]
     pub r#type: String,
@@ -66,26 +66,26 @@ pub struct RoundDto {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct RoundsDto {
+pub(super) struct RoundsDto {
     #[serde(rename = "$value")]
     pub rounds_list: Vec<RoundDto>,
 }
 
 // Pack information
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct AuthorDto {
+pub(super) struct AuthorDto {
     #[serde(rename = "$value")]
     pub name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct InfoDto {
+pub(super) struct InfoDto {
     #[serde(rename = "$value")]
     pub authors: Vec<AuthorDto>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct PackageDto {
+pub(super) struct PackageDto {
     pub name: String,
     pub version: String,
     pub id: String,

@@ -11,23 +11,25 @@ use unic_normal::StrNormalForm;
 use urlencoding::decode;
 use uuid::Uuid;
 use zip::ZipArchive;
+use quick_xml::events::Event;
+use quick_xml::Reader;
+use std::io::BufRead;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, thiserror::Error)]
 pub enum GamePackLoadingError {
+    #[error("Invalid path to media element: {0}")]
     InvalidPathToMediaElement(String),
-    InvalidPathToPack(String),
+    #[error("Invalid path to pack: {0}")]
     InvalidPackFileExtension(String),
+    #[error("Corrupted pack: {0}")]
+    InvalidPathToPack(String),
+    #[error("Corrupted pack: {0}")]
     CorruptedPack(String),
+    #[error("Unknown version: {0}")]
+    UnknownVersion(String),
+    #[error("Internal error")]
     InternalError,
 }
-
-impl fmt::Display for GamePackLoadingError {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.write_str("Failed to load game pack:")
-    }
-}
-
-impl Error for GamePackLoadingError {}
 
 /// Accepts path to pack, returns Result with GamePack or GamePackLoadingError
 pub fn load_game_pack(game_archive_path: &str) -> Result<GamePack, GamePackLoadingError> {
@@ -71,6 +73,7 @@ pub fn load_game_pack(game_archive_path: &str) -> Result<GamePack, GamePackLoadi
     })
 }
 
+
 impl QuestionMediaType {
     fn get_media_dir<'a>(&'a self, locations: &'a PackLocationData) -> Option<&Path> {
         match self {
@@ -94,10 +97,10 @@ fn simplify_pack_assets_paths(locations: &PackLocationData, pack_content: &mut P
                     let file_name = Uuid::new_v4().to_string()
                         + "."
                         + Path::new(&a.content)
-                            .extension()
-                            .expect("Expected file extension")
-                            .to_str()
-                            .unwrap();
+                        .extension()
+                        .expect("Expected file extension")
+                        .to_str()
+                        .unwrap();
                     let new_path = media_dir.join(file_name);
                     log::debug!(
                         "Renaming file: {} -> {}",
@@ -197,7 +200,7 @@ fn validate_pack_path(game_archive_path: &str) -> Result<(), GamePackLoadingErro
         return Err(Report::new(GamePackLoadingError::InvalidPathToPack(
             game_archive_path.to_string(),
         ))
-        .attach_printable(err_msg));
+            .attach_printable(err_msg));
     }
 
     if !game_archive_path.ends_with(".siq") {
@@ -210,7 +213,7 @@ fn validate_pack_path(game_archive_path: &str) -> Result<(), GamePackLoadingErro
         return Err(Report::new(GamePackLoadingError::InvalidPackFileExtension(
             game_archive_path.to_string(),
         ))
-        .attach_printable(err_msg));
+            .attach_printable(err_msg));
     }
 
     Ok(())
