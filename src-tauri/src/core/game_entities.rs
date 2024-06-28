@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-
+use crate::core::game_entities::GameplayError::PackElementNotPresent;
 use crate::core::game_entities::HubStatus::Detected;
 use crate::core::game_pack::pack_content_entities::Question;
 use crate::player_server::entities::PsPlayer;
@@ -112,11 +112,10 @@ impl HubStatus {
 #[derive(Debug, Clone, Serialize, Error)]
 pub enum GamePackError {
     #[error("Theme not present")]
-    ThemeNotPresent,
+    TopicNotPresent,
     #[error("Question not present")]
     QuestionNotPresent,
 }
-
 #[derive(Debug, Clone, Serialize, Error)]
 pub enum GameplayError {
     #[error("Not enough players for game")]
@@ -128,8 +127,8 @@ pub enum GameplayError {
     #[error("Answer request timeout")]
     AnswerRequestTimeout,
 
-    #[error("HUB operation failed")]
-    PackElementNotPresent,
+    #[error("{0}")]
+    PackElementNotPresent(GamePackError),
     #[error("Player {0} not present")]
     PlayerNotPresent(u8),
     #[error("HUB operation failed")]
@@ -143,3 +142,10 @@ pub enum GameplayError {
     #[error("Broken Hub Connection")]
     BrokenHubConnection,
 }
+
+impl From<GamePackError> for GameplayError {
+    fn from(value: GamePackError) -> Self {
+        PackElementNotPresent(value)
+    }
+}
+

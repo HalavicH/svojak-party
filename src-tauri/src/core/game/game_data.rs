@@ -1,4 +1,4 @@
-use crate::core::game_entities::{Player, PlayerState};
+use crate::core::game_entities::{GamePackError, GameplayError, Player, PlayerState};
 use crate::core::game_pack::pack_content_entities::{PackContent, Question, Round, RoundStats};
 use crate::host_api::dto::{PlayerEndRoundStatsDto, QuestionDto, RoundStatsDto};
 use crate::host_api::events::{
@@ -57,7 +57,7 @@ impl GameData {
     }
 
     // TODO: Update by marking questions instead of removing them
-    pub fn use_question(&mut self, topic_name: &str, price: i32) -> Option<()> {
+    pub fn use_question(&mut self, topic_name: &str, price: i32) -> Result<(), GamePackError> {
         let round = self.current_round_mut();
         let round_name: &str = round.name.as_ref();
         let Some(topic) = round.topics.get_mut(topic_name) else {
@@ -66,22 +66,22 @@ impl GameData {
                 topic_name,
                 round_name
             );
-            return None;
+            return Err(GamePackError::TopicNotPresent);
         };
 
         round.questions_left -= 1;
         log::debug!("Questions left: {}", round.questions_left);
         // let question: Option<Question> = topic.questions.remove(&price);
-        let question = topic.questions.get_mut(&price)?;
+        let question = topic.questions.get_mut(&price).ok_or(GamePackError::QuestionNotPresent)?;
         question.is_used = true;
         emit_round((self.current_round_ref()).into());
-
-        Some(())
+        Ok(())
     }
 
-    pub fn get_question(&self, topic_name: &str, price: i32) -> Option<&Question> {
-        let topic = self.current_round_ref().topics.get(topic_name)?;
+    pub fn get_question(&self, topic_name: &str, price: i32) -> Result<&Question, GamePackError> {
+        let topic = self.current_round_ref().topics.get(topic_name).ok_or(GamePackError::TopicNotPresent)?;
         topic.questions.get(&price)
+            .ok_or(GamePackError::QuestionNotPresent)
     }
 }
 
@@ -208,7 +208,7 @@ impl GameData {
         &mut self.current_round_mut().round_stats
     }
 
-    pub fn remove_current_question(&mut self) {
+    pub fn remove_current_question(&mut self) -> Result<(), GamePackError> {
         let topic = &self.current_question.topic.clone();
         let price = self.current_question.price;
         log::debug!(
@@ -216,7 +216,7 @@ impl GameData {
             topic,
             price
         );
-        self.use_question(topic, price);
+        self.use_question(topic, price)
     }
 
     pub fn to_round_stats_dto(&self) -> RoundStatsDto {

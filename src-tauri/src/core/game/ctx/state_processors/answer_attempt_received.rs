@@ -16,13 +16,13 @@ impl GameCtx<AnswerAttemptReceived> {
         self.update_non_active_player_states("AnswerAttemptReceived");
         let no_players_to_answer_left = self.no_players_to_answer_left();
         log::debug!(
-            "Anwsered correctly: {}, players to answer left: {}",
+            "Answered correctly: {}, no players to answer left: {}",
             answered_correctly,
             no_players_to_answer_left
         );
         if answered_correctly || no_players_to_answer_left {
             log::info!("Removing correctly answered question from the pack");
-            self.data.remove_current_question();
+            self.data.remove_current_question()?;
             Ok(AnswerQuestionResult::EndQuestion(self.transition()))
         } else {
             Ok(AnswerQuestionResult::DisplayQuestion(self.transition()))

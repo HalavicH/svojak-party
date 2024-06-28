@@ -1,6 +1,6 @@
 use crate::core::game_controller::game_mut;
 use crate::core::game_pack::game_pack_loader::{load_game_pack, GamePackLoadingError};
-use crate::host_api::dto::PackErrorData;
+use crate::host_api::dto::PackErrorDataDto;
 use crate::host_api::events::emit_pack_info;
 use crate::host_api::events::*;
 use error_stack::Report;
@@ -8,7 +8,7 @@ use tauri::{command, Window};
 
 /// Load game pack into the game
 #[command]
-pub fn init_game_pack(path: String) -> Result<(), PackErrorData> {
+pub fn init_game_pack(path: String) -> Result<(), PackErrorDataDto> {
     log::info!("Obtained package path: {}", path);
 
     let result = load_game_pack(path.as_str());
@@ -26,7 +26,7 @@ pub fn init_game_pack(path: String) -> Result<(), PackErrorData> {
 fn handle_pack_info_error(
     path: String,
     err: Report<GamePackLoadingError>,
-) -> Result<(), PackErrorData> {
+) -> Result<(), PackErrorDataDto> {
     log::error!("\n{err:?}");
 
     let stack_trace = format!("{:?}", err);
@@ -39,7 +39,7 @@ fn handle_pack_info_error(
         details.to_string()
     });
 
-    let data = PackErrorData {
+    let data = PackErrorDataDto {
         path,
         cause: err.current_context().to_string(),
         details: html_details,

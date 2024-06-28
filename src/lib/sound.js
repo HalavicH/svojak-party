@@ -15,7 +15,7 @@ let newLevelSound = new Audio('/sounds/new-level.mp3');
 newLevelSound.volume = 0.3 * volumeFactor;
 
 let ohNoSound = new Audio('/sounds/oh-no.mp3');
-ohNoSound.volume = 0.2 * volumeFactor;
+ohNoSound.volume = 0.15 * volumeFactor;
 
 let pickSound = new Audio('/sounds/pick.mp3');
 pickSound.volume = 0.2 * volumeFactor;

@@ -41,7 +41,10 @@
 
     async function startTheGame() {
         await goToQuiz();
-        await callBackend(TauriApiCommand.START_NEW_GAME);
+        await callBackend(TauriApiCommand.START_NEW_GAME, {
+            roundDurationMin: 10,
+            isQcafMode: true,
+        });
         notify.info(`Game started`);
     }
 

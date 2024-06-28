@@ -22,7 +22,7 @@
 
     let defaultDuration = 20;
     let roundDurationMin = defaultDuration;
-    let isQcafMode;
+    let isQcafMode = false;
 
     // Static
     let gameDurationOptions = [

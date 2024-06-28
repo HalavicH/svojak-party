@@ -50,7 +50,6 @@
 
 <style>
     .main-view {
-        padding-top: 0.3em; /* Fixes weird shift to top */
         display: flex;
         flex-direction: column;
         /*flex: 1;*/

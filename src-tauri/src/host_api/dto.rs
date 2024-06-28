@@ -40,7 +40,7 @@ pub struct PackInfoDto {
 }
 
 #[derive(Debug, Serialize)]
-pub struct PackErrorData {
+pub struct PackErrorDataDto {
     pub path: String,
     pub cause: String,
     pub details: String,

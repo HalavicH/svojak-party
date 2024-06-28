@@ -17,15 +17,16 @@ impl GameCtx<ChooseQuestion> {
         let data = &mut ctx.data;
         let question = data
             .get_question(topic, price)
-            .ok_or(GameplayError::PackElementNotPresent)?;
+            .map_err(Into::<GameplayError>::into)?;
 
         data.set_current_question(question.clone());
 
         log::info!("Picked question! Topic: {}, price: {}", topic, price);
 
+        let player = data.active_player_id;
         return if data.game_mode.question_chooser_answers_first {
-            let mut ctx: GameCtx<WaitingForAnswerRequests> = self.transition();
-            let ctx = ctx.request_answer_by_player_id(data.active_player_id)?;
+            let mut ctx: GameCtx<WaitingForAnswerRequests> = ctx.transition();
+            let ctx = ctx.request_answer_by_player_id(player)?;
             Ok(ChooseQuestionResult::AnswerAttemptReceived(ctx))
         } else {
             data.set_active_player_state(PlayerState::Idle);

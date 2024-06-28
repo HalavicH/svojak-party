@@ -1,12 +1,13 @@
 <script>
     import {currentGameStateStore, currentRoundStore, GameState} from "../../../../../../lib/stores.js";
-    import {TauriApiCommand, callBackend} from "../../../../../../lib/commands.js";
+    import {callBackend, TauriApiCommand} from "../../../../../../lib/commands.js";
     import Button from "../../../../../../components/generic/Button.svelte";
     import VSpacing from "../../../../../../components/generic/VSpacing.svelte";
     import AllowAnswerButton from "./AllowAnswerButton.svelte";
     import CorrectAnswerButton from "./CorrectAnswerButton.svelte";
     import WrongAnswerButton from "./WrongAnswerButton.svelte";
     import QuestionMetaData from "./QuestionMetaData.svelte";
+    import SkipAnswerButton from "./SkipAnswerButton.svelte";
 
     $: currentRound = $currentRoundStore;
     $: state = $currentGameStateStore.gameState;
@@ -48,7 +49,7 @@
         <VSpacing size="0.5em"/>
         <WrongAnswerButton onClick={wrongAnswer} active={clickAllowed}/>
         <VSpacing size="0.5em"/>
-        <Button text="Show answer and end question" onClick={stopAskingAndShowAnswer} active={clickAllowed && noPlayersToAnswerLeft}/>
+        <SkipAnswerButton onClick={stopAskingAndShowAnswer} active={!clickAllowed || noPlayersToAnswerLeft}/>
     </div>
 </div>
 
@@ -99,20 +100,8 @@
         border-radius: inherit;
     }
 
-    #exit-dialog-text {
-        text-align: center;
-    }
-
-    #exit-dialog-answer {
-        display: flex;
-        justify-content: space-around;
-    }
-
-    #exit-dialog-yes {
-        background-color: var(--primary-button-color);
-    }
-
-    #exit-dialog-no {
-        background-color: var(--secondary-button-color);
+    .inactive {
+        filter: grayscale(100%);
+        pointer-events: none;
     }
 </style>

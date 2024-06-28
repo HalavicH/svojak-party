@@ -71,7 +71,8 @@
     .viewport {
         display: flex;
         height: 66vh;
-        width: 70vw;
+        width: auto;
+        max-width: 80vw;
     }
 
     .question-text {
