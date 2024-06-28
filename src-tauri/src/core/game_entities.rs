@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
-use thiserror::Error;
 use crate::core::game_entities::GameplayError::PackElementNotPresent;
 use crate::core::game_entities::HubStatus::Detected;
 use crate::core::game_pack::pack_content_entities::Question;
 use crate::player_server::entities::PsPlayer;
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 pub const DEFAULT_ICON: &str = "default";
 
@@ -148,4 +148,3 @@ impl From<GamePackError> for GameplayError {
         PackElementNotPresent(value)
     }
 }
-

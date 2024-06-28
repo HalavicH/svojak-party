@@ -53,4 +53,3 @@ fn handle_pack_info_error(
 pub fn init_window_handle(window: Window) {
     set_window(window);
 }
-

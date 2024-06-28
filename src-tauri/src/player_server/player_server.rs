@@ -7,14 +7,14 @@ use crate::hub::hw::hw_hub_manager::HwHubManager;
 use crate::hub::web::web_hub_manager::WebHubManager;
 use crate::player_server::entities::PsPlayer;
 use crate::player_server::player_connection_listener::run_player_discovery_loop;
-use crate::types::{ArcRwBox, GAME_SPEED_FACTOR, Swap};
+use crate::to_factored_ms;
+use crate::types::{ArcRwBox, Swap};
 use error_stack::Report;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::thread;
 use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
-use crate::to_factored_ms;
 
 lazy_static::lazy_static! {
     static ref PLAYER_SERVER: Arc<RwLock<PlayerServer >> = Arc::new(RwLock::new(PlayerServer::default()));
@@ -197,7 +197,6 @@ impl PlayerServer {
     }
 }
 
-
 const EVT_POLLING_INTERVAL_MS: u64 = to_factored_ms!(200);
 
 fn listen_hub_events(
@@ -214,7 +213,7 @@ fn listen_hub_events(
             Err(error) => {
                 match error.current_context() {
                     HubManagerError::NoResponseFromHub => log::debug!("No response from hub"),
-                    _ => log::error!("Can't read event queue. Error: {:#?}", error)
+                    _ => log::error!("Can't read event queue. Error: {:#?}", error),
                 }
                 continue;
             }

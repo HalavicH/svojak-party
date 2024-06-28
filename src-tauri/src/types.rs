@@ -7,7 +7,7 @@ pub const GAME_SPEED_FACTOR: f64 = 1.0;
 #[macro_export]
 macro_rules! to_factored_ms {
     ($ms:expr) => {
-        (($ms as f64 * crate::types::GAME_SPEED_FACTOR) as u64)
+        (($ms as f64 * $crate::types::GAME_SPEED_FACTOR) as u64)
     };
 }
 

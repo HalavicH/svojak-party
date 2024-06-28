@@ -25,7 +25,7 @@ pub struct Question {
     pub correct_answer: String,
     pub question_type: QuestionType,
     pub price: i32,
-    pub is_used: bool
+    pub is_used: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -33,7 +33,6 @@ pub struct Topic {
     pub name: String,
     pub questions: HashMap<i32, Question>,
 }
-
 
 ///// LEGACY
 #[derive(Default, Debug, Clone, PartialEq)]

@@ -1,21 +1,19 @@
-use std::path::Path;
-#[allow(dead_code, unused, unused_imports)]
-use std::{collections::HashMap, error::Error, fmt, fs, io};
-use std::io::BufRead;
 use error_stack::{IntoReport, Result, ResultExt};
 use quick_xml::events::Event;
 use quick_xml::Reader;
 use serde::Deserialize;
 use serde_xml_rs::from_str;
+use std::io::BufRead;
+use std::path::Path;
+#[allow(dead_code, unused, unused_imports)]
+use std::{collections::HashMap, error::Error, fmt, fs, io};
 use unic_normal::StrNormalForm;
 use urlencoding::encode;
 
 use crate::core::game_pack::game_pack_entites::PackLocationData;
 use crate::core::game_pack::game_pack_loader::GamePackLoadingError;
-use crate::core::game_pack::pack_content_dto::*;
-use crate::core::game_pack::pack_content_dto_v4::{AtomDtoV4, AtomTypeDtoV4, PackageDtoV4, QuestionDtoV4, RoundDtoV4, ThemeDtoV4};
+use crate::core::game_pack::pack_content_dto_v4::PackageDtoV4;
 use crate::core::game_pack::pack_content_entities::*;
-use crate::host_api::dto::QuestionType;
 
 pub fn load_pack_content(
     pack_location_data: &PackLocationData,
@@ -36,7 +34,7 @@ pub fn load_pack_content(
             expand_and_validate_package_paths(&mut mapped_content, pack_location_data)?;
             Ok(mapped_content)
         }
-        PackageByVersion::V5(package) => todo!("V5 package version is not supported yet")
+        PackageByVersion::V5(package) => todo!("V5 package version is not supported yet"),
     }
 }
 
@@ -157,7 +155,9 @@ enum PackageVersion {
 fn get_package_version(package_xml: &str) -> Result<PackageVersion, GamePackLoadingError> {
     let reader = package_xml.as_bytes();
     let version = parse_package_version(reader)
-        .ok_or(GamePackLoadingError::CorruptedPack("Can't parse package version".to_string()))
+        .ok_or(GamePackLoadingError::CorruptedPack(
+            "Can't parse package version".to_string(),
+        ))
         .into_report()
         .attach_printable("Can't parse package version. Check package content file")?;
     match version.as_str() {
@@ -171,7 +171,9 @@ fn parse_package(file_path: &str) -> Result<PackageByVersion, GamePackLoadingErr
     let package_xml = fs::read_to_string(file_path)
         .into_report()
         .attach_printable_lazy(|| format!("Can't open package content file: '{file_path}'"))
-        .change_context(GamePackLoadingError::CorruptedPack("Can't open package content file".to_string()))?;
+        .change_context(GamePackLoadingError::CorruptedPack(
+            "Can't open package content file".to_string(),
+        ))?;
 
     let version = get_package_version(&package_xml)?;
 
@@ -179,16 +181,24 @@ fn parse_package(file_path: &str) -> Result<PackageByVersion, GamePackLoadingErr
         PackageVersion::V4 => {
             let package_dto = from_str(&package_xml)
                 .into_report()
-                .attach_printable_lazy(|| format!("Can't parse pack content XML file: '{file_path}'"))
-                .change_context(GamePackLoadingError::CorruptedPack("Can't parse pack content XML file".to_string()))?;
+                .attach_printable_lazy(|| {
+                    format!("Can't parse pack content XML file: '{file_path}'")
+                })
+                .change_context(GamePackLoadingError::CorruptedPack(
+                    "Can't parse pack content XML file".to_string(),
+                ))?;
 
             Ok(PackageByVersion::V4(package_dto))
         }
         PackageVersion::V5 => {
             let package_dto: PackageDtoV5 = from_str(&package_xml)
                 .into_report()
-                .attach_printable_lazy(|| format!("Can't parse pack content XML file: '{file_path}'"))
-                .change_context(GamePackLoadingError::CorruptedPack("Can't parse pack content XML file".to_string()))?;
+                .attach_printable_lazy(|| {
+                    format!("Can't parse pack content XML file: '{file_path}'")
+                })
+                .change_context(GamePackLoadingError::CorruptedPack(
+                    "Can't parse pack content XML file".to_string(),
+                ))?;
 
             Ok(PackageByVersion::V5(package_dto))
         }

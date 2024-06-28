@@ -103,7 +103,10 @@ impl GameController {
     }
 
     // Gameplay host API
-    pub fn start_new_game(&mut self, game_mode: GameMode) -> error_stack::Result<(), GameplayError> {
+    pub fn start_new_game(
+        &mut self,
+        game_mode: GameMode,
+    ) -> error_stack::Result<(), GameplayError> {
         let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
 
         let content = self.game_pack.content.clone();
@@ -128,7 +131,9 @@ impl GameController {
         let path = ctx.choose_question(topic, price)?;
         let state = match path {
             ChooseQuestionResult::DisplayQuestion(ctx) => GameState::DisplayQuestion(ctx),
-            ChooseQuestionResult::AnswerAttemptReceived(ctx) => GameState::AnswerAttemptReceived(ctx)
+            ChooseQuestionResult::AnswerAttemptReceived(ctx) => {
+                GameState::AnswerAttemptReceived(ctx)
+            }
         };
         self.set_game_state(state);
         Ok(())

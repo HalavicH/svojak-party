@@ -1,7 +1,9 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
 use crate::core::game_pack::pack_content_dto::{InfoDto, RightDto};
-use crate::core::game_pack::pack_content_entities::{Atom, Author, Info, PackContent, Question, QuestionMediaType, Round, Topic};
+use crate::core::game_pack::pack_content_entities::{
+    Atom, Author, Info, PackContent, Question, QuestionMediaType, Round, Topic,
+};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 // Game entities
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
@@ -14,7 +16,6 @@ pub(super) enum AtomTypeDtoV4 {
     marker,
     image,
 }
-
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub(super) struct AtomDtoV4 {
@@ -83,7 +84,6 @@ pub(super) struct PackageDtoV4 {
     pub info: InfoDto,
     pub rounds: RoundsDtoV4,
 }
-
 
 impl From<&AtomDtoV4> for Atom {
     fn from(value: &AtomDtoV4) -> Self {
@@ -161,7 +161,6 @@ impl From<&RoundDtoV4> for Round {
         }
     }
 }
-
 
 impl From<&PackageDtoV4> for PackContent {
     fn from(dto: &PackageDtoV4) -> Self {

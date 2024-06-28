@@ -1,10 +1,10 @@
-use std::time::Duration;
+use crate::core::game::game_data::GameMode;
 use crate::core::game_controller::game_mut;
 use crate::core::game_entities::GameplayError;
 use crate::host_api::events::emit_error;
 use error_stack::Report;
+use std::time::Duration;
 use tauri::command;
-use crate::core::game::game_data::GameMode;
 
 fn map_game_error(e: Report<GameplayError>) -> GameplayError {
     emit_error(e.to_string());
@@ -14,7 +14,10 @@ fn map_game_error(e: Report<GameplayError>) -> GameplayError {
 
 /// Start the game with selected players and game pack
 #[command]
-pub async fn start_new_game(round_duration_min: i32, is_qcaf_mode: bool) -> Result<(), GameplayError> {
+pub async fn start_new_game(
+    round_duration_min: i32,
+    is_qcaf_mode: bool,
+) -> Result<(), GameplayError> {
     log::info!("Triggered the game start");
     let mut app = game_mut();
     let game_mode = GameMode {

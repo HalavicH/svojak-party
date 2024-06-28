@@ -1,4 +1,4 @@
-use crate::core::game_entities::{GamePackError, GameplayError, Player, PlayerState};
+use crate::core::game_entities::{GamePackError, Player, PlayerState};
 use crate::core::game_pack::pack_content_entities::{PackContent, Question, Round, RoundStats};
 use crate::host_api::dto::{PlayerEndRoundStatsDto, QuestionDto, RoundStatsDto};
 use crate::host_api::events::{
@@ -72,15 +72,24 @@ impl GameData {
         round.questions_left -= 1;
         log::debug!("Questions left: {}", round.questions_left);
         // let question: Option<Question> = topic.questions.remove(&price);
-        let question = topic.questions.get_mut(&price).ok_or(GamePackError::QuestionNotPresent)?;
+        let question = topic
+            .questions
+            .get_mut(&price)
+            .ok_or(GamePackError::QuestionNotPresent)?;
         question.is_used = true;
         emit_round((self.current_round_ref()).into());
         Ok(())
     }
 
     pub fn get_question(&self, topic_name: &str, price: i32) -> Result<&Question, GamePackError> {
-        let topic = self.current_round_ref().topics.get(topic_name).ok_or(GamePackError::TopicNotPresent)?;
-        topic.questions.get(&price)
+        let topic = self
+            .current_round_ref()
+            .topics
+            .get(topic_name)
+            .ok_or(GamePackError::TopicNotPresent)?;
+        topic
+            .questions
+            .get(&price)
             .ok_or(GamePackError::QuestionNotPresent)
     }
 }

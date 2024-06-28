@@ -3,11 +3,11 @@ use crate::core::game_entities::{GameplayError, DEFAULT_ICON};
 use crate::host_api::events::emit_message;
 use crate::hub::hub_api::HubManager;
 use crate::player_server::entities::PsPlayer;
+use crate::to_factored_ms;
 use crate::types::Swap;
 use std::sync::{Arc, RwLock};
 use std::thread::sleep;
 use std::time::Duration;
-use crate::to_factored_ms;
 
 pub fn run_player_discovery_loop(
     hub: Arc<RwLock<Box<dyn HubManager>>>,

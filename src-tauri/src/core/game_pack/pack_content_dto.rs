@@ -17,5 +17,3 @@ pub(super) struct InfoDto {
     #[serde(rename = "$value")]
     pub authors: Vec<AuthorDto>,
 }
-
-
