@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "svojak-hw",
-    "version": "0.1.0"
+    "productName": "svojak-party",
+    "version": "0.1.4"
   },
   "tauri": {
     "allowlist": {
@@ -43,7 +43,7 @@
     },
     "windows": [
       {
-        "title": "svojak-hw",
+        "title": "Svojak party",
         "width": 1200,
         "height": 800
       }
