@@ -35,8 +35,6 @@
     });
 
     onMount(() => {
-        initEventListeners();
-
         setupEventListener('message', (event) => {
             const message = event.payload;
             notify.info(message);
@@ -49,7 +47,9 @@
             console.error(`Rust error: ${message}`);
         });
 
-        callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE).then();
+        initEventListeners().then(() => {
+            callBackend(TauriApiCommand.REQUEST_CONTEXT_UPDATE);
+        });
 
         const unsubscribe = isDebugMode.subscribe((value) => {
             devMode = true;

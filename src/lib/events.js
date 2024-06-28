@@ -25,7 +25,7 @@ export const TauriEvents = {
     FinalResults: "FinalResults",
 }
 
-export function initEventListeners() {
+export async function initEventListeners() {
     listenAndStoreEvent(TauriEvents.HubConFig, currentHubConfigStore);
     listenAndStoreEvent(TauriEvents.Players, currentPlayersStore);
     listenAndStoreEvent(TauriEvents.PackInfo, currentPackInfoStore);
