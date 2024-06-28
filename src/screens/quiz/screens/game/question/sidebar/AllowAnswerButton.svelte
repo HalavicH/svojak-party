@@ -1,40 +1,33 @@
 <script>
-    import {getAllowAnswerSound} from "../../../../../../lib/sound.js";
+    import {getAllowAnswerSound, sleep, stopSoundWithFadeOut} from "../../../../../../lib/sound.js";
     import {currentGameStateStore, GameState} from "../../../../../../lib/stores.js";
     import {get} from "svelte/store";
+    import {onDestroy} from "svelte";
 
     export let onClick = async () => {
     };
     export let active;
+    const sound = getAllowAnswerSound();
 
-    async function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
 
     async function playWithSoundUntilState() {
-        const sound = getAllowAnswerSound();
         sound.play().then();
         let counter = 10;
         while (get(currentGameStateStore).gameState !== GameState.AnswerAttemptReceived && counter > 0) {
             await sleep(1000);
             counter--;
         }
-
-        let startVolume = sound.volume;
-        let step = sound.volume / 10;
-        for (let i = 0; i < 10; i++) {
-            sound.volume -= step;
-            await sleep(100);
-        }
-        sound.pause();
-        sound.currentTime = 0;
-        sound.volume = startVolume;
+        await stopSoundWithFadeOut(sound);
     }
 
     function handleClick() {
         onClick().then();
         playWithSoundUntilState().then();
     }
+
+    onDestroy(() => {
+        stopSoundWithFadeOut(sound).then();
+    })
 </script>
 
 <button type="button" on:click={handleClick} class:inactive={!active}>Allow answer</button>

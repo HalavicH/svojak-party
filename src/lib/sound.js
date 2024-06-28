@@ -3,7 +3,7 @@ let clickSound = new Audio('/sounds/click.mp3');
 clickSound.volume = 0.3 * volumeFactor;
 
 let collectSound = new Audio('/sounds/collect.mp3');
-collectSound.volume = 0.3 * volumeFactor;
+collectSound.volume = 0.5 * volumeFactor;
 
 let countdownSound = new Audio('/sounds/countdown.mp3');
 countdownSound.volume = 0.2 * volumeFactor;
@@ -69,3 +69,20 @@ function playClickSound(clickSound) {
         clickSound.onerror = reject;
     });
 }
+
+export async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function stopSoundWithFadeOut(soundToStop) {
+    let startVolume = soundToStop.volume;
+    let step = soundToStop.volume / 10;
+    for (let i = 0; i < 10; i++) {
+        soundToStop.volume -= step;
+        await sleep(100);
+    }
+    soundToStop.pause();
+    soundToStop.currentTime = 0;
+    soundToStop.volume = startVolume;
+}
+
