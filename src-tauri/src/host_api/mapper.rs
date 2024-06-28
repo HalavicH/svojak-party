@@ -134,6 +134,7 @@ impl From<&Round> for RoundDto {
                     .map(|(i, q)| QuestionBriefDto {
                         index: i,
                         price: q.price,
+                        used: q.is_used,
                     })
                     .collect();
                 questions.sort_by(|a, b| a.price.cmp(&b.price));

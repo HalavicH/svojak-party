@@ -22,6 +22,9 @@
 
     --accent-color: rgba(40, 114, 124, 0.281);
 
+    --used-question-background-color: #d9e9f6;
+    --used-question-color: #c2d0dc;
+
     /* Other api settings */
     color: var(--text-color);
     background-color: var(--background-color);
@@ -62,6 +65,9 @@
         --modal-select-color: #262828;
 
         --accent-color: rgba(40, 114, 124, 0.281);
+
+        --used-question-background-color: #292929;
+        --used-question-color: #4a4a4a;
     }
 }
 
@@ -87,6 +93,9 @@
     --modal-select-color: #262828;
 
     --accent-color: rgba(40, 114, 124, 0.281);
+
+    --used-question-background-color: #292929;
+    --used-question-color: #4a4a4a;
 
     background-color: var(--background-color);
     color: var(--text-color);

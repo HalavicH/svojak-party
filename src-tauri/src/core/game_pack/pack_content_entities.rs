@@ -25,6 +25,7 @@ pub struct Question {
     pub correct_answer: String,
     pub question_type: QuestionType,
     pub price: i32,
+    pub is_used: bool
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -33,15 +34,6 @@ pub struct Topic {
     pub questions: HashMap<i32, Question>,
 }
 
-impl Topic {
-    pub fn pop_question_by_price(&mut self, price: &i32) -> Option<Question> {
-        self.questions.remove(price)
-    }
-
-    pub fn question_by_price(&self, price: &i32) -> Option<&Question> {
-        self.questions.get(price)
-    }
-}
 
 ///// LEGACY
 #[derive(Default, Debug, Clone, PartialEq)]

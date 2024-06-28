@@ -42,7 +42,10 @@
     }
 
     td.used {
-        color: #868686;
+        filter: none;
+        color: var(--used-question-color);
         transition: 0.5s;
+        background-color: var(--used-question-background-color);
+        cursor: default;
     }
 </style>

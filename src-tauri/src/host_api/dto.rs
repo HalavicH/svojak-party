@@ -67,6 +67,7 @@ pub struct TopicDto {
 pub struct QuestionBriefDto {
     pub index: usize,
     pub price: i32,
+    pub used: bool
 }
 
 ////////// Question data ///////////

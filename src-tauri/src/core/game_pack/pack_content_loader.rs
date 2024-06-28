@@ -191,6 +191,7 @@ fn map_question(q: &QuestionDto, topic: String) -> Question {
         correct_answer: q.right.answer.clone(),
         // TODO: Set random pip
         question_type: QuestionType::Normal,
+        is_used: false,
     }
 }
 

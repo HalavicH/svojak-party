@@ -48,7 +48,7 @@ impl GameData {
     }
 
     // TODO: Update by marking questions instead of removing them
-    fn pop_question(&mut self, topic_name: &str, price: i32) -> Option<Question> {
+    pub fn use_question(&mut self, topic_name: &str, price: i32) -> Option<()> {
         let round = self.current_round_mut();
         let round_name: &str = round.name.as_ref();
         let Some(topic) = round.topics.get_mut(topic_name) else {
@@ -62,9 +62,12 @@ impl GameData {
 
         round.questions_left -= 1;
         log::debug!("Questions left: {}", round.questions_left);
-        let question = topic.questions.remove(&price);
+        // let question: Option<Question> = topic.questions.remove(&price);
+        let question = topic.questions.get_mut(&price)?;
+        question.is_used = true;
         emit_round((self.current_round_ref()).into());
-        question
+
+        Some(())
     }
 
     pub fn get_question(&self, topic_name: &str, price: i32) -> Option<&Question> {
@@ -204,7 +207,7 @@ impl GameData {
             topic,
             price
         );
-        self.pop_question(topic, price);
+        self.use_question(topic, price);
     }
 
     pub fn to_round_stats_dto(&self) -> RoundStatsDto {
