@@ -40,8 +40,8 @@
     {#if scenario.mediaType === QuestionMediaType.Image}
         <img class="image" src={content} alt="Image"/>
     {:else if scenario.mediaType === QuestionMediaType.Video}
-        <video controls>
-            <source src={content} type="video/mp4"/>
+        <video controls class="video">
+            <source src={content} type="video/mp4" />
             Your browser does not support the video tag.
         </video>
     {:else if scenario.mediaType === QuestionMediaType.Voice}
@@ -80,6 +80,11 @@
     .question-text {
         font-size: 1.5em;
         text-align: center;
+    }
+
+    .video {
+        max-width: 100%;
+        max-height: 100%;
     }
 </style>
 

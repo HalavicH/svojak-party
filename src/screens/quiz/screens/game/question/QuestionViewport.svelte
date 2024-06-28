@@ -73,6 +73,7 @@
         height: 66vh;
         width: auto;
         max-width: 80vw;
+        flex: 1;
     }
 
     .question-text {
