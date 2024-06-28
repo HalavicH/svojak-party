@@ -13,6 +13,7 @@ use urlencoding::encode;
 use crate::core::game_pack::game_pack_entites::PackLocationData;
 use crate::core::game_pack::game_pack_loader::GamePackLoadingError;
 use crate::core::game_pack::pack_content_dto_v4::PackageDtoV4;
+use crate::core::game_pack::pack_content_dto_v5::PackageDtoV5;
 use crate::core::game_pack::pack_content_entities::*;
 
 pub fn load_pack_content(
@@ -28,14 +29,12 @@ pub fn load_pack_content(
         .attach_printable("Can't get content file path. Check pack location data validity")?;
 
     let package_by_version = parse_package(package_content_file_str)?;
-    match package_by_version {
-        PackageByVersion::V4(package) => {
-            let mut mapped_content = PackContent::from(&package);
-            expand_and_validate_package_paths(&mut mapped_content, pack_location_data)?;
-            Ok(mapped_content)
-        }
-        PackageByVersion::V5(package) => todo!("V5 package version is not supported yet"),
-    }
+    let mut mapped_content = match package_by_version {
+        PackageByVersion::V4(package) => PackContent::from(&package),
+        PackageByVersion::V5(package) => PackContent::from(&package),
+    };
+    expand_and_validate_package_paths(&mut mapped_content, pack_location_data)?;
+    Ok(mapped_content)
 }
 
 fn parse_package_version<R: BufRead>(reader: R) -> Option<String> {
@@ -71,58 +70,61 @@ fn expand_and_validate_package_paths(
     pack: &mut PackContent,
     locations: &PackLocationData,
 ) -> Result<(), GamePackLoadingError> {
-    let mut result = Ok(());
-
-    pack.rounds.iter_mut().for_each(|r| {
-        r.topics.iter_mut().for_each(|(_, theme)| {
-            theme.questions.iter_mut().for_each(|(_, q)| {
-                q.scenario.iter_mut().for_each(|a| {
-                    log::debug!("Atom {:?} before mapping: {}", a.atom_type, a.content);
-                    match a.atom_type {
-                        QuestionMediaType::Text => {}
-                        QuestionMediaType::Voice => {
-                            a.content = locations
-                                .audio_path
-                                .join(to_url_filename(a))
-                                .to_str()
-                                .unwrap_or_default()
-                                .to_owned();
-                        }
-                        QuestionMediaType::Video => {
-                            a.content = locations
-                                .video_path
-                                .join(to_url_filename(a))
-                                .to_str()
-                                .unwrap_or_default()
-                                .to_owned()
-                        }
-                        QuestionMediaType::Marker => {}
-                        QuestionMediaType::Image => {
-                            a.content = locations
-                                .images_path
-                                .join(to_url_filename(a))
-                                .to_str()
-                                .unwrap_or_default()
-                                .to_owned()
-                        }
-                    }
-                    log::debug!("Atom {:?} after mapping: {}", a.atom_type, a.content);
-                    if is_atom_media(&a.atom_type) && !Path::new(&a.content).exists() {
-                        let err_msg = format!(
-                            "Atom corrupted! Round: {}, theme: {}, question: {}, atom {:?}",
-                            r.name, theme.name, q.price, a
-                        );
-                        log::error!("{}", err_msg);
-                        result = Err(GamePackLoadingError::CorruptedPack(err_msg.clone()))
-                            .into_report()
-                            .attach_printable(err_msg);
-                    }
+    pack.rounds.iter_mut().try_for_each(|r| {
+        r.topics.iter_mut().try_for_each(|(_, theme)| {
+            theme.questions.iter_mut().try_for_each(|(_, q)| {
+                q.scenario.iter_mut().try_for_each(|a| {
+                    validate_atom(locations, a, q.price, &r.name, &theme.name)
                 })
             })
         })
-    });
+    })
+}
 
-    result
+fn validate_atom(locations: &PackLocationData, atom: &mut Atom, q_price: i32, round_name: &str, topic_name: &str) -> Result<(), GamePackLoadingError> {
+    let old_content = atom.content.clone();
+    log::debug!("Atom {:?} before mapping: {}", atom.atom_type, old_content);
+    match atom.atom_type {
+        QuestionMediaType::Text => {}
+        QuestionMediaType::Voice => {
+            atom.content = locations
+                .audio_path
+                .join(to_url_filename(atom))
+                .to_str()
+                .unwrap_or_default()
+                .to_owned();
+        }
+        QuestionMediaType::Video => {
+            atom.content = locations
+                .video_path
+                .join(to_url_filename(atom))
+                .to_str()
+                .unwrap_or_default()
+                .to_owned()
+        }
+        QuestionMediaType::Marker => {}
+        QuestionMediaType::Image => {
+            atom.content = locations
+                .images_path
+                .join(to_url_filename(atom))
+                .to_str()
+                .unwrap_or_default()
+                .to_owned()
+        }
+    }
+    log::debug!("Atom {:?} after mapping: {}", atom.atom_type, atom.content);
+    if is_atom_media(&atom.atom_type) && !Path::new(&atom.content).exists() {
+        let err_msg = format!(
+            "Atom corrupted: Missing media '{}'. Round: {}, theme: {}, question: {}, atom {:?}",
+            old_content, round_name, topic_name, q_price, atom
+        );
+        log::error!("{}", err_msg);
+        Err(GamePackLoadingError::CorruptedPack(err_msg.clone()))
+            .into_report()
+            .attach_printable(err_msg)
+    } else {
+        Ok(())
+    }
 }
 
 fn is_atom_media(qmt: &QuestionMediaType) -> bool {
@@ -132,17 +134,12 @@ fn is_atom_media(qmt: &QuestionMediaType) -> bool {
 }
 
 fn to_url_filename(a: &mut Atom) -> String {
-    let orig_path = &a.content[1..].to_owned();
-
-    let normalized_filename = orig_path.nfkd().collect::<String>();
+    let normalized_filename = a.content.as_str().nfkd().collect::<String>();
 
     encode(&normalized_filename).to_string()
 }
 
-#[derive(Debug, Deserialize)]
-pub struct PackageDtoV5 {}
-
-enum PackageByVersion {
+pub enum PackageByVersion {
     V4(PackageDtoV4),
     V5(PackageDtoV5),
 }

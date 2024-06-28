@@ -87,17 +87,26 @@ pub(super) struct PackageDtoV4 {
 
 impl From<&AtomDtoV4> for Atom {
     fn from(value: &AtomDtoV4) -> Self {
+        let media_type = match value.r#type {
+            AtomTypeDtoV4::say => QuestionMediaType::Text,
+            AtomTypeDtoV4::voice => QuestionMediaType::Voice,
+            AtomTypeDtoV4::video => QuestionMediaType::Video,
+            AtomTypeDtoV4::marker => QuestionMediaType::Marker,
+            AtomTypeDtoV4::image => QuestionMediaType::Image,
+        };
         Self {
-            atom_type: {
-                match value.r#type {
-                    AtomTypeDtoV4::say => QuestionMediaType::Text,
-                    AtomTypeDtoV4::voice => QuestionMediaType::Voice,
-                    AtomTypeDtoV4::video => QuestionMediaType::Video,
-                    AtomTypeDtoV4::marker => QuestionMediaType::Marker,
-                    AtomTypeDtoV4::image => QuestionMediaType::Image,
+            content: {
+                match media_type {
+                    QuestionMediaType::Voice |
+                    QuestionMediaType::Video |
+                    QuestionMediaType::Image => {
+                        value.content[1..].to_owned()
+                    }
+                    QuestionMediaType::Text |
+                    QuestionMediaType::Marker => { value.content.clone() }
                 }
             },
-            content: value.content.clone(),
+            atom_type: media_type,
         }
     }
 }
