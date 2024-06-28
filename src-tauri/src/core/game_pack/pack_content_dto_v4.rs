@@ -1,5 +1,7 @@
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::core::game_pack::pack_content_dto::{InfoDto, RightDto, };
+use crate::core::game_pack::pack_content_dto::{InfoDto, RightDto};
+use crate::core::game_pack::pack_content_entities::{Atom, Author, Info, PackContent, Question, QuestionMediaType, Round, Topic};
 
 // Game entities
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
@@ -12,6 +14,7 @@ pub(super) enum AtomTypeDtoV4 {
     marker,
     image,
 }
+
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub(super) struct AtomDtoV4 {
@@ -79,4 +82,112 @@ pub(super) struct PackageDtoV4 {
     pub difficulty: u8,
     pub info: InfoDto,
     pub rounds: RoundsDtoV4,
+}
+
+
+impl From<&AtomDtoV4> for Atom {
+    fn from(value: &AtomDtoV4) -> Self {
+        Self {
+            atom_type: {
+                match value.r#type {
+                    AtomTypeDtoV4::say => QuestionMediaType::Text,
+                    AtomTypeDtoV4::voice => QuestionMediaType::Voice,
+                    AtomTypeDtoV4::video => QuestionMediaType::Video,
+                    AtomTypeDtoV4::marker => QuestionMediaType::Marker,
+                    AtomTypeDtoV4::image => QuestionMediaType::Image,
+                }
+            },
+            content: value.content.clone(),
+        }
+    }
+}
+impl From<(String, &QuestionDtoV4)> for Question {
+    fn from(tuple: (String, &QuestionDtoV4)) -> Self {
+        let (topic, q) = tuple;
+        Question {
+            topic,
+            price: q.price,
+            scenario: {
+                q.scenario
+                    .atoms_list
+                    .iter()
+                    .map(Atom::from)
+                    .collect::<Vec<Atom>>()
+            },
+            correct_answer: q.right.answer.clone(),
+            question_type: Default::default(),
+            is_used: false,
+        }
+    }
+}
+
+impl From<&ThemeDtoV4> for Topic {
+    fn from(value: &ThemeDtoV4) -> Self {
+        Self {
+            name: value.name.clone(),
+            questions: {
+                value
+                    .questions
+                    .questions_list
+                    .iter()
+                    .map(|q| (q.price, Question::from((value.name.clone(), q))))
+                    .collect::<HashMap<i32, Question>>()
+            },
+        }
+    }
+}
+
+impl From<&RoundDtoV4> for Round {
+    fn from(value: &RoundDtoV4) -> Self {
+        let topics = value
+            .themes
+            .themes_list
+            .iter()
+            .map(|t| (t.name.clone(), Topic::from(t)))
+            .collect::<HashMap<String, Topic>>();
+        let question_count = Vec::from_iter(topics.values())
+            .iter()
+            .map(|&theme| theme.questions.len() as i32)
+            .sum::<i32>();
+        Self {
+            name: value.name.clone(),
+            round_type: value.r#type.clone(),
+            topics,
+            question_count,
+            questions_left: question_count,
+            normal_question_count: question_count,
+            pip_question_count: 0,
+            round_stats: Default::default(),
+        }
+    }
+}
+
+
+impl From<&PackageDtoV4> for PackContent {
+    fn from(dto: &PackageDtoV4) -> Self {
+        PackContent {
+            name: dto.name.clone(),
+            version: dto.version.clone(),
+            id: dto.id.clone(),
+            restriction: dto.restriction.clone(),
+            date: dto.date.clone(),
+            difficulty: dto.difficulty,
+            info: Info {
+                authors: dto
+                    .info
+                    .authors
+                    .iter()
+                    .map(|a| Author {
+                        name: a.name.clone(),
+                    })
+                    .collect::<Vec<Author>>(),
+            },
+            rounds: dto
+                .rounds
+                .rounds_list
+                .iter()
+                .map(Round::from)
+                .collect::<Vec<Round>>(),
+        }
+    }
 }
