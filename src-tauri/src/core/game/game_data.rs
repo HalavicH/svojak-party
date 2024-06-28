@@ -7,6 +7,7 @@ use crate::host_api::events::{
 use crate::hub::hub_api::PlayerEvent;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
+use std::time::Duration;
 
 #[derive(Debug, Default, Clone)]
 pub struct GameData {
@@ -24,6 +25,14 @@ pub struct GameData {
     pub events: Arc<RwLock<Vec<PlayerEvent>>>,
     pub allow_answer_timestamp: u32,
     pub round_duration_min: i32,
+    pub game_mode: GameMode,
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct GameMode {
+    pub round_duration: Duration,
+    pub question_chooser_answers_first: bool,
+    pub pig_in_poke_enabled: bool,
 }
 
 impl GameData {

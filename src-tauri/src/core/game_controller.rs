@@ -5,7 +5,9 @@ use tempfile::TempDir;
 
 use crate::core::game::ctx::state_processors::answer_attempt_received::AnswerQuestionResult as Aqr;
 use crate::core::game::ctx::state_processors::check_end_of_round::CheckEndOfRoundResult;
+use crate::core::game::ctx::state_processors::choose_question::ChooseQuestionResult;
 use crate::core::game::ctx::state_processors::show_round_stats::RoundStatsResult;
+use crate::core::game::game_data::GameMode;
 use crate::core::game::game_state::GameState;
 use crate::core::game_entities::GameplayError;
 use crate::core::game_pack::game_pack_entites::GamePack;
@@ -101,11 +103,11 @@ impl GameController {
     }
 
     // Gameplay host API
-    pub fn start_new_game(&mut self) -> error_stack::Result<(), GameplayError> {
+    pub fn start_new_game(&mut self, game_mode: GameMode) -> error_stack::Result<(), GameplayError> {
         let ctx = get_ctx_ensuring_state!(self, SetupAndLoading);
 
         let content = self.game_pack.content.clone();
-        let ctx = ctx.start(content)?;
+        let ctx = ctx.start(content, game_mode)?;
         self.set_game_state(GameState::StartNextRound(ctx));
         self.init_next_round()?;
         self.pick_first_question_chooser()?;
@@ -123,8 +125,12 @@ impl GameController {
     pub fn select_question(&mut self, topic: &str, price: i32) -> Result<(), GameplayError> {
         let ctx = get_ctx_ensuring_state!(self, ChooseQuestion);
 
-        let ctx = ctx.choose_question(topic, price)?;
-        self.set_game_state(GameState::DisplayQuestion(ctx));
+        let path = ctx.choose_question(topic, price)?;
+        let state = match path {
+            ChooseQuestionResult::DisplayQuestion(ctx) => GameState::DisplayQuestion(ctx),
+            ChooseQuestionResult::AnswerAttemptReceived(ctx) => GameState::AnswerAttemptReceived(ctx)
+        };
+        self.set_game_state(state);
         Ok(())
     }
 

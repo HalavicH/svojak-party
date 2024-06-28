@@ -33,8 +33,6 @@ fn main() {
             set_hw_hub_radio_channel,
             save_players,
             init_game_pack,
-            save_round_duration,
-            init_game_pack,
             start_new_game,
             // Gameplay API
             select_question,

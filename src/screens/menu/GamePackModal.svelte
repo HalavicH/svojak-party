@@ -19,6 +19,11 @@
     $: packInfo = $currentPackInfoStore;
     $: players = $currentPlayersStore
 
+
+    let defaultDuration = 20;
+    let roundDurationMin = defaultDuration;
+    let isQcafMode;
+
     // Static
     let gameDurationOptions = [
         {value: 10, title: "10min"},
@@ -36,14 +41,15 @@
         console.log("Start pressed");
         closeModal();
         navTo(Views.QUIZ);
-        callBackend(TauriApiCommand.START_NEW_GAME).then()
+        callBackend(TauriApiCommand.START_NEW_GAME, {
+            roundDurationMin,
+            isQcafMode,
+        }).then()
     }
 
     async function setRoundDuration(selected) {
-        await callBackend(TauriApiCommand.SAVE_ROUND_DURATION, {roundMinutes: Number.parseInt(selected)})
+        roundDurationMin = Number.parseInt(selected);
     }
-
-    let defaultDuration = "20";
 </script>
 
 <BaseModal {isOpen}>
@@ -68,6 +74,13 @@
             <label for="round-duration">Select round duration:</label>
             <HSpacing size="1em"/>
             <DropDown defaultValue={defaultDuration} options={gameDurationOptions} handleSelection={setRoundDuration}/>
+        </Row>
+        <VSpacing size="1em"/>
+        <Row>
+            <label>
+                Enable "Question chooser answers first" mode
+                <input type="checkbox" bind:checked={isQcafMode}>
+            </label>
         </Row>
     </ItemsBlock>
 

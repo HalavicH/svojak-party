@@ -1,24 +1,35 @@
 use crate::core::game::ctx::game_ctx::GameCtx;
-use crate::core::game::state_structs::{ChooseQuestion, DisplayQuestion};
+use crate::core::game::state_structs::{AnswerAttemptReceived, ChooseQuestion, DisplayQuestion, WaitingForAnswerRequests};
 use crate::core::game_entities::{GameplayError, PlayerState};
+
+pub enum ChooseQuestionResult {
+    DisplayQuestion(GameCtx<DisplayQuestion>),
+    AnswerAttemptReceived(GameCtx<AnswerAttemptReceived>),
+}
 
 impl GameCtx<ChooseQuestion> {
     pub fn choose_question(
         &self,
         topic: &str,
         price: i32,
-    ) -> Result<GameCtx<DisplayQuestion>, GameplayError> {
-        let mut game: GameCtx<DisplayQuestion> = self.transition();
-        let data = &mut game.data;
+    ) -> Result<ChooseQuestionResult, GameplayError> {
+        let mut ctx: GameCtx<DisplayQuestion> = self.transition();
+        let data = &mut ctx.data;
         let question = data
             .get_question(topic, price)
             .ok_or(GameplayError::PackElementNotPresent)?;
 
         data.set_current_question(question.clone());
 
-        data.set_active_player_state(PlayerState::Idle);
-
         log::info!("Picked question! Topic: {}, price: {}", topic, price);
-        Ok(game)
+
+        return if data.game_mode.question_chooser_answers_first {
+            let mut ctx: GameCtx<WaitingForAnswerRequests> = self.transition();
+            let ctx = ctx.request_answer_by_player_id(data.active_player_id)?;
+            Ok(ChooseQuestionResult::AnswerAttemptReceived(ctx))
+        } else {
+            data.set_active_player_state(PlayerState::Idle);
+            Ok(ChooseQuestionResult::DisplayQuestion(ctx))
+        }
     }
 }

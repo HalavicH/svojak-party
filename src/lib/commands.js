@@ -3,7 +3,7 @@ import {isRunningInTauri} from "./misc.js";
 
 export async function callBackend(apiCommand, params) {
     if (!isRunningInTauri()) {
-        console.warn(`No Tauri context!\nSkipping Tauri API call: '${apiCommand}' with payload: '${params}'`);
+        console.warn(`No Tauri context!\nSkipping Tauri API call: '${apiCommand}' with payload: '${JSON.stringify(params)}'`);
         return;
     }
     console.log(`Calling: ${apiCommand} with params`, params)
@@ -22,7 +22,6 @@ export const TauriApiCommand = {
     SET_HW_HUB_RADIO_CHANNEL: 'set_hw_hub_radio_channel',
     SAVE_PLAYERS: 'save_players',
     INIT_GAME_PACK: 'init_game_pack',
-    SAVE_ROUND_DURATION: 'save_round_duration',
     START_NEW_GAME: 'start_new_game',
 
     // Gameplay API

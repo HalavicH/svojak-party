@@ -54,10 +54,3 @@ pub fn init_window_handle(window: Window) {
     set_window(window);
 }
 
-/// Store round duration
-#[command]
-pub fn save_round_duration(round_minutes: i32) {
-    log::info!("Round duration is {round_minutes}");
-    game_mut().save_round_duration(round_minutes)
-    // No emit required, as it's internal fields
-}
