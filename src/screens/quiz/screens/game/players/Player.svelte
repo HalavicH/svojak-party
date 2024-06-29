@@ -40,13 +40,31 @@
             throw new Error("Invalid input: The string can only contain numbers, +, -, and spaces.");
         }
 
+        // Split the string into tokens
+        const tokens = str.split(/([+\-])/).filter(Boolean);
+
         // Evaluate the expression
-        try {
-            // Use the Function constructor to safely evaluate the expression
-            return new Function('return ' + str)();
-        } catch (e) {
-            throw new Error("Error evaluating the expression");
+        let result = 0;
+        let currentOperator = '+';
+
+        for (let token of tokens) {
+            token = token.trim();
+            if (token === '+' || token === '-') {
+                currentOperator = token;
+            } else {
+                const number = parseInt(token, 10);
+                if (isNaN(number)) {
+                    throw new Error("Invalid number found in the expression.");
+                }
+                if (currentOperator === '+') {
+                    result += number;
+                } else if (currentOperator === '-') {
+                    result -= number;
+                }
+            }
         }
+
+        return result;
     }
 
     // Function to handle score update
@@ -65,6 +83,7 @@
                 playerId: player.id, score
             })
         } catch (e) {
+            console.log("Can't do shit", e);
             handleCancellation()
         }
     }

@@ -52,38 +52,38 @@ const mockHubConfig = {
 
 
 const mockPlayers = [
-    {
-        id: 1,
-        iconPath: DFL_PLAYER_ICON,
-        name: "HalavicH",
-        isUsed: true,
-        score: 500,
-        state: PlayerState.Idle
-    },
-    {
-        termId: 2,
-        iconPath: DFL_PLAYER_ICON,
-        name: "Button",
-        isUsed: true,
-        score: -100,
-        state: PlayerState.Dead
-    },
-    {
-        termId: 3,
-        iconPath: DFL_PLAYER_ICON,
-        name: "Baadtrip",
-        isUsed: true,
-        score: 200,
-        state: PlayerState.QuestionChooser
-    },
-    {
-        termId: 4,
-        iconPath: DFL_PLAYER_ICON,
-        name: "Valadis",
-        isUsed: true,
-        score: 400,
-        state: PlayerState.Inactive
-    },
+    // {
+    //     id: 1,
+    //     iconPath: DFL_PLAYER_ICON,
+    //     name: "HalavicH",
+    //     isUsed: true,
+    //     score: 500,
+    //     state: PlayerState.Idle
+    // },
+    // {
+    //     termId: 2,
+    //     iconPath: DFL_PLAYER_ICON,
+    //     name: "Button",
+    //     isUsed: true,
+    //     score: -100,
+    //     state: PlayerState.Dead
+    // },
+    // {
+    //     termId: 3,
+    //     iconPath: DFL_PLAYER_ICON,
+    //     name: "Baadtrip",
+    //     isUsed: true,
+    //     score: 200,
+    //     state: PlayerState.QuestionChooser
+    // },
+    // {
+    //     termId: 4,
+    //     iconPath: DFL_PLAYER_ICON,
+    //     name: "Valadis",
+    //     isUsed: true,
+    //     score: 400,
+    //     state: PlayerState.Inactive
+    // },
 ];
 
 const mockPackInfo = {
