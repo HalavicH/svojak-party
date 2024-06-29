@@ -13,9 +13,17 @@ pub enum QuestionMediaType {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub enum AtomRole {
+    Question,
+    Answer,
+    Marker,
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub struct Atom {
     pub atom_type: QuestionMediaType,
     pub content: String,
+    pub role: AtomRole
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]

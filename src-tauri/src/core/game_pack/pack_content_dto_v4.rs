@@ -1,7 +1,5 @@
 use crate::core::game_pack::pack_content_dto::{InfoDto, RightDto};
-use crate::core::game_pack::pack_content_entities::{
-    Atom, Author, Info, PackContent, Question, QuestionMediaType, Round, Topic,
-};
+use crate::core::game_pack::pack_content_entities::{Atom, AtomRole, Author, Info, PackContent, Question, QuestionMediaType, Round, Topic};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -106,6 +104,7 @@ impl From<&AtomDtoV4> for Atom {
                     QuestionMediaType::Marker => { value.content.clone() }
                 }
             },
+            role: if media_type == QuestionMediaType::Marker { AtomRole::Marker } else { AtomRole::Question },
             atom_type: media_type,
         }
     }
@@ -113,21 +112,38 @@ impl From<&AtomDtoV4> for Atom {
 impl From<(String, &QuestionDtoV4)> for Question {
     fn from(tuple: (String, &QuestionDtoV4)) -> Self {
         let (topic, q) = tuple;
-        let correct_answer = vec![Atom {
-            atom_type: QuestionMediaType::Text,
-            content: q.right.answer.clone(),
-        }];
+        let atoms = q.scenario
+            .atoms_list
+            .iter()
+            .map(Atom::from)
+            .collect::<Vec<Atom>>();
+
+        let slices: Vec<_> = atoms.split(|a| a.atom_type == QuestionMediaType::Marker).collect();
+        if slices.len() > 2 {
+            panic!("Too many markers in question scenario: {:?}", slices);
+        }
+
+        let mut correct_answer = if q.right.answer.is_empty() {
+            vec![]
+        } else {
+            vec![Atom {
+                atom_type: QuestionMediaType::Text,
+                content: q.right.answer.clone(),
+                role: AtomRole::Answer,
+            }]
+        };
+        correct_answer.extend(if slices.len() == 2 { slices[1].to_vec() } else { vec![] });
+
+        let scenario = if slices.len() == 2 {
+            slices[0].to_vec()
+        } else {
+            atoms
+        };
 
         Question {
             topic,
             price: q.price,
-            scenario: {
-                q.scenario
-                    .atoms_list
-                    .iter()
-                    .map(Atom::from)
-                    .collect::<Vec<Atom>>()
-            },
+            scenario,
             correct_answer,
             question_type: Default::default(),
             is_used: false,

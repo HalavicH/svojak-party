@@ -75,6 +75,9 @@ fn expand_and_validate_package_paths(
             theme.questions.iter_mut().try_for_each(|(_, q)| {
                 q.scenario.iter_mut().try_for_each(|a| {
                     validate_atom(locations, a, q.price, &r.name, &theme.name)
+                })?;
+                q.correct_answer.iter_mut().try_for_each(|a| {
+                    validate_atom(locations, a, q.price, &r.name, &theme.name)
                 })
             })
         })

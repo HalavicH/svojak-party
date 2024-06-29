@@ -1,7 +1,7 @@
 use crate::core::game_pack::game_pack_entites::*;
-use crate::core::game_pack::pack_content_entities::{PackContent, QuestionMediaType};
+use crate::core::game_pack::pack_content_entities::{Atom, PackContent, QuestionMediaType};
 use crate::core::game_pack::pack_content_loader::load_pack_content;
-use error_stack::{IntoReport, Report, Result, ResultExt};
+use error_stack::{bail, IntoReport, Report, report, Result, ResultExt};
 use serde::Serialize;
 use std::fs;
 use std::io::BufRead;
@@ -63,7 +63,7 @@ pub fn load_game_pack(game_archive_path: &str) -> Result<GamePack, GamePackLoadi
         .change_context(GamePackLoadingError::CorruptedPack(err_message.clone()))
         .attach_printable(err_message)?;
 
-    simplify_pack_assets_paths(&locations, &mut game_package);
+    // simplify_pack_assets_paths(&locations, &mut game_package)?;
     Ok(GamePack {
         location: locations,
         content: game_package,
@@ -81,34 +81,50 @@ impl QuestionMediaType {
     }
 }
 
-fn simplify_pack_assets_paths(locations: &PackLocationData, pack_content: &mut PackContent) {
+fn simplify_pack_assets_paths(locations: &PackLocationData, pack_content: &mut PackContent) -> error_stack::Result<(), GamePackLoadingError> {
     // generate uuid for each filename, rename the file and update the path in the pack content
-    pack_content.rounds.iter_mut().for_each(|r| {
-        r.topics.iter_mut().for_each(|(_, theme)| {
-            theme.questions.iter_mut().for_each(|(_, q)| {
-                q.scenario.iter_mut().for_each(|a| {
-                    let media_dir = a.atom_type.get_media_dir(locations);
-                    let Some(media_dir) = media_dir else { return };
+    pack_content.rounds.iter_mut().try_for_each(|r| {
+        r.topics.iter_mut().try_for_each(|(_, theme)| {
+            theme.questions.iter_mut().try_for_each(|(_, q)| {
+                q.scenario.iter_mut().try_for_each(|a| {
+                    try_rename(locations, a)
+                })
+            })
+        })
+    })
+}
 
-                    let file_name = Uuid::new_v4().to_string()
-                        + "."
-                        + Path::new(&a.content)
-                            .extension()
-                            .expect("Expected file extension")
-                            .to_str()
-                            .unwrap();
-                    let new_path = media_dir.join(file_name);
-                    log::debug!(
-                        "Renaming file: {} -> {}",
-                        a.content,
-                        new_path.to_str().unwrap()
-                    );
-                    fs::rename(&a.content, &new_path).expect("Failed to rename file");
-                    a.content = new_path.to_str().unwrap().to_owned();
-                });
-            });
-        });
-    });
+fn try_rename(locations: &PackLocationData, a: &mut Atom) -> error_stack::Result<(), GamePackLoadingError> {
+    let media_dir = a.atom_type.get_media_dir(locations);
+    let Some(media_dir) = media_dir else {
+        return Ok(());
+    };
+
+    let file_name = Uuid::new_v4().to_string()
+        + "."
+        + Path::new(&a.content)
+        .extension()
+        .expect("Expected file extension")
+        .to_str()
+        .unwrap();
+    let new_path = media_dir.join(file_name);
+    log::debug!(
+            "Renaming file: {} -> {}",
+            a.content,
+            new_path.to_str().unwrap()
+            );
+    fs::rename(&a.content, &new_path)
+        .into_report()
+        .attach_printable_lazy(|| {
+            format!(
+                "Failed to rename file: {} -> {}",
+                a.content,
+                new_path.to_str().unwrap()
+            )
+        })
+        .change_context(GamePackLoadingError::InternalError)?;
+    a.content = new_path.to_str().unwrap().to_owned();
+    Ok(())
 }
 
 fn normalize_pack_entities_filenames(
@@ -196,7 +212,7 @@ fn validate_pack_path(game_archive_path: &str) -> Result<(), GamePackLoadingErro
         return Err(Report::new(GamePackLoadingError::InvalidPathToPack(
             game_archive_path.to_string(),
         ))
-        .attach_printable(err_msg));
+            .attach_printable(err_msg));
     }
 
     if !game_archive_path.ends_with(".siq") {
@@ -209,7 +225,7 @@ fn validate_pack_path(game_archive_path: &str) -> Result<(), GamePackLoadingErro
         return Err(Report::new(GamePackLoadingError::InvalidPackFileExtension(
             game_archive_path.to_string(),
         ))
-        .attach_printable(err_msg));
+            .attach_printable(err_msg));
     }
 
     Ok(())

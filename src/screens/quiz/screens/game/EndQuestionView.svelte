@@ -5,6 +5,7 @@
     import VSpacing from "../../../../components/generic/VSpacing.svelte";
     import {onMount} from "svelte";
     import Scenario from "./question/Scenario.svelte";
+    import Centered from "../../../../components/generic/Centered.svelte";
 
     // answer: [
     //     {
@@ -42,7 +43,7 @@
     });
 </script>
 
-<!--<Centered greedy={true}>-->
+<Centered greedy={true}>
 <div class="tall-column">
     <h1>Question finished! Answer was:</h1>
     <VSpacing size="1em"/>
@@ -53,7 +54,7 @@
             <!--{:else if mediaType === QuestionMediaType.Image}-->
             <!--    <img class="image" src={content} alt="Answer image"/>-->
             <!--{/if}-->
-            <Scenario scenario={{mediaType, content}} isFullScreen={false}/>
+            <Scenario scenario={{mediaType, content}} isFullScreen={false} scaleContent={false}/>
 
             <!--{#if scenario.mediaType === QuestionMediaType.Image}-->
             <!--    <img class="image" src={content} alt="Image"/>-->
@@ -88,7 +89,7 @@
     <Button text="Next question" onClick={finishQuestion}/>
 
 </div>
-<!--</Centered>-->
+</Centered>
 
 <style>
     .tall-column {
@@ -97,6 +98,8 @@
         justify-content: space-between;
         align-items: center;
         flex: 1;
+        max-width: 70vh;
+        z-index: 1;
     }
 
     .answer {

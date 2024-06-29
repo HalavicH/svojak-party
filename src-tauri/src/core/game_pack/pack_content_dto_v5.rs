@@ -1,7 +1,5 @@
 use crate::core::game_pack::pack_content_dto::{InfoDto, RightDto};
-use crate::core::game_pack::pack_content_entities::{
-    Atom, Author, Info, PackContent, Question, QuestionMediaType, Round, Topic,
-};
+use crate::core::game_pack::pack_content_entities::{Atom, AtomRole, Author, Info, PackContent, Question, QuestionMediaType, Round, Topic};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -36,11 +34,19 @@ pub enum ParamTypeV5 {
     content,
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+#[allow(non_camel_case_types)]
+pub enum ParamNameType {
+    #[default]
+    question,
+    answer,
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub(super) struct ParamDtoV5 {
     pub r#type: Option<ParamTypeV5>,
     // #[serde(default = "String::default")]
-    pub name: String,
+    pub name: ParamNameType,
     #[serde(rename = "$value")]
     pub item: ItemDtoV5,
 }
@@ -132,27 +138,51 @@ impl From<&ParamDtoV5> for Atom {
                 }
             },
             content: value.item.content.clone(),
+            role: match value.name {
+                ParamNameType::question => AtomRole::Question,
+                ParamNameType::answer => AtomRole::Answer
+            },
         }
     }
 }
 impl From<(String, &QuestionDtoV5)> for Question {
     fn from(tuple: (String, &QuestionDtoV5)) -> Self {
         let (topic, q) = tuple;
-        let scenario = q.params
+
+        let atoms = q.params
             .params_list
             .iter()
             .map(Atom::from)
             .collect::<Vec<Atom>>();
-        let correct_answer = vec![Atom {
-            atom_type: QuestionMediaType::Text,
-            content: q.right.answer.clone(),
-        }];
+
+        let mut question_atoms = vec![];
+        let mut answer_atoms = if q.right.answer.is_empty() {
+            vec![]
+        } else {
+            vec![Atom {
+                atom_type: QuestionMediaType::Text,
+                content: q.right.answer.clone(),
+                role: AtomRole::Answer,
+            }]
+        };
+        atoms.iter().for_each(|a| {
+            match a.role {
+                AtomRole::Question => question_atoms.push(a.clone()),
+                AtomRole::Answer => answer_atoms.push(a.clone()),
+                AtomRole::Marker => {} // Skipping markers
+            }
+            if a.atom_type == QuestionMediaType::Marker {
+                answer_atoms.push(a.clone());
+            } else {
+                question_atoms.push(a.clone());
+            }
+        });
 
         Question {
             topic,
             price: q.price,
-            scenario,
-            correct_answer,
+            scenario: question_atoms,
+            correct_answer: answer_atoms,
             question_type: Default::default(),
             is_used: false,
         }
