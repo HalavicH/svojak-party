@@ -171,11 +171,11 @@ impl From<(String, &QuestionDtoV5)> for Question {
                 AtomRole::Answer => answer_atoms.push(a.clone()),
                 AtomRole::Marker => {} // Skipping markers
             }
-            if a.atom_type == QuestionMediaType::Marker {
-                answer_atoms.push(a.clone());
-            } else {
-                question_atoms.push(a.clone());
-            }
+            // if a.atom_type == QuestionMediaType::Marker {
+            //     answer_atoms.push(a.clone());
+            // } else {
+            //     question_atoms.push(a.clone());
+            // }
         });
 
         Question {

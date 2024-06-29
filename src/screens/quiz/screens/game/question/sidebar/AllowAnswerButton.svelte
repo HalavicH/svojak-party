@@ -7,17 +7,14 @@
     export let onClick = async () => {
     };
     export let active;
-    const sound = getAllowAnswerSound();
-
-
     async function playWithSoundUntilState() {
-        sound.play().then();
+        getAllowAnswerSound().play().then();
         let counter = 10;
         while (get(currentGameStateStore).gameState !== GameState.AnswerAttemptReceived && counter > 0) {
             await sleep(1000);
             counter--;
         }
-        await stopSoundWithFadeOut(sound);
+        await stopSoundWithFadeOut(getAllowAnswerSound());
     }
 
     function handleClick() {
@@ -26,7 +23,7 @@
     }
 
     onDestroy(() => {
-        stopSoundWithFadeOut(sound).then();
+        stopSoundWithFadeOut(getAllowAnswerSound()).then();
     })
 </script>
 

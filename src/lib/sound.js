@@ -1,53 +1,53 @@
 const volumeFactor = 1;
 let clickSound = new Audio('/sounds/click.mp3');
-clickSound.volume = 0.3 * volumeFactor;
 
 let collectSound = new Audio('/sounds/collect.mp3');
-collectSound.volume = 0.5 * volumeFactor;
 
 let countdownSound = new Audio('/sounds/countdown.mp3');
-countdownSound.volume = 0.2 * volumeFactor;
 
 let swipeSound = new Audio('/sounds/movement-swipe-whoosh.mp3');
-swipeSound.volume = 0.1 * volumeFactor;
 
 let newLevelSound = new Audio('/sounds/new-level.mp3');
-newLevelSound.volume = 0.3 * volumeFactor;
 
 let ohNoSound = new Audio('/sounds/oh-no.mp3');
-ohNoSound.volume = 0.15 * volumeFactor;
 
 let pickSound = new Audio('/sounds/pick.mp3');
 pickSound.volume = 0.2 * volumeFactor;
 
 let selectSound = new Audio('/sounds/select.mp3');
-selectSound.volume = 0.2 * volumeFactor;
 
 export function getClickSound() {
+    clickSound.volume = 0.3 * volumeFactor;
     return clickSound;
 }
 
 export function getAllowAnswerSound() {
+    countdownSound.volume = 0.2 * volumeFactor;
     return countdownSound;
 }
 
 export function getCorrectAnswerSound() {
+    collectSound.volume = 0.5 * volumeFactor;
     return collectSound;
 }
 
 export function getWrongAnswerSound() {
+    ohNoSound.volume = 0.15 * volumeFactor;
     return ohNoSound;
 }
 
 export function getWhooshSound() {
+    swipeSound.volume = 0.1 * volumeFactor;
     return swipeSound;
 }
 
 export function getSelectQuestionSound() {
+    selectSound.volume = 0.2 * volumeFactor;
     return selectSound;
 }
 
 export function getNewLevelSound() {
+    newLevelSound.volume = 0.3 * volumeFactor;
     return newLevelSound;
 }
 
