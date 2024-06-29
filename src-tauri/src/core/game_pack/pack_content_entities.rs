@@ -22,7 +22,7 @@ pub struct Atom {
 pub struct Question {
     pub topic: String,
     pub scenario: Vec<Atom>,
-    pub correct_answer: String,
+    pub correct_answer: Vec<Atom>,
     pub question_type: QuestionType,
     pub price: i32,
     pub is_used: bool,

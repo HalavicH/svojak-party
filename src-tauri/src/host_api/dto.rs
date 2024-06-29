@@ -79,7 +79,7 @@ pub struct QuestionDto {
     pub price: i32,
     pub questionType: QuestionType,
     pub scenario: Vec<QuestionSceneDto>,
-    pub answer: String,
+    pub answer: Vec<QuestionSceneDto>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize)]

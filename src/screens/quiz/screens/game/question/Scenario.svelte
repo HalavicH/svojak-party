@@ -4,6 +4,8 @@
     import {onMount} from "svelte";
 
     export let scenario;
+    export let isFullScreen = true;
+
     let content;
     switch (scenario.mediaType) {
         case QuestionMediaType.Image:
@@ -36,7 +38,7 @@
     });
 </script>
 
-<div class="slide">
+<div class:full-screen-slide={isFullScreen}>
     {#if scenario.mediaType === QuestionMediaType.Image}
         <img class="image" src={content} alt="Image"/>
     {:else if scenario.mediaType === QuestionMediaType.Video}
@@ -61,7 +63,7 @@
 </div>
 
 <style>
-    .slide {
+    .full-screen-slide {
         display: flex;
         flex-direction: column;
         justify-content: center;

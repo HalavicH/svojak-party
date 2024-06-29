@@ -192,7 +192,16 @@ const mockQuestion = {
             content: "/bc-logo.png",
         }
     ],
-    answer: String,
+    answer: [
+        {
+            mediaType: QuestionMediaType.Text,
+            content: "Front ui should send requests via `invoke` and listen response through `listen`",
+        },
+        {
+            mediaType: QuestionMediaType.Image,
+            content: "/bc-logo.png",
+        }
+    ],
 }
 
 let roundStatsMock = {

@@ -162,8 +162,8 @@ impl From<&Question> for QuestionDto {
             category: question.topic.clone(),
             price: question.price,
             questionType: question.question_type.clone(),
-            scenario: question.scenario.iter().map(|a| a.into()).collect(),
-            answer: question.correct_answer.clone(),
+            scenario: question.scenario.iter().map(QuestionSceneDto::from).collect(),
+            answer: question.correct_answer.iter().map(QuestionSceneDto::from).collect(),
         }
     }
 }

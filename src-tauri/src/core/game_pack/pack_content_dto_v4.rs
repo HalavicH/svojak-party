@@ -113,6 +113,11 @@ impl From<&AtomDtoV4> for Atom {
 impl From<(String, &QuestionDtoV4)> for Question {
     fn from(tuple: (String, &QuestionDtoV4)) -> Self {
         let (topic, q) = tuple;
+        let correct_answer = vec![Atom {
+            atom_type: QuestionMediaType::Text,
+            content: q.right.answer.clone(),
+        }];
+
         Question {
             topic,
             price: q.price,
@@ -123,7 +128,7 @@ impl From<(String, &QuestionDtoV4)> for Question {
                     .map(Atom::from)
                     .collect::<Vec<Atom>>()
             },
-            correct_answer: q.right.answer.clone(),
+            correct_answer,
             question_type: Default::default(),
             is_used: false,
         }

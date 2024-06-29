@@ -95,7 +95,7 @@ pub(super) struct RoundsDtoV5 {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub(super) struct Tag {
     #[serde(rename = "$value")]
-    pub tags: String
+    pub tags: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -138,17 +138,21 @@ impl From<&ParamDtoV5> for Atom {
 impl From<(String, &QuestionDtoV5)> for Question {
     fn from(tuple: (String, &QuestionDtoV5)) -> Self {
         let (topic, q) = tuple;
+        let scenario = q.params
+            .params_list
+            .iter()
+            .map(Atom::from)
+            .collect::<Vec<Atom>>();
+        let correct_answer = vec![Atom {
+            atom_type: QuestionMediaType::Text,
+            content: q.right.answer.clone(),
+        }];
+
         Question {
             topic,
             price: q.price,
-            scenario: {
-                q.params
-                    .params_list
-                    .iter()
-                    .map(Atom::from)
-                    .collect::<Vec<Atom>>()
-            },
-            correct_answer: q.right.answer.clone(),
+            scenario,
+            correct_answer,
             question_type: Default::default(),
             is_used: false,
         }
