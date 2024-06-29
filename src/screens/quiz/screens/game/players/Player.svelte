@@ -1,9 +1,10 @@
 <script>
-    import {PlayerState} from '../../../../../lib/stores.js'
+    import {PlayerState} from '../../../../../lib/stores.js';
+    import {writable} from 'svelte/store';
+    import {notify} from "../../../../../lib/notifications.js";
+    import {callBackend, TauriApiCommand} from "../../../../../lib/commands.js";
 
-    export let player
-
-    $: stateClass = getPlayerStateClass(player.state)
+    export let player;
 
     // Function to get the player state class based on the player's state
     function getPlayerStateClass(playerState) {
@@ -27,6 +28,60 @@
                 return 'unknown-state';
         }
     }
+
+    let isEditingScore = writable(false);
+    let currentScore = player.score;
+    let oldValue = currentScore;
+
+    function evaluateExpression(str) {
+        // Validate the input string
+        const validPattern = /^[0-9+\- ]+$/;
+        if (!validPattern.test(str)) {
+            throw new Error("Invalid input: The string can only contain numbers, +, -, and spaces.");
+        }
+
+        // Evaluate the expression
+        try {
+            // Use the Function constructor to safely evaluate the expression
+            return new Function('return ' + str)();
+        } catch (e) {
+            throw new Error("Error evaluating the expression");
+        }
+    }
+
+    // Function to handle score update
+    function handleScoreUpdate() {
+        notify.info(`New score : ${currentScore}`)
+        try {
+            let score = evaluateExpression(currentScore)
+            if (score === Number.parseInt(oldValue)) {
+                return;
+            }
+            oldValue = score;
+            disableEditing();
+
+            callBackend(TauriApiCommand.EDIT_PLAYER_SCORE, {
+                playerId: player.id, score
+            })
+        } catch (e) {
+            handleCancellation()
+        }
+    }
+
+    // Function to enable editing mode
+    function enableEditing() {
+        isEditingScore.set(true);
+    }
+
+    // Function to disable editing mode and reset score
+    function disableEditing() {
+        currentScore = oldValue;
+        isEditingScore.set(false);
+    }
+
+    function handleCancellation() {
+        disableEditing();
+    }
 </script>
 
 <div class="badge {getPlayerStateClass(player.state)}">
@@ -35,7 +90,13 @@
     </div>
     <div class="details">
         <p class="name">{player.name}</p>
-        <p class="score">Score: {player.score}</p>
+        <p class="score" on:dblclick={enableEditing}>
+            {#if $isEditingScore}
+                Score: <input type="text" bind:value={currentScore} on:blur={handleCancellation} on:keydown={(e) => e.key === 'Enter' && handleScoreUpdate()} class="score-input"/>
+            {:else}
+                Score: {player.score}
+            {/if}
+        </p>
     </div>
 </div>
 
@@ -45,8 +106,6 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
-        /* box-sizing: border-box; */
-
         background-color: var(--items-block-color);
         border: 1px solid var(--items-block-border-color);
         border-radius: 10px;
@@ -54,8 +113,7 @@
         margin: 5px;
         min-width: 10%;
         max-width: 15%;
-        height: auto; /* Let the height adjust according to content */
-
+        height: auto;
         transition: box-shadow 0.5s;
     }
 
@@ -127,23 +185,19 @@
     }
 
     .icon img {
-        max-width: 100%; /* Ensure the image doesn't exceed the container's width */
-        height: auto; /* Allow the height to adjust proportionally */
+        max-width: 100%;
+        height: auto;
     }
 
     .details {
-        /*display: flex;*/
-        /*flex-direction: column;*/
     }
 
     .name {
         text-align: center;
         padding: 5px;
         margin: 0;
-
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
-
         font-weight: bolder;
         font-size: 20px;
         background-color: var(--modal-table-labels-color);
@@ -153,49 +207,26 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-
         text-align: center;
         padding: 0 10px;
         margin: 0;
-
         border-bottom-left-radius: 10px;
         border-bottom-right-radius: 10px;
         background-color: var(--accent-color);
-
         font-size: 20px;
     }
 
-    /* For future use */
-    .player-details-score-value {
+    .score input {
+        width: 100%;
+        font-size: 20px;
+        padding: 0;
+        margin: 0;
+        border: none;
         text-align: center;
-        padding: 5px;
-        margin: 0;
-
-        font-weight: bold;
-        font-size: 20px;
+        background-color: inherit;
     }
 
-    .player-details-bid {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        justify-content: center;
-        padding: 0 10px;
-        margin: 0;
-
-        background-color: var(--secondary-button-border-color);
-
-        font-size: 20px;
+    .score input:focus {
+        outline: none;
     }
-
-    .player-details-bid-value {
-        text-align: center;
-        padding: 5px;
-        margin: 0;
-
-        font-weight: bold;
-        font-size: 20px;
-    }
-
 </style>

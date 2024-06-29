@@ -93,3 +93,8 @@ pub async fn reset_game() {
     let mut app = game_mut();
     app.reset_the_game();
 }
+
+#[command]
+pub async fn edit_player_score(player_id: i32, score: i32) -> Result<(), GameplayError>{
+    game_mut().edit_player_score(player_id, score).map_err(map_game_error)
+}

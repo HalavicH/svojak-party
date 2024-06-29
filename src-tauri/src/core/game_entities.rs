@@ -141,6 +141,8 @@ pub enum GameplayError {
     InternalError,
     #[error("Broken Hub Connection")]
     BrokenHubConnection,
+    #[error("Player not found")]
+    PlayerNotFound,
 }
 
 impl From<GamePackError> for GameplayError {

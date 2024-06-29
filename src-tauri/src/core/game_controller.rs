@@ -232,6 +232,14 @@ impl GameController {
         Ok(())
     }
 
+    pub fn edit_player_score(&mut self, player_id: i32, score: i32) -> error_stack::Result<(), GameplayError> {
+        let data = self.game_state.game_mut();
+        let player = data.players.get_mut(&(player_id as u8)).ok_or(GameplayError::PlayerNotFound)?;
+        player.stats.score = score;
+        emit_players_by_game_data(data);
+        Ok(())
+    }
+
     /// Used to reset everything
     pub fn reset_the_game(&mut self) {
         self.game_pack = GamePack::default();

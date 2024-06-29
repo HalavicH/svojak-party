@@ -44,6 +44,7 @@ fn main() {
             init_next_round,
             finish_game,
             reset_game,
+            edit_player_score,
             // Debug API
             dbg_setup_hub_connection,
             dbg_send_raw_request_frame,

@@ -45,6 +45,7 @@ export const TauriApiCommand = {
     SETUP_HUB_CONNECTION: 'setup_hub_connection',
     SEND_RAW_REQUEST_FRAME: 'send_raw_request_frame',
     SEND_HUB_COMMAND: 'send_hub_command',
+    EDIT_PLAYER_SCORE: 'edit_player_score'
 };
 
 export const HubType = {
