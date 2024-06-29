@@ -233,6 +233,8 @@ impl GameController {
     }
 
     pub fn edit_player_score(&mut self, player_id: i32, score: i32) -> error_stack::Result<(), GameplayError> {
+        log::info!("received: player: {player_id} score {score}");
+
         let data = self.game_state.game_mut();
         let player = data.players.get_mut(&(player_id as u8)).ok_or(GameplayError::PlayerNotFound)?;
         player.stats.score = score;

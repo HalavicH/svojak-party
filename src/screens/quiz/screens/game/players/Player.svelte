@@ -53,6 +53,7 @@
     function handleScoreUpdate() {
         notify.info(`New score : ${currentScore}`)
         try {
+        console.log("test");
             let score = evaluateExpression(currentScore)
             if (score === Number.parseInt(oldValue)) {
                 return;

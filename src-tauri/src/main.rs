@@ -13,7 +13,7 @@ use svojak_app::host_api::controller::startup::*;
 
 fn main() {
     if env::var("RUST_LOG").is_err() {
-        env::set_var("RUST_LOG", "info")
+        env::set_var("RUST_LOG", "info,rocket::server=error,svojak_app::hub=error")
     }
     println!("Logger env var is: {:#?}", env::var("RUST_LOG"));
     env_logger::init();
