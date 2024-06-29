@@ -10,29 +10,29 @@
 <body>
 <main>
     <!-- Register screen -->
-    <div id="register">
-        <h1>Вітаю в веб клієнті Свояка</h1>
-        <h2>який був запілений накалєнкє за 1 вечір</h2>
-        <h2>бо де-хто вміє в тайм менеджмент</h2>
+    <div id="register" class="register">
+        <h1>Hi new friend</h1>
+        <h2>You're going to play Svoyak</h2>
+        <h2>Enter your name and press ready to join the game</h2>
         <div class="row">
             <img src="assets/welcome.png" class="logo" />
         </div>
 
         <div id="new-player">
-            <input type="text" name="name" id="name" autocomplete="off" placeholder="Твій нік" maxlength="29" />
-            <button type="submit" id="submit-player">Готово</button>
+            <input type="text" name="name" id="name" autocomplete="off" placeholder="Your name" maxlength="29" />
+            <button type="submit" id="submit-player">I'm ready</button>
         </div>
     </div>
 
     <div id="collision">
-        <h1>Хм... конфлікт</h1>
-        <h2>Здається з цієї IP адреси вже є гравець.</h2>
+        <h1>Hm... a collision</h1>
+        <h2>Seems like there's another player on this IP address</h2>
     </div>
 
     <div id="unauthorized">
         <h1>Хм...</h1>
-        <h2>Здається в тебе сторінка з попередньої гри.</h2>
-        <h2>Онови сторінку і перелогінься.</h2>
+        <h2>Looks like you have page from previous game</h2>
+        <h2>Reload the page and register again</h2>
     </div>
 
     <div id="content">
@@ -41,16 +41,16 @@
             <div class="info" id="player-id"></div>
             <div class="info" id="player-name"></div>
         </div>
-        <h1>Уявляй що це фізичний термінал</h1>
-        <h2>Коли хочеш відповісти - жмакай по кнопці</h2>
+        <h1>Nice! You're ready to play</h1>
+        <h2>When it's time to race for the answer - hit button bellow</h2>
         <div class="row">
             <img src="assets/welcome.png" class="user-image" />
         </div>
 
-        <div id="player-status">Тут буде статус твого кліку :)</div>
+        <div id="player-status">***</div>
         <br />
         <div class="button-container">
-            <button type="submit" id="answer" class="answer active">Answer</button>
+            <button type="submit" id="answer" class="answer active">Request answer</button>
         </div>
     </div>
 </main>
