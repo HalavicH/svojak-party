@@ -5,3 +5,4 @@ mod pack_content_dto_v4;
 mod pack_content_dto_v5;
 pub mod pack_content_entities;
 pub mod pack_content_loader;
+mod question_table_generator;

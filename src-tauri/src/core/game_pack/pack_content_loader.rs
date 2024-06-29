@@ -15,6 +15,7 @@ use crate::core::game_pack::game_pack_loader::GamePackLoadingError;
 use crate::core::game_pack::pack_content_dto_v4::PackageDtoV4;
 use crate::core::game_pack::pack_content_dto_v5::PackageDtoV5;
 use crate::core::game_pack::pack_content_entities::*;
+use crate::core::game_pack::question_table_generator::generate_question_table;
 
 pub fn load_pack_content(
     pack_location_data: &PackLocationData,
@@ -33,6 +34,7 @@ pub fn load_pack_content(
         PackageByVersion::V4(package) => PackContent::from(&package),
         PackageByVersion::V5(package) => PackContent::from(&package),
     };
+    generate_question_table(&mapped_content, package_content_file_str.to_owned() + "-answers.md");
     expand_and_validate_package_paths(&mut mapped_content, pack_location_data)?;
     Ok(mapped_content)
 }
